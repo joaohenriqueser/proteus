@@ -1,6 +1,7 @@
 /**
  * Tietê River Water Diagnostics - IRE Math Engine
  * Eutrophication Risk Index (Índice de Risco de Eutrofização - IRE)
+ * Environmental Water Quality Framework for Tietê River (Barbosa-SP)
  */
 
 window.IREEngine = {
@@ -79,7 +80,7 @@ window.IREEngine = {
     let ire = iPonderado / fTemp;
     ire = Math.min(100, Math.max(0, ire));
 
-    // Status Mapping
+    // Real-World Status Mapping
     let status = {
       code: 'OTIMO',
       title: 'ÓTIMO / ÁGUA BOA',
@@ -88,8 +89,8 @@ window.IREEngine = {
       textHex: '#16a34a',
       accentColor: '#10b981',
       iconName: 'check-circle-2',
-      message: 'Água em equilíbrio, sem proliferação algal.',
-      conamaNote: 'Parâmetros em atendimento à Resolução CONAMA 357/2005 (Classe 2).'
+      message: 'Água em equilíbrio ecológico, sem proliferação de microalgas.',
+      conamaNote: 'Conforme com a Resolução CONAMA 357/2005 (Classe 2).'
     };
 
     if (ire < 35) {
@@ -102,7 +103,7 @@ window.IREEngine = {
         accentColor: '#ef4444',
         iconName: 'alert-triangle',
         message: 'Hipóxia severa, risco de mortandade de peixes e presença de toxinas.',
-        conamaNote: 'Situação Crítica: Colapso do Oxigênio Dissolvido (<2.0 mg/L) e hiper-eutrofização.'
+        conamaNote: 'Alerta Ambiental: Colapso do Oxigênio Dissolvido (<2.0 mg/L) e hiper-eutrofização.'
       };
     } else if (ire < 55) {
       status = {
@@ -113,8 +114,8 @@ window.IREEngine = {
         textHex: '#ea580c',
         accentColor: '#f97316',
         iconName: 'alert-circle',
-        message: 'Presença confirmada de água verde. Riscos para recreação e banho.',
-        conamaNote: 'Alerta: Floração de cianobactérias/microalgas ativas, pH alcalino elevado.'
+        message: 'Presença confirmada de água verde. Riscos para recreação e balneabilidade.',
+        conamaNote: 'Alerta: Floração ativa de cianobactérias com pH alcalino elevado.'
       };
     } else if (ire < 80) {
       status = {
@@ -125,8 +126,8 @@ window.IREEngine = {
         textHex: '#ca8a04',
         accentColor: '#f59e0b',
         iconName: 'info',
-        message: 'Elevação leve de turbidez/pH. Início de proliferação.',
-        conamaNote: 'Atenção: Condições pré-ambientes favoráveis à multiplicação algal.'
+        message: 'Elevação leve de turbidez/pH. Início de proliferação algal.',
+        conamaNote: 'Atenção Operacional: Condições ambientais propícias à proliferação.'
       };
     }
 
@@ -136,7 +137,7 @@ window.IREEngine = {
         value: ph,
         subIndex: spH.toFixed(1),
         percentage: Math.min(100, (ph / 14) * 100),
-        statusText: ph >= 6.5 && ph <= 8.0 ? 'Ideal' : (ph > 8.5 ? 'Alcalino Elevado' : 'Ácido'),
+        statusText: ph >= 6.5 && ph <= 8.0 ? 'Faixa Ideal' : (ph > 8.5 ? 'Alcalino Elevado' : 'Ácido'),
         statusColor: ph >= 6.5 && ph <= 8.0 ? 'text-emerald-400' : 'text-amber-400'
       },
       turb: {
