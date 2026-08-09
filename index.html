@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Monitoramento IoT - Qualidade da Água e Eutrofização (Rio Tietê / Barbosa-SP)</title>
+  <meta name="description" content="Protótipo de Dashboard de Monitoramento IoT e Diagnóstico da Água Verde (Eutrofização) no Rio Tietê - Barbosa-SP. Projeto de TCC.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Custom Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col justify-between pb-12">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Title & Location -->
+      <div class="flex items-center gap-3">
+        <div class="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-400">
+          <i data-lucide="waves" class="w-8 h-8"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white font-heading">
+              Sistema de Monitoramento IoT
+            </h1>
+            <span class="text-xs px-2.5 py-0.5 rounded-full font-medium bg-sky-500/20 text-sky-300 border border-sky-500/30">
+              TCC - Eng. / Computação
+            </span>
+          </div>
+          <p class="text-sm text-slate-400 flex items-center gap-1.5 mt-0.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Estação Experimental - Rio Tietê / Barbosa-SP (Trecho Baixo Tietê)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Mode Badge & Telemetry Clock -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/90 border border-slate-700/60 text-xs">
+          <span class="pulse-indicator w-2 h-2 rounded-full bg-emerald-400 text-emerald-400"></span>
+          <span class="text-slate-300 font-medium">Modo: Simulação de Bancada (Sem DB)</span>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/40 text-xs text-slate-400">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span id="liveClock">--:--:--</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 w-full flex-grow">
+
+    <!-- TOP ROW: SIMULATION CONTROLS & MAIN DIAGNOSIS -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- [B] SIMULATION CONTROL PANEL (7 cols on lg) -->
+      <section class="lg:col-span-7 glass-panel rounded-2xl p-5 flex flex-col justify-between space-y-5">
+        
+        <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders" class="w-5 h-5 text-sky-400"></i>
+            <h2 class="text-lg font-bold text-white font-heading">Painel de Controle de Simulação IoT</h2>
+          </div>
+          <span class="text-xs text-slate-400 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">
+            Nó Sensor ESP32
+          </span>
+        </div>
+
+        <!-- 4 Preset Scenarios -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Cenários Pré-Configurados de Teste:
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button id="btnScenario1" class="scenario-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-left transition-all text-xs font-medium focus:ring-2 focus:ring-sky-500">
+              <div class="text-emerald-400 font-semibold mb-0.5 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                Cenário 1
+              </div>
+              <div class="text-slate-200 truncate">Água Limpa (Boa)</div>
+              <div class="text-[10px] text-slate-400 mt-1">pH 7.2 | 8 NTU</div>
+            </button>
+
+            <button id="btnScenario2" class="scenario-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-left transition-all text-xs font-medium focus:ring-2 focus:ring-amber-500">
+              <div class="text-amber-400 font-semibold mb-0.5 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                Cenário 2
+              </div>
+              <div class="text-slate-200 truncate">Enxurrada</div>
+              <div class="text-[10px] text-slate-400 mt-1">pH 7.5 | 55 NTU</div>
+            </button>
+
+            <button id="btnScenario3" class="scenario-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-left transition-all text-xs font-medium focus:ring-2 focus:ring-orange-500">
+              <div class="text-orange-400 font-semibold mb-0.5 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+                Cenário 3
+              </div>
+              <div class="text-slate-200 truncate">Água Verde</div>
+              <div class="text-[10px] text-slate-400 mt-1">pH 8.9 | 85 NTU</div>
+            </button>
+
+            <button id="btnScenario4" class="scenario-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 text-left transition-all text-xs font-medium focus:ring-2 focus:ring-red-500">
+              <div class="text-red-400 font-semibold mb-0.5 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                Cenário 4
+              </div>
+              <div class="text-slate-200 truncate">Anoxia/Morte</div>
+              <div class="text-[10px] text-slate-400 mt-1">pH 9.1 | 120 NTU</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Real-time Sliders for Manual Parameter Manipulation -->
+        <div class="space-y-4 pt-1">
+          
+          <!-- Slider: pH -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1.5 text-xs">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="test-tube" class="w-4 h-4 text-purple-400"></i>
+                Potencial Hidrogeniônico (pH)
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-purple-300 font-mono font-bold" id="valPHDisplay">7.2</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] text-slate-500 font-mono">0</span>
+              <input type="range" id="inputPH" min="0" max="14" step="0.1" value="7.2" class="w-full">
+              <span class="text-[10px] text-slate-500 font-mono">14</span>
+            </div>
+          </div>
+
+          <!-- Slider: Turbidez -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1.5 text-xs">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="droplet" class="w-4 h-4 text-amber-400"></i>
+                Turbidez da Água (NTU)
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-amber-300 font-mono font-bold" id="valTurbDisplay">8 NTU</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] text-slate-500 font-mono">0</span>
+              <input type="range" id="inputTurb" min="0" max="150" step="1" value="8" class="w-full">
+              <span class="text-[10px] text-slate-500 font-mono">150 NTU</span>
+            </div>
+          </div>
+
+          <!-- Slider: Oxigênio Dissolvido (OD) -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1.5 text-xs">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="wind" class="w-4 h-4 text-sky-400"></i>
+                Oxigênio Dissolvido - OD (mg/L)
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-sky-300 font-mono font-bold" id="valODDisplay">6.8 mg/L</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] text-slate-500 font-mono">0</span>
+              <input type="range" id="inputOD" min="0" max="12" step="0.1" value="6.8" class="w-full">
+              <span class="text-[10px] text-slate-500 font-mono">12 mg/L</span>
+            </div>
+          </div>
+
+          <!-- Slider: Temperatura -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-1.5 text-xs">
+              <span class="font-semibold text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="thermometer" class="w-4 h-4 text-rose-400"></i>
+                Temperatura da Água (°C)
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-rose-300 font-mono font-bold" id="valTempDisplay">22.0 °C</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] text-slate-500 font-mono">10°C</span>
+              <input type="range" id="inputTemp" min="10" max="40" step="0.5" value="22" class="w-full">
+              <span class="text-[10px] text-slate-500 font-mono">40°C</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Toggle for Continuous Telemetry Simulation Loop -->
+        <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button id="toggleSimLoop" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all flex items-center gap-2 shadow-lg shadow-sky-900/30">
+              <i data-lucide="play" id="simToggleIcon" class="w-4 h-4"></i>
+              <span id="simToggleText">Simular Leitura Contínua (3s)</span>
+            </button>
+            <span id="simLoopBadge" class="hidden text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              Transmitindo ESP32...
+            </span>
+          </div>
+
+          <button id="btnReset" class="text-xs text-slate-400 hover:text-slate-200 underline flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            Resetar Valores
+          </button>
+        </div>
+
+      </section>
+
+      <!-- [C] MAIN DIAGNOSTIC CARD (5 cols on lg) -->
+      <section class="lg:col-span-5 flex flex-col space-y-4">
+        
+        <!-- Status Card with Dynamic Colors & Glow -->
+        <div id="mainDiagnosticCard" class="glass-panel rounded-2xl p-6 flex flex-col justify-between flex-grow transition-all duration-500 relative overflow-hidden status-bg-otimo">
+          
+          <!-- Background Subtle Grid Decorator -->
+          <div class="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none"></div>
+
+          <div>
+            <!-- Top Status Badge & Icon -->
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i data-lucide="activity" class="w-4 h-4 text-sky-400"></i>
+                Diagnóstico Algorítmico do Tietê
+              </span>
+              <span id="diagBadge" class="px-3 py-1 rounded-full text-xs font-bold border bg-emerald-500/20 text-emerald-400 border-emerald-500/30 flex items-center gap-1.5">
+                <i id="diagIcon" data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <span id="diagStatusTitle">ÓTIMO / ÁGUA BOA</span>
+              </span>
+            </div>
+
+            <!-- Big Score Display -->
+            <div class="my-4 text-center">
+              <div class="text-xs text-slate-300 uppercase tracking-wider mb-1">Índice de Risco de Eutrofização (IRE)</div>
+              <div class="flex items-baseline justify-center gap-2">
+                <span id="ireValueDisplay" class="text-6xl sm:text-7xl font-extrabold tracking-tight font-heading text-white">85.4</span>
+                <span class="text-xl text-slate-300 font-semibold font-mono">/ 100</span>
+              </div>
+              <div class="w-full bg-slate-900/60 rounded-full h-3 mt-3 overflow-hidden border border-slate-700/50 p-0.5">
+                <div id="ireProgressBar" class="h-full rounded-full transition-all duration-500 bg-emerald-500" style="width: 85.4%;"></div>
+              </div>
+            </div>
+
+            <!-- Diagnostic Text & Message -->
+            <div class="mt-6 bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-2">
+              <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="message-square-text" class="w-4 h-4 text-sky-400"></i>
+                Parecer Técnico Automatizado:
+              </div>
+              <p id="diagMessageText" class="text-sm font-medium text-slate-200 leading-relaxed">
+                "Água em equilíbrio, sem proliferação algal."
+              </p>
+              <div id="diagConamaNote" class="text-xs text-slate-400 pt-2 border-t border-slate-800 flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Parâmetros em atendimento à Resolução CONAMA 357/2005 (Classe 2).</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Micro Metrics summary -->
+          <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-700/50 text-xs">
+            <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-slate-400 block text-[10px] uppercase">Ponderado Bruto:</span>
+              <span id="iPonderadoDisplay" class="font-mono font-bold text-sky-300">85.4 pts</span>
+            </div>
+            <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+              <span class="text-slate-400 block text-[10px] uppercase">Penalização Temp:</span>
+              <span id="fTempDisplay" class="font-mono font-bold text-emerald-400">1.0 (Normal)</span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- [D] INDIVIDUAL PARAMETER CARDS (4 Grid Cards) -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-white font-heading flex items-center gap-2">
+          <i data-lucide="layout-grid" class="w-5 h-5 text-sky-400"></i>
+          Telemetria dos Parâmetros Monitorados (CONAMA 357)
+        </h2>
+        <span class="text-xs text-slate-400">Nó IoT - Rio Tietê</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: pH -->
+        <div class="glass-panel glass-panel-interactive rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs text-slate-400 uppercase font-semibold">pH da Água</span>
+              <div class="text-2xl font-bold text-white font-mono mt-0.5" id="cardValPH">7.2</div>
+            </div>
+            <div class="p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-400">
+              <i data-lucide="test-tube" class="w-5 h-5"></i>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Sub-índice $S_{pH}$:</span>
+              <span id="subPHVal" class="font-mono font-bold text-purple-300">100.0 / 100</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div id="barPH" class="bg-purple-500 h-full transition-all duration-300" style="width: 51%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Escala: 0 - 14</span>
+              <span id="statusPHText" class="font-semibold text-emerald-400">Faixa Ideal (6.5-8.0)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Turbidez -->
+        <div class="glass-panel glass-panel-interactive rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs text-slate-400 uppercase font-semibold">Turbidez</span>
+              <div class="text-2xl font-bold text-white font-mono mt-0.5" id="cardValTurb">8 <span class="text-xs font-normal text-slate-400">NTU</span></div>
+            </div>
+            <div class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400">
+              <i data-lucide="droplet" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Sub-índice $S_{turb}$:</span>
+              <span id="subTurbVal" class="font-mono font-bold text-amber-300">100.0 / 100</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div id="barTurb" class="bg-amber-500 h-full transition-all duration-300" style="width: 7%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Límite CONAMA: 100 NTU</span>
+              <span id="statusTurbText" class="font-semibold text-emerald-400">Excelente (<=10)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Oxigênio Dissolvido -->
+        <div class="glass-panel glass-panel-interactive rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs text-slate-400 uppercase font-semibold">Oxigênio Dissolvido (OD)</span>
+              <div class="text-2xl font-bold text-white font-mono mt-0.5" id="cardValOD">6.8 <span class="text-xs font-normal text-slate-400">mg/L</span></div>
+            </div>
+            <div class="p-2 bg-sky-500/10 border border-sky-500/30 rounded-lg text-sky-400">
+              <i data-lucide="wind" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Sub-índice $S_{OD}$:</span>
+              <span id="subODVal" class="font-mono font-bold text-sky-300">100.0 / 100</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div id="barOD" class="bg-sky-500 h-full transition-all duration-300" style="width: 68%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Mínimo CONAMA: 5.0 mg/L</span>
+              <span id="statusODText" class="font-semibold text-emerald-400">Ótimo (>=5.0)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Temperatura -->
+        <div class="glass-panel glass-panel-interactive rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs text-slate-400 uppercase font-semibold">Temperatura</span>
+              <div class="text-2xl font-bold text-white font-mono mt-0.5" id="cardValTemp">22.0 <span class="text-xs font-normal text-slate-400">°C</span></div>
+            </div>
+            <div class="p-2 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400">
+              <i data-lucide="thermometer" class="w-5 h-5"></i>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+              <span>Fator $F_{temp}$:</span>
+              <span id="subTempVal" class="font-mono font-bold text-rose-300">1.0 (Sem penalização)</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+              <div id="barTemp" class="bg-rose-500 h-full transition-all duration-300" style="width: 55%;"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+              <span>Limiar Algal: 25.0 °C</span>
+              <span id="statusTempText" class="font-semibold text-emerald-400">Ameno (<25°C)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- [F] TEMPORAL CHARTS & LOG TABLE -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Chart Canvas Container (8 cols) -->
+      <div class="lg:col-span-8 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/60 pb-3 gap-2">
+          <div>
+            <h3 class="text-base font-bold text-white font-heading flex items-center gap-2">
+              <i data-lucide="line-chart" class="w-5 h-5 text-sky-400"></i>
+              Gráfico Temporal de Qualidade da Água
+            </h3>
+            <p class="text-xs text-slate-400">Evolução do Índice IRE e Oxigênio Dissolvido (Últimos registros)</p>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs">
+            <span class="flex items-center gap-1 text-sky-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> IRE
+            </span>
+            <span class="flex items-center gap-1 text-cyan-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> OD (mg/L)
+            </span>
+          </div>
+        </div>
+
+        <div class="relative w-full h-64 sm:h-72 mt-4">
+          <canvas id="ireChart"></canvas>
+        </div>
+      </div>
+
+      <!-- History Packet Stream Log (4 cols) -->
+      <div class="lg:col-span-4 glass-panel rounded-2xl p-5 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+          <h3 class="text-base font-bold text-white font-heading flex items-center gap-2">
+            <i data-lucide="history" class="w-4 h-4 text-emerald-400"></i>
+            Log de Telemetria ESP32
+          </h3>
+          <button id="btnClearHistory" class="text-[11px] text-slate-400 hover:text-white underline">Limpar</button>
+        </div>
+
+        <div class="mt-3 overflow-y-auto max-h-[260px] space-y-2 pr-1" id="historyLogContainer">
+          <!-- History items will be dynamically prepended here -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- [E] EXPLANATORY MATH FORMULA & RATIONALE (Academic Thesis Board Accordion Panel) -->
+    <section class="glass-panel rounded-2xl p-6 border border-slate-700/80">
+      
+      <button id="toggleFormulaAccordion" class="w-full flex items-center justify-between text-left focus:outline-none">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-xl text-indigo-400">
+            <i data-lucide="book-open-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-white font-heading">
+              Fundamentação Matemática e Biológica do Algoritmo IRE (Para a Banca Examinadora)
+            </h3>
+            <p class="text-xs text-slate-400">
+              Detalhamento das equações de normalização, matriz de pesos e dinâmica físico-química da eutrofização
+            </p>
+          </div>
+        </div>
+
+        <div class="p-2 bg-slate-800 rounded-lg text-slate-300 hover:bg-slate-700">
+          <i id="accordionChevron" data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-300"></i>
+        </div>
+      </button>
+
+      <!-- Accordion Body -->
+      <div id="formulaAccordionBody" class="mt-6 pt-6 border-t border-slate-700/60 space-y-6">
+        
+        <!-- Step 1: Formulas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="calculator" class="w-4 h-4"></i>
+              1. Equação do Índice Ponderado ($I_{ponderado}$)
+            </div>
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center font-mono text-sm text-sky-300 font-semibold">
+              I<sub>ponderado</sub> = (0.40 × S<sub>turb</sub>) + (0.35 × S<sub>OD</sub>) + (0.25 × S<sub>pH</sub>)
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Atribui maior relevância técnica à <strong class="text-amber-300">Turbidez (40%)</strong> devido ao bloqueio da penetração de luz e presença de biomassa algal, seguida pelo <strong class="text-sky-300">Oxigênio Dissolvido (35%)</strong> e <strong class="text-purple-300">pH (25%)</strong>.
+            </p>
+          </div>
+
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 space-y-3">
+            <div class="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="flame" class="w-4 h-4"></i>
+              2. Fator de Penalização Térmica ($F_{temp}$) e Equação Final
+            </div>
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center font-mono text-sm text-rose-300 font-semibold">
+              IRE = I<sub>ponderado</sub> / F<sub>temp</sub>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Quando a temperatura atinge ou supera <strong class="text-rose-300">25.0 °C</strong>, o fator $F_{temp} = 1.2$ é ativado como divisor, reduzindo a pontuação final do IRE em 16.7% para simular a aceleração metabólica do crescimento da *Microcystis aeruginosa*.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Step 2: Live Calculation Breakdown Table -->
+        <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+          <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+            Demonstrativo dos Sub-Índices em Tempo Real (Valores Atuais do Simulador):
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse font-mono">
+              <thead>
+                <tr class="border-b border-slate-700 text-slate-400">
+                  <th class="py-2 px-3">Parâmetro</th>
+                  <th class="py-2 px-3">Leitura Atual</th>
+                  <th class="py-2 px-3">Regra de Normalização Aplicada</th>
+                  <th class="py-2 px-3">Sub-índice Calculado</th>
+                  <th class="py-2 px-3">Peso no IRE</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-200">
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-amber-400">Turbidez</td>
+                  <td class="py-2.5 px-3 font-bold" id="tableValTurb">8 NTU</td>
+                  <td class="py-2.5 px-3 text-slate-400" id="tableRuleTurb">Turb <= 10 -> S_turb = 100</td>
+                  <td class="py-2.5 px-3 text-amber-300 font-bold" id="tableSubTurb">100.0 / 100</td>
+                  <td class="py-2.5 px-3">40% (x0.40)</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-sky-400">Oxigênio Dissolvido (OD)</td>
+                  <td class="py-2.5 px-3 font-bold" id="tableValOD">6.8 mg/L</td>
+                  <td class="py-2.5 px-3 text-slate-400" id="tableRuleOD">OD >= 5.0 -> S_OD = 100</td>
+                  <td class="py-2.5 px-3 text-sky-300 font-bold" id="tableSubOD">100.0 / 100</td>
+                  <td class="py-2.5 px-3">35% (x0.35)</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-purple-400">pH</td>
+                  <td class="py-2.5 px-3 font-bold" id="tableValPH">7.2</td>
+                  <td class="py-2.5 px-3 text-slate-400" id="tableRulePH">6.5 <= pH <= 8.0 -> S_pH = 100</td>
+                  <td class="py-2.5 px-3 text-purple-300 font-bold" id="tableSubPH">100.0 / 100</td>
+                  <td class="py-2.5 px-3">25% (x0.25)</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-rose-400">Temperatura</td>
+                  <td class="py-2.5 px-3 font-bold" id="tableValTemp">22.0 °C</td>
+                  <td class="py-2.5 px-3 text-slate-400" id="tableRuleTemp">Temp < 25 °C -> F_temp = 1.0</td>
+                  <td class="py-2.5 px-3 text-rose-300 font-bold" id="tableSubTemp">1.0 (Penalização)</td>
+                  <td class="py-2.5 px-3">Divisor F<sub>temp</sub></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Step 3: Limnological & Ecological Rationale -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+          
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <h4 class="font-bold text-sky-400 flex items-center gap-1.5 text-sm font-heading">
+              <i data-lucide="sun" class="w-4 h-4"></i>
+              Por que o pH sobe durante a Floração de Água Verde?
+            </h4>
+            <p class="leading-relaxed text-slate-400">
+              Durante o fenônemo da eutrofização, a alta densidade de cianobactérias realiza fotossíntese acelerada sob insolação. Esse processo consome massivamente o dióxido de carbono livre ($CO_2$) e o ácido carbônico da água, deslocando o equilíbrio de carbonatos e elevando alcalinamente o pH para valores superiores a <strong class="text-purple-300">8.5 - 9.5</strong>.
+            </p>
+          </div>
+
+          <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 space-y-2">
+            <h4 class="font-bold text-rose-400 flex items-center gap-1.5 text-sm font-heading">
+              <i data-lucide="skull" class="w-4 h-4"></i>
+              Por que o Oxigênio Dissolvido (OD) despenca para Anoxia?
+            </h4>
+            <p class="leading-relaxed text-slate-400">
+              Quando a biomassa algal atinge o pico e morre, bactérias decompositoras aeróbicas se multiplicam para degradar a matéria orgânica. A respiração microbiana intensa consome rapidamente todo o Oxigênio Dissolvido na coluna d'água, reduzindo o OD para abaixo de <strong class="text-red-400">2.0 mg/L (hipóxia/anoxia)</strong> e causando a mortandade em massa dos peixes do Rio Tietê.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 text-center text-xs text-slate-500 border-t border-slate-800/60 pt-4 w-full">
+    <p>Trabalho de Conclusão de Curso (TCC) • Monitoramento de Recursos Hídricos no Rio Tietê (Barbosa-SP)</p>
+    <p class="mt-1 text-[11px] text-slate-600">Desenvolvido com HTML5, Tailwind CSS, JavaScript ES6+ e Chart.js • Protótipo Client-Side</p>
+  </footer>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/ire_engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
