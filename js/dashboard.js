@@ -1,5 +1,5 @@
 /**
- * P.R.O.T.E.U.S. - Live Telemetry Dashboard & Auto-Simulation Engine
+ * P.R.O.T.E.U.S. - Live Telemetry Dashboard, Leaflet Map & Auto-Simulation Engine
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,156 +9,215 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let state = app.loadState();
   let chartInstance = null;
+  let mapInstance = null;
+  let mapMarker = null;
+  let mapHalo = null;
   let simIntervalId = null;
+
+  const BARBOSA_COORDS = [-21.2662, -49.9482];
 
   // DOM Elements
   const ireValueDisplay = document.getElementById('ireValueDisplay');
   const ireProgressBar = document.getElementById('ireProgressBar');
-  const diagBadge = document.getElementById('diagBadge');
-  const diagIcon = document.getElementById('diagIcon');
-  const diagStatusTitle = document.getElementById('diagStatusTitle');
-  const diagMessageText = document.getElementById('diagMessageText');
-  const diagConamaNote = document.getElementById('diagConamaNote');
-  const mainDiagnosticCard = document.getElementById('mainDiagnosticCard');
+  const statusLabelDisplay = document.getElementById('statusLabelDisplay');
+  const statusDotDisplay = document.getElementById('statusDotDisplay');
+  const diagSummaryText = document.getElementById('diagSummaryText');
+  const scenarioTagDisplay = document.getElementById('scenarioTagDisplay');
+  const lastReadTimestamp = document.getElementById('lastReadTimestamp');
 
-  const iPonderadoDisplay = document.getElementById('iPonderadoDisplay');
-  const fTempDisplay = document.getElementById('fTempDisplay');
+  // Parameter Value & Note Displays
+  const valPH = document.getElementById('valPH');
+  const notePH = document.getElementById('notePH');
+  const dotPH = document.getElementById('dotPH');
 
-  // Individual Cards
-  const cardValPH = document.getElementById('cardValPH');
-  const subPHVal = document.getElementById('subPHVal');
-  const barPH = document.getElementById('barPH');
-  const statusPHText = document.getElementById('statusPHText');
+  const valTurb = document.getElementById('valTurb');
+  const noteTurb = document.getElementById('noteTurb');
+  const dotTurb = document.getElementById('dotTurb');
 
-  const cardValTurb = document.getElementById('cardValTurb');
-  const subTurbVal = document.getElementById('subTurbVal');
-  const barTurb = document.getElementById('barTurb');
-  const statusTurbText = document.getElementById('statusTurbText');
+  const valOD = document.getElementById('valOD');
+  const noteOD = document.getElementById('noteOD');
+  const dotOD = document.getElementById('dotOD');
 
-  const cardValOD = document.getElementById('cardValOD');
-  const subODVal = document.getElementById('subODVal');
-  const barOD = document.getElementById('barOD');
-  const statusODText = document.getElementById('statusODText');
+  const valTemp = document.getElementById('valTemp');
+  const noteTemp = document.getElementById('noteTemp');
+  const dotTemp = document.getElementById('dotTemp');
 
-  const cardValTemp = document.getElementById('cardValTemp');
-  const subTempVal = document.getElementById('subTempVal');
-  const barTemp = document.getElementById('barTemp');
-  const statusTempText = document.getElementById('statusTempText');
-
+  // Footer & Log Elements
   const historyLogContainer = document.getElementById('historyLogContainer');
   const btnClearHistory = document.getElementById('btnClearHistory');
   const btnToggleTelemetry = document.getElementById('btnToggleTelemetry');
+  const mapOverlayStatus = document.getElementById('mapOverlayStatus');
 
   /**
-   * Render Dashboard Telemetry & Diagnosis
+   * Color Palette Helper
+   */
+  function getStatusColor(code) {
+    switch (code) {
+      case 'CRITICO': return '#C55A54';
+      case 'ALERTA': return '#C97A3C';
+      case 'ATENCAO': return '#C9A03C';
+      default: return '#3FA87A';
+    }
+  }
+
+  /**
+   * Render Dashboard Telemetry, Map & Cards
    */
   function renderDashboard() {
     const diag = engine.diagnose(state.params);
-    const { ire, ireNum, subIndices, iPonderado, status } = diag;
+    const { ire, ireNum, subIndices, status } = diag;
+    const colorHex = getStatusColor(status.code);
 
-    // Big IRE Score Display
-    if (ireValueDisplay) ireValueDisplay.textContent = ire;
+    // Hero IRE Score & Status
+    if (ireValueDisplay) {
+      ireValueDisplay.textContent = ire;
+      ireValueDisplay.style.color = colorHex;
+    }
+    if (statusLabelDisplay) {
+      statusLabelDisplay.textContent = status.title;
+      statusLabelDisplay.style.color = colorHex;
+    }
+    if (statusDotDisplay) {
+      statusDotDisplay.style.backgroundColor = colorHex;
+    }
     if (ireProgressBar) {
       ireProgressBar.style.width = `${Math.min(100, Math.max(0, ireNum))}%`;
-      ireProgressBar.style.backgroundColor = status.accentColor || '#10b981';
+      ireProgressBar.style.backgroundColor = colorHex;
+    }
+    if (diagSummaryText) {
+      diagSummaryText.textContent = status.message;
+    }
+    if (scenarioTagDisplay) {
+      scenarioTagDisplay.textContent = state.activeScenarioTag || '[MOCK] 1 · ÁGUA LIMPA';
+    }
+    if (lastReadTimestamp) {
+      const now = new Date();
+      lastReadTimestamp.textContent = `${now.toLocaleTimeString('pt-BR')} [MOCK]`;
     }
 
-    // Status Badge & Message
-    if (diagBadge) {
-      diagBadge.className = `px-3.5 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 shadow-sm ${status.badgeClass}`;
-    }
-    if (diagIcon) diagIcon.setAttribute('data-lucide', status.iconName || 'check-circle-2');
-    if (diagStatusTitle) diagStatusTitle.textContent = status.title;
-    if (diagMessageText) diagMessageText.textContent = `"${status.message}"`;
-    if (diagConamaNote) diagConamaNote.textContent = status.conamaNote;
-
-    // Card Main Background Class
-    if (mainDiagnosticCard) {
-      mainDiagnosticCard.className = `glass-panel p-6 transition-all duration-300 w-full space-y-4 ${status.colorClass}`;
-    }
-
-    // Secondary Metrics
-    if (iPonderadoDisplay) iPonderadoDisplay.textContent = `${iPonderado.toFixed(1)} pts`;
-    if (fTempDisplay) fTempDisplay.textContent = `${subIndices.fTemp === 1.2 ? '1.2 (Penalizado)' : '1.0 (Normal)'}`;
-
-    // Parameter 1: pH
-    if (cardValPH) cardValPH.textContent = state.params.ph.toFixed(1);
-    if (subPHVal) subPHVal.textContent = `${subIndices.spH.toFixed(1)} / 100`;
-    if (barPH) barPH.style.width = `${(state.params.ph / 14) * 100}%`;
-    if (statusPHText) {
+    // Individual Parameters
+    // 1. pH
+    if (valPH) valPH.textContent = state.params.ph.toFixed(1);
+    if (notePH) {
       if (state.params.ph >= 6.5 && state.params.ph <= 8.0) {
-        statusPHText.textContent = 'Faixa Ideal (6.5 - 8.0)';
-        statusPHText.className = 'font-bold text-emerald-400';
+        notePH.textContent = 'Faixa neutra (CONAMA OK)';
+        if (dotPH) dotPH.style.backgroundColor = '#3FA87A';
       } else if (state.params.ph > 8.5) {
-        statusPHText.textContent = 'Alcalino / Floração Algal (>8.5)';
-        statusPHText.className = 'font-bold text-rose-400';
+        notePH.textContent = 'Alcalino / Floração Algal';
+        if (dotPH) dotPH.style.backgroundColor = '#C97A3C';
       } else {
-        statusPHText.textContent = 'Fora dos padrões CONAMA';
-        statusPHText.className = 'font-bold text-amber-400';
+        notePH.textContent = 'Fora dos padrões';
+        if (dotPH) dotPH.style.backgroundColor = '#C9A03C';
       }
     }
 
-    // Parameter 2: Turbidez
-    if (cardValTurb) cardValTurb.innerHTML = `${Math.round(state.params.turb)} <span class="text-xs font-normal opacity-70">NTU</span>`;
-    if (subTurbVal) subTurbVal.textContent = `${subIndices.sTurb.toFixed(1)} / 100`;
-    if (barTurb) barTurb.style.width = `${Math.min((state.params.turb / 150) * 100, 100)}%`;
-    if (statusTurbText) {
+    // 2. Turbidez
+    if (valTurb) valTurb.textContent = Math.round(state.params.turb);
+    if (noteTurb) {
       if (state.params.turb <= 10) {
-        statusTurbText.textContent = 'Excelente (<=10 NTU)';
-        statusTurbText.className = 'font-bold text-emerald-400';
+        noteTurb.textContent = 'Sólidos baixos (Excelente)';
+        if (dotTurb) dotTurb.style.backgroundColor = '#3FA87A';
       } else if (state.params.turb > 100) {
-        statusTurbText.textContent = 'Crítico (>100 NTU)';
-        statusTurbText.className = 'font-bold text-rose-400';
+        noteTurb.textContent = 'Acima do limite (>100 NTU)';
+        if (dotTurb) dotTurb.style.backgroundColor = '#C55A54';
       } else {
-        statusTurbText.textContent = 'Moderado (CONAMA <=100)';
-        statusTurbText.className = 'font-bold text-amber-400';
+        noteTurb.textContent = 'Aporte em elevação';
+        if (dotTurb) dotTurb.style.backgroundColor = '#C9A03C';
       }
     }
 
-    // Parameter 3: OD
-    if (cardValOD) cardValOD.innerHTML = `${state.params.od.toFixed(1)} <span class="text-xs font-normal opacity-70">mg/L</span>`;
-    if (subODVal) subODVal.textContent = `${subIndices.sOD.toFixed(1)} / 100`;
-    if (barOD) barOD.style.width = `${Math.min((state.params.od / 12) * 100, 100)}%`;
-    if (statusODText) {
+    // 3. OD
+    if (valOD) valOD.textContent = state.params.od.toFixed(1);
+    if (noteOD) {
       if (state.params.od >= 5.0) {
-        statusODText.textContent = 'Ótimo (>=5.0 mg/L)';
-        statusODText.className = 'font-bold text-emerald-400';
+        noteOD.textContent = 'Saturação adequada';
+        if (dotOD) dotOD.style.backgroundColor = '#3FA87A';
       } else if (state.params.od < 2.0) {
-        statusODText.textContent = 'Anoxia / Colapso (<2.0 mg/L)';
-        statusODText.className = 'font-bold text-rose-400';
+        noteOD.textContent = 'Anóxico / Hipóxia Severa';
+        if (dotOD) dotOD.style.backgroundColor = '#C55A54';
       } else {
-        statusODText.textContent = 'Atenção (<5.0 mg/L)';
-        statusODText.className = 'font-bold text-amber-400';
+        noteOD.textContent = 'Oxigênio em queda';
+        if (dotOD) dotOD.style.backgroundColor = '#C9A03C';
       }
     }
 
-    // Parameter 4: Temperatura
-    if (cardValTemp) cardValTemp.innerHTML = `${state.params.temp.toFixed(1)} <span class="text-xs font-normal opacity-70">°C</span>`;
-    if (subTempVal) subTempVal.textContent = subIndices.fTemp === 1.2 ? '1.2 (Penalizado)' : '1.0 (Normal)';
-    if (barTemp) barTemp.style.width = `${Math.min(((state.params.temp - 10) / 30) * 100, 100)}%`;
-    if (statusTempText) {
+    // 4. Temperatura
+    if (valTemp) valTemp.textContent = state.params.temp.toFixed(1);
+    if (noteTemp) {
       if (state.params.temp >= 25.0) {
-        statusTempText.textContent = 'Alerta Térmico (>=25°C)';
-        statusTempText.className = 'font-bold text-rose-400';
+        noteTemp.textContent = 'Estresse térmico (Ftemp 1.2)';
+        if (dotTemp) dotTemp.style.backgroundColor = '#C97A3C';
       } else {
-        statusTempText.textContent = 'Ameno (<25°C)';
-        statusTempText.className = 'font-bold text-emerald-400';
+        noteTemp.textContent = 'Sazonal normal';
+        if (dotTemp) dotTemp.style.backgroundColor = '#3FA87A';
       }
     }
 
-    if (window.lucide) lucide.createIcons();
-    updateChart(diag.ireNum, state.params.od);
+    // Sync Map Marker & Circle Halo
+    syncMap(colorHex, status.title);
+
+    // Sync Chart & Log
+    updateChart(ireNum, state.params.od);
     renderHistoryLog();
   }
 
   /**
-   * Initialize Chart.js
+   * Leaflet.js Map Controller
+   */
+  function initMap() {
+    const mapContainer = document.getElementById('leafletMap');
+    if (!mapContainer || mapInstance || !window.L) return;
+
+    mapInstance = L.map(mapContainer, {
+      zoomControl: true,
+      attributionControl: true,
+      scrollWheelZoom: false
+    }).setView(BARBOSA_COORDS, 13);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap · © CARTO · TILES REAIS / DADOS MOCKADOS',
+      maxZoom: 19
+    }).addTo(mapInstance);
+
+    const initialColor = getStatusColor('OTIMO');
+    mapHalo = L.circle(BARBOSA_COORDS, {
+      radius: 900,
+      color: initialColor,
+      weight: 1,
+      fillColor: initialColor,
+      fillOpacity: 0.12
+    }).addTo(mapInstance);
+
+    mapMarker = L.circleMarker(BARBOSA_COORDS, {
+      radius: 6,
+      color: initialColor,
+      weight: 2,
+      fillColor: '#020617',
+      fillOpacity: 1
+    }).addTo(mapInstance);
+
+    mapMarker.bindPopup(`<b>Ponto de Coleta (SIMULADO) - Barbosa-SP</b><br>IRE 85.4 / 100 — ÓTIMO / ÁGUA BOA`);
+    setTimeout(() => mapInstance.invalidateSize(), 200);
+  }
+
+  function syncMap(colorHex, statusTitle) {
+    if (!mapInstance || !mapMarker || !mapHalo) return;
+    mapHalo.setStyle({ color: colorHex, fillColor: colorHex });
+    mapMarker.setStyle({ color: colorHex });
+    mapMarker.setPopupContent(`<b>Ponto de Coleta (SIMULADO) - Barbosa-SP</b><br>IRE ${state.params.ph.toFixed(1)} — ${statusTitle}<br>${state.activeScenarioTag}`);
+    if (mapOverlayStatus) {
+      mapOverlayStatus.textContent = statusTitle;
+      mapOverlayStatus.style.color = colorHex;
+    }
+  }
+
+  /**
+   * Chart.js Time-Series Dual Y-Axes
    */
   function initChart() {
     const ctx = document.getElementById('ireChart');
-    if (!ctx) return;
+    if (!ctx || !window.Chart) return;
 
-    // Pre-fill chart with existing history from state if available
     const initialLabels = [];
     const initialIRE = [];
     const initialOD = [];
@@ -169,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initialLabels.push(item.timestamp || item.time || '');
         initialIRE.push(parseFloat(item.ire) || 85);
         const odVal = item.params ? item.params.od : parseFloat(item.od) || 6.8;
-        initialOD.push(odVal * 10);
+        initialOD.push(odVal);
       });
     }
 
@@ -179,52 +238,74 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: initialLabels,
         datasets: [
           {
-            label: 'Índice IRE',
+            label: 'IRE [MOCK]',
             data: initialIRE,
-            borderColor: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.1)',
-            fill: true,
+            borderColor: '#06B6D4',
+            backgroundColor: 'rgba(6, 182, 212, 0.10)',
+            borderWidth: 1.6,
+            pointRadius: 2,
+            pointBackgroundColor: '#06B6D4',
             tension: 0.3,
-            borderWidth: 2.5,
-            pointRadius: 3
+            fill: true,
+            yAxisID: 'y'
           },
           {
-            label: 'Oxigênio (OD mg/L)',
+            label: 'OD mg/L [MOCK]',
             data: initialOD,
-            borderColor: '#06b6d4',
+            borderColor: '#2563EB',
             backgroundColor: 'transparent',
+            borderWidth: 1.6,
             borderDash: [4, 4],
+            pointRadius: 2,
+            pointBackgroundColor: '#2563EB',
             tension: 0.3,
-            borderWidth: 2,
-            pointRadius: 2
+            yAxisID: 'y1'
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: { duration: 320 },
+        interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
           tooltip: {
-            mode: 'index',
-            intersect: false,
-            backgroundColor: '#0f172a',
-            borderColor: '#334155',
+            backgroundColor: '#0F172A',
+            borderColor: '#1E293B',
             borderWidth: 1,
-            titleColor: '#f8fafc',
-            bodyColor: '#cbd5e1'
+            displayColors: true,
+            titleColor: '#F8FAFC',
+            bodyColor: '#94A3B8',
+            padding: 8,
+            cornerRadius: 3,
+            titleFont: { family: "'IBM Plex Mono',monospace", size: 10 },
+            bodyFont: { family: "'IBM Plex Mono',monospace", size: 10 }
           }
         },
         scales: {
           x: {
-            grid: { color: '#1e293b' },
-            ticks: { color: '#94a3b8', font: { size: 10 } }
+            grid: { color: '#111C31', drawTicks: false },
+            border: { color: '#1E293B' },
+            ticks: { color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 }, padding: 8 }
           },
           y: {
             min: 0,
             max: 100,
-            grid: { color: '#1e293b' },
-            ticks: { color: '#94a3b8', font: { size: 10 } }
+            position: 'left',
+            grid: { color: '#111C31', drawTicks: false },
+            border: { display: false },
+            title: { display: true, text: 'IRE [MOCK]', color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 } },
+            ticks: { color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 }, padding: 6, stepSize: 25 }
+          },
+          y1: {
+            min: 0,
+            max: 10,
+            position: 'right',
+            grid: { display: false },
+            border: { display: false },
+            title: { display: true, text: 'OD mg/L [MOCK]', color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 } },
+            ticks: { color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 }, padding: 6, stepSize: 2.5 }
           }
         }
       }
@@ -237,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     chartInstance.data.labels.push(nowLabel);
     chartInstance.data.datasets[0].data.push(ireNum);
-    chartInstance.data.datasets[1].data.push(od * 10); // Scaled for comparison
+    chartInstance.data.datasets[1].data.push(od);
 
     if (chartInstance.data.labels.length > 15) {
       chartInstance.data.labels.shift();
@@ -272,24 +353,24 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderHistoryLog() {
     if (!historyLogContainer) return;
     if (!Array.isArray(state.history) || state.history.length === 0) {
-      historyLogContainer.innerHTML = `<div class="text-xs text-slate-500 py-4 text-center">Nenhuma leitura registrada.</div>`;
+      historyLogContainer.innerHTML = `<div class="text-xs text-slate-500 py-4 text-center font-mono font-medium">NENHUMA LEITURA REGISTRADA NO MOCK.</div>`;
       return;
     }
 
     historyLogContainer.innerHTML = state.history.map(item => {
       const time = item.timestamp || item.time || '--:--:--';
-      const title = item.status ? item.status.title : 'LEITURA TELEMETRIA';
-      const badgeClass = item.status ? item.status.badgeClass : 'text-emerald-400';
+      const title = item.status ? item.status.title : 'LEITURA SIMULADA';
+      const colorHex = item.status ? getStatusColor(item.status.code) : '#3FA87A';
       const ireVal = item.ire || '--';
 
       return `
-        <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs transition-all hover:border-slate-700">
+        <div class="p-2.5 rounded bg-slate-900 border border-slate-800 flex items-center justify-between text-xs font-mono transition-all hover:border-slate-700">
           <div class="flex items-center gap-2">
-            <span class="font-mono text-[11px] text-slate-400 font-bold">${time}</span>
-            <span class="font-bold text-[11px] ${badgeClass} px-2 py-0.5 rounded border">${title}</span>
+            <span class="text-[11px] text-slate-500 font-medium">${time}</span>
+            <span class="font-semibold text-[10px] px-1.5 py-0.5 rounded border" style="color: ${colorHex}; border-color: ${colorHex}40; background-color: ${colorHex}15">${title}</span>
           </div>
-          <div class="font-mono font-bold text-white text-xs">
-            IRE: ${ireVal}
+          <div class="font-bold text-white text-xs">
+            IRE: <span style="color: ${colorHex}">${ireVal}</span>
           </div>
         </div>
       `;
@@ -297,10 +378,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Real-time Simulation Engine Loop (3s Interval)
+   * Auto-Simulation Step
    */
   function runSimulationStep() {
-    // Generate realistic IoT telemetry fluctuations
     let newPH = state.params.ph + (Math.random() * 0.4 - 0.2);
     newPH = Math.max(5.5, Math.min(10.0, newPH));
 
@@ -325,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
     simIntervalId = setInterval(runSimulationStep, 3000);
     state.isLoopRunning = true;
     if (btnToggleTelemetry) {
-      btnToggleTelemetry.innerHTML = `<i data-lucide="pause" class="w-3.5 h-3.5"></i> <span>Pausar Telemetria</span>`;
+      btnToggleTelemetry.innerHTML = `<i data-lucide="pause" class="w-3 h-3"></i> <span>PAUSAR SIMULAÇÃO</span>`;
     }
     app.saveState(state);
     if (window.lucide) lucide.createIcons();
@@ -336,25 +416,43 @@ document.addEventListener('DOMContentLoaded', () => {
     simIntervalId = null;
     state.isLoopRunning = false;
     if (btnToggleTelemetry) {
-      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5"></i> <span>Atualizar / Iniciar</span>`;
+      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3 h-3"></i> <span>REINICIAR SIMULAÇÃO</span>`;
     }
     app.saveState(state);
     if (window.lucide) lucide.createIcons();
   }
 
-  // Telemetry Toggle Button on index.html
+  // Preset Scenario Quick Buttons Function
+  function applyPresetScenario(ph, turb, od, temp, tag) {
+    state.params = { ph, turb, od, temp };
+    state.activeScenarioTag = tag;
+    app.saveState(state);
+    renderDashboard();
+  }
+
+  // Bind Quick Buttons
+  const sc1 = document.getElementById('btnQuickScenario1');
+  const sc2 = document.getElementById('btnQuickScenario2');
+  const sc3 = document.getElementById('btnQuickScenario3');
+  const sc4 = document.getElementById('btnQuickScenario4');
+
+  if (sc1) sc1.onclick = () => applyPresetScenario(7.2, 4.1, 8.6, 22.4, '[MOCK] 1 · ÁGUA LIMPA');
+  if (sc2) sc2.onclick = () => applyPresetScenario(6.8, 128, 6.1, 24.1, '[MOCK] 2 · ENXURRADA');
+  if (sc3) sc3.onclick = () => applyPresetScenario(9.1, 34, 5.2, 27.8, '[MOCK] 3 · ÁGUA VERDE');
+  if (sc4) sc4.onclick = () => applyPresetScenario(6.2, 96, 1.1, 29.6, '[MOCK] 4 · CRÍTICO');
+
+  // Action Buttons
   if (btnToggleTelemetry) {
     btnToggleTelemetry.onclick = () => {
       if (state.isLoopRunning && simIntervalId) {
         stopSimLoop();
       } else {
-        runSimulationStep(); // Immediate reading
+        runSimulationStep();
         startSimLoop();
       }
     };
   }
 
-  // Clear History Button
   if (btnClearHistory) {
     btnClearHistory.onclick = () => {
       state.history = [];
@@ -370,7 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Boot & Initial Run
+  initMap();
   initChart();
   renderDashboard();
-  startSimLoop(); // AUTO START LIVE TELEMETRY SIMULATION IMMEDIATELY!
+  startSimLoop();
 });

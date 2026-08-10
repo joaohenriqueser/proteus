@@ -1,56 +1,54 @@
-/* Custom Styles for P.R.O.T.E.U.S. Water Quality Platform (Pure Dark Theme) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+/* P.R.O.T.E.U.S. Environmental Monitoring Dashboard - Prototype Design System */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  --font-sans: 'Inter', sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 
-  /* Exclusive Dark Theme Tokens */
-  --bg-app: #090d16;
-  --bg-header: #0f172a;
-  --bg-card: #1e293b;
-  --bg-card-subtle: #0f172a;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-card: #334155;
-  --border-card-hover: #475569;
-  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  /* Prototype Palette Tokens */
+  --bg-app: #020617;
+  --bg-card: #0F172A;
+  --bg-card-subtle: #1E293B;
+  --border-card: #1E293B;
+  --border-card-hover: #334155;
+  
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  --text-dark: #475569;
+
+  --color-cyan: #06B6D4;
+  --color-cyan-light: #22D3EE;
+  
+  /* Status Colors */
+  --color-ok: #3FA87A;
+  --color-warn: #C9A03C;
+  --color-alert: #C97A3C;
+  --color-crit: #C55A54;
 }
 
 body {
-  font-family: var(--font-sans);
+  margin: 0;
   background-color: var(--bg-app);
   color: var(--text-main);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
   font-size: 14px;
 }
 
 h1, h2, h3, h4, .font-heading {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
 }
 
-/* Page Entry Fade-In Transition */
-@keyframes pageFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-main {
-  animation: pageFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.font-mono {
+  font-family: var(--font-mono);
 }
 
 /* Minimal Solid Card Style */
 .glass-panel {
   background-color: var(--bg-card);
   border: 1px solid var(--border-card);
-  box-shadow: var(--shadow-card);
-  border-radius: 1rem;
+  border-radius: 4px;
 }
 
 .glass-panel-interactive {
@@ -59,30 +57,38 @@ main {
 
 .glass-panel-interactive:hover {
   border-color: var(--border-card-hover);
-  transform: translateY(-2px);
 }
 
-/* Minimal Header Navigation Links */
-.nav-link {
-  display: inline-flex;
+/* Vertical Sidebar Navigation Link */
+.sidebar-link {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.9375rem;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-muted);
   transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
+  border-left: 3px solid transparent;
+  text-decoration: none;
 }
 
-.nav-link:hover {
+.sidebar-link:hover {
   color: var(--text-main);
+  background-color: rgba(30, 41, 59, 0.6);
 }
 
-.nav-link.active {
-  color: #38bdf8;
-  font-weight: 700;
-  border-bottom-color: #38bdf8;
+.sidebar-link.active {
+  color: var(--text-main);
+  background-color: rgba(6, 182, 212, 0.12);
+  border-left-color: var(--color-cyan-light);
+  font-weight: 600;
+}
+
+.sidebar-link.active i {
+  color: var(--color-cyan-light) !important;
 }
 
 /* Range Sliders */
@@ -90,71 +96,103 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 8px;
-  background: #334155;
-  border-radius: 6px;
+  height: 6px;
+  background: #1E293B;
+  border-radius: 3px;
   outline: none;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: #38bdf8;
-  border: 3px solid #0f172a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  background: var(--color-cyan-light);
+  border: 2px solid #0F172A;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   transition: transform 0.15s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
+  transform: scale(1.2);
 }
 
-/* Matte Status Background Classes */
-.status-bg-otimo {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(22, 163, 74, 0.2) 100%);
-  border: 2px solid #16a34a;
+/* Leaflet Map Customization & Z-Index Containment Rules */
+.leaflet-container {
+  background: #020617 !important;
+  font-family: var(--font-mono) !important;
+  z-index: 1 !important;
 }
 
-.status-bg-atencao {
-  background: linear-gradient(135deg, rgba(202, 138, 4, 0.2) 0%, rgba(234, 179, 8, 0.1) 100%);
-  border: 2px solid #ca8a04;
+.leaflet-pane, 
+.leaflet-top, 
+.leaflet-bottom, 
+.leaflet-control, 
+.leaflet-map-pane,
+.leaflet-tile-pane,
+.leaflet-overlay-pane,
+.leaflet-shadow-pane,
+.leaflet-marker-pane,
+.leaflet-tooltip-pane,
+.leaflet-popup-pane {
+  z-index: 10 !important;
 }
 
-.status-bg-alerta {
-  background: linear-gradient(135deg, rgba(234, 88, 12, 0.2) 0%, rgba(249, 115, 22, 0.1) 100%);
-  border: 2px solid #ea580c;
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: #0F172A !important;
+  color: #F8FAFC !important;
+  border: 1px solid #1E293B !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
 }
 
-.status-bg-critico {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(153, 27, 27, 0.15) 100%);
-  border: 2px solid #dc2626;
+.leaflet-popup-content {
+  margin: 8px 10px !important;
+  font: 400 11px/1.5 var(--font-mono) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(2, 6, 23, 0.75) !important;
+  color: #475569 !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #64748B !important;
+}
+
+.leaflet-bar a {
+  background: #0F172A !important;
+  color: #94A3B8 !important;
+  border-color: #1E293B !important;
 }
 
 /* Photo Placeholder Box */
 .photo-placeholder {
-  border: 2px dashed #334155;
-  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px dashed #334155;
+  background-color: rgba(15, 23, 42, 0.8);
   transition: all 0.2s ease;
 }
 
 .photo-placeholder:hover {
-  border-color: #0284c7;
-  background-color: rgba(14, 165, 233, 0.05);
+  border-color: #06B6D4;
+  background-color: rgba(6, 182, 212, 0.05);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
   background: #334155;
-  border-radius: 4px;
 }
