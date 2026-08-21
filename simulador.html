@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROTEUS — Simulador de Cenários</title>
-  <meta name="description" content="Simulador de Condições Hídricas e Cenários de Eutrofização do Rio Tietê (Barbosa-SP).">
+  <title>PROTEUS — Simulador de Parâmetros</title>
+  <meta name="description" content="Simulador de Condições Hídricas e Parâmetros Físico-Químicos da Água.">
 
   <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,135 +69,55 @@
       </nav>
     </div>
 
-    <!-- Bottom Sidebar Footer Info -->
-    <div class="pt-4 border-t border-[#1E293B] space-y-2 font-mono">
-      <div class="text-[11px] text-[#CBD5E1] font-medium flex items-center gap-1.5">
-        <i data-lucide="clock" class="w-3.5 h-3.5 text-[#06B6D4]"></i>
-        <span id="liveClock">01 JAN 2023 · 12:00:00</span>
-      </div>
-      <div class="text-[10px] text-[#64748B] tracking-wider">
-        IFSP BIRIGUI · BARBOSA-SP
-      </div>
-    </div>
-
   </aside>
 
-  <!-- Toast Notification Container -->
-  <div id="toastNotification" class="fixed bottom-14 right-6 z-50 transition-all duration-300 transform opacity-0 translate-y-4 pointer-events-none">
-    <div class="bg-[#0F172A] border border-[#06B6D4]/40 text-[#F8FAFC] text-xs font-mono px-4 py-3 rounded shadow-2xl flex items-center gap-2">
-      <i data-lucide="check-circle-2" class="w-4 h-4 text-[#3FA87A]"></i>
-      <span id="toastMessage">Alteração salva com sucesso!</span>
-    </div>
-  </div>
-
-  <!-- ==================== MAIN CONTENT & FOOTER WRAPPER ==================== -->
+  <!-- ==================== MAIN CONTENT ==================== -->
   <div class="flex-1 flex flex-col justify-between min-w-0">
 
     <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 space-y-4 w-full flex-grow">
 
-      <!-- Page Intro Header -->
-      <div class="bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <!-- Concise Page Intro Header -->
+      <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-lg font-bold text-white font-heading flex items-center gap-2">
-            <i data-lucide="sliders" class="w-5 h-5 text-[#06B6D4]"></i>
-            Simulador de Condições Hídricas &amp; Cenários de Estresse
+          <h2 class="text-base font-bold text-white font-heading flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4.5 h-4.5 text-[#06B6D4]"></i>
+            Simulador de Parâmetros
           </h2>
-          <p class="text-xs text-[#94A3B8] mt-1 max-w-2xl leading-relaxed">
-            Manipule individualmente os parâmetros físico-químicos da água ou selecione cenários de estresse ecológico para observar em tempo real o cálculo do Índice de Risco de Eutrofização (IRE).
+          <p class="text-xs text-[#94A3B8] mt-0.5">
+            Ajuste os sliders para simular diferentes condições físico-químicas e visualizar a variação do Índice de Risco de Eutrofização (IRE).
           </p>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button id="btnApplyToDashboard" class="px-4 py-2.5 rounded bg-[#3FA87A] hover:bg-[#348e67] text-white font-mono font-semibold text-xs transition-all flex items-center gap-2">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            <span>SINCRONIZAR COM MONITORAMENTO</span>
-          </button>
-        </div>
+        <button id="btnReset" type="button" class="px-3.5 py-2 rounded bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#CBD5E1] hover:text-white font-mono font-semibold text-xs transition-all flex items-center gap-1.5 flex-none shadow-sm">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-[#06B6D4]"></i>
+          <span>RESETAR PARÂMETROS</span>
+        </button>
       </div>
 
-      <!-- PRESET SCENARIOS BAR -->
-      <section class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
-        <label class="block text-xs font-mono font-bold text-[#64748B] uppercase tracking-wider">
-          Selecione um Cenário de Teste Pré-Configurado:
-        </label>
+      <!-- MAIN SIMULATOR INTERACTIVE GRID (50/50 SPLIT) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Sliders Column (6 cols) -->
+        <section class="lg:col-span-6 bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col justify-between space-y-4">
           
-          <button id="btnScenario1" class="p-3.5 rounded border border-[#3FA87A]/30 bg-[#020617] hover:border-[#3FA87A] text-left transition-all text-xs font-medium">
-            <div class="text-[#3FA87A] font-mono font-bold mb-1 flex items-center justify-between">
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-[#3FA87A]"></span>
-                1. Água Limpa
-              </span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#3FA87A]/15 text-[#3FA87A] font-mono font-bold">EQUILÍBRIO</span>
-            </div>
-            <div class="text-[#CBD5E1] text-xs">Condições normais da bacia</div>
-            <div class="text-[11px] text-[#64748B] mt-1.5 font-mono font-semibold">pH 7.2 | 8 NTU | OD 6.8 | 22°C</div>
-          </button>
-
-          <button id="btnScenario2" class="p-3.5 rounded border border-[#C9A03C]/30 bg-[#020617] hover:border-[#C9A03C] text-left transition-all text-xs font-medium">
-            <div class="text-[#C9A03C] font-mono font-bold mb-1 flex items-center justify-between">
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-[#C9A03C]"></span>
-                2. Enxurrada
-              </span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#C9A03C]/15 text-[#C9A03C] font-mono font-bold">TURBIDEZ</span>
-            </div>
-            <div class="text-[#CBD5E1] text-xs">Aumento de escoamento superficial</div>
-            <div class="text-[11px] text-[#64748B] mt-1.5 font-mono font-semibold">pH 7.5 | 55 NTU | OD 5.2 | 24°C</div>
-          </button>
-
-          <button id="btnScenario3" class="p-3.5 rounded border border-[#C97A3C]/30 bg-[#020617] hover:border-[#C97A3C] text-left transition-all text-xs font-medium">
-            <div class="text-[#C97A3C] font-mono font-bold mb-1 flex items-center justify-between">
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-[#C97A3C]"></span>
-                3. Água Verde
-              </span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#C97A3C]/15 text-[#C97A3C] font-mono font-bold">FLORAÇÃO</span>
-            </div>
-            <div class="text-[#CBD5E1] text-xs">Alta insolação &amp; pH elevado</div>
-            <div class="text-[11px] text-[#64748B] mt-1.5 font-mono font-semibold">pH 8.9 | 85 NTU | OD 6.1 | 27°C</div>
-          </button>
-
-          <button id="btnScenario4" class="p-3.5 rounded border border-[#C55A54]/30 bg-[#020617] hover:border-[#C55A54] text-left transition-all text-xs font-medium">
-            <div class="text-[#C55A54] font-mono font-bold mb-1 flex items-center justify-between">
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-[#C55A54]"></span>
-                4. Crítico
-              </span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#C55A54]/15 text-[#C55A54] font-mono font-bold">ANOXIA</span>
-            </div>
-            <div class="text-[#CBD5E1] text-xs">Decomposição orgânica intensa</div>
-            <div class="text-[11px] text-[#64748B] mt-1.5 font-mono font-semibold">pH 9.1 | 120 NTU | OD 1.5 | 28°C</div>
-          </button>
-
-        </div>
-      </section>
-
-      <!-- MAIN SIMULATOR INTERACTIVE GRID -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-        <!-- Sliders Column (7 cols) -->
-        <section class="lg:col-span-7 bg-[#0F172A] border border-[#1E293B] rounded p-5 space-y-4">
-          
-          <div class="flex items-center justify-between border-b border-[#1E293B] pb-2.5">
+          <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
             <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <i data-lucide="tune" class="w-4 h-4 text-[#06B6D4]"></i>
-              Controles Manuais de Telemetria
+              Controles de Telemetria
             </h3>
-            <span class="text-xs font-mono text-[#64748B]">Ajuste fino instantâneo</span>
+            <span class="text-xs font-mono text-[#64748B]">Ajuste em tempo real</span>
           </div>
 
-          <div class="space-y-4 font-mono">
+          <div class="space-y-4 font-mono flex-grow">
             
             <!-- Slider: pH -->
-            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B]">
-              <div class="flex justify-between items-center mb-2 text-xs">
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
                 <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
                   <i data-lucide="test-tube" class="w-4 h-4 text-purple-400"></i>
                   Potencial Hidrogeniônico (pH)
                 </span>
-                <span class="text-xs px-2 py-0.5 rounded bg-[#0F172A] text-purple-300 font-mono font-bold border border-[#1E293B]" id="valPHDisplay">7.2</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-purple-300 font-mono font-bold border border-[#1E293B]" id="valPHDisplay">7.2</span>
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-[10px] text-[#475569]">0</span>
@@ -207,13 +127,13 @@
             </div>
 
             <!-- Slider: Turbidez -->
-            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B]">
-              <div class="flex justify-between items-center mb-2 text-xs">
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
                 <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
                   <i data-lucide="droplet" class="w-4 h-4 text-amber-400"></i>
                   Turbidez da Água (NTU)
                 </span>
-                <span class="text-xs px-2 py-0.5 rounded bg-[#0F172A] text-amber-300 font-mono font-bold border border-[#1E293B]" id="valTurbDisplay">8 NTU</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-amber-300 font-mono font-bold border border-[#1E293B]" id="valTurbDisplay">8 NTU</span>
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-[10px] text-[#475569]">0</span>
@@ -223,13 +143,13 @@
             </div>
 
             <!-- Slider: OD -->
-            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B]">
-              <div class="flex justify-between items-center mb-2 text-xs">
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
                 <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
                   <i data-lucide="wind" class="w-4 h-4 text-sky-400"></i>
                   Oxigênio Dissolvido - OD (mg/L)
                 </span>
-                <span class="text-xs px-2 py-0.5 rounded bg-[#0F172A] text-sky-300 font-mono font-bold border border-[#1E293B]" id="valODDisplay">6.8 mg/L</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-sky-300 font-mono font-bold border border-[#1E293B]" id="valODDisplay">6.8 mg/L</span>
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-[10px] text-[#475569]">0</span>
@@ -239,13 +159,13 @@
             </div>
 
             <!-- Slider: Temperatura -->
-            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B]">
-              <div class="flex justify-between items-center mb-2 text-xs">
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
                 <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
                   <i data-lucide="thermometer" class="w-4 h-4 text-rose-400"></i>
                   Temperatura da Água (°C)
                 </span>
-                <span class="text-xs px-2 py-0.5 rounded bg-[#0F172A] text-rose-300 font-mono font-bold border border-[#1E293B]" id="valTempDisplay">22.4 °C</span>
+                <span class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-rose-300 font-mono font-bold border border-[#1E293B]" id="valTempDisplay">22.4 °C</span>
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-[10px] text-[#475569]">10°C</span>
@@ -256,37 +176,19 @@
 
           </div>
 
-          <!-- Loop Control & Reset -->
-          <div class="pt-3 border-t border-[#1E293B] flex items-center justify-between flex-wrap gap-2">
-            <div class="flex items-center gap-2">
-              <button id="toggleSimLoop" class="px-3.5 py-2 rounded bg-[#06B6D4] hover:bg-[#0891b2] text-white font-mono font-semibold text-xs transition-all flex items-center gap-2 shadow-md">
-                <i data-lucide="play" id="simToggleIcon" class="w-3.5 h-3.5"></i>
-                <span id="simToggleText">INICIAR SIMULAÇÃO CONTÍNUA (3S)</span>
-              </button>
-              
-              <span id="simLoopBadge" class="hidden text-[11px] px-2.5 py-1 rounded bg-[#3FA87A]/15 text-[#3FA87A] border border-[#3FA87A]/30 font-mono font-bold items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#3FA87A] animate-ping"></span>
-                TRANSMISSÃO ATIVA...
-              </span>
-            </div>
-
-            <button id="btnReset" class="text-xs text-[#94A3B8] hover:text-white underline font-mono font-semibold flex items-center gap-1">
-              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-              RESETAR
-            </button>
-          </div>
-
         </section>
 
-        <!-- Dynamic Preview Card (5 cols) -->
-        <section class="lg:col-span-5 flex flex-col space-y-4">
+        <!-- Dynamic Diagnostic Result Card (6 cols) -->
+        <section class="lg:col-span-6 flex flex-col">
           
-          <div id="previewDiagnosticCard" class="bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col justify-between flex-grow transition-all duration-300 relative overflow-hidden">
-            <div>
-              <div class="flex items-center justify-between mb-4">
+          <div id="previewDiagnosticCard" class="bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col justify-between flex-grow transition-all duration-300 relative overflow-hidden space-y-5">
+            
+            <div class="space-y-4">
+              <!-- Header -->
+              <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
                 <span class="font-mono text-xs font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
-                  <i data-lucide="eye" class="w-4 h-4 text-[#06B6D4]"></i>
-                  PRÉ-VISUALIZAÇÃO DO DIAGNÓSTICO
+                  <i data-lucide="activity" class="w-4 h-4 text-[#06B6D4]"></i>
+                  DIAGNÓSTICO EM TEMPO REAL
                 </span>
                 <span id="previewBadge" class="px-2.5 py-1 rounded text-xs font-mono font-bold border flex items-center gap-1.5 border-[#3FA87A]/40 bg-[#3FA87A]/15 text-[#3FA87A]">
                   <i id="previewIcon" data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
@@ -294,124 +196,62 @@
                 </span>
               </div>
 
-              <div class="my-6 text-center">
-                <div class="text-xs font-mono text-[#64748B] font-bold uppercase tracking-wider mb-1">ÍNDICE CALCULADO (IRE)</div>
+              <!-- Score Center Display -->
+              <div class="my-4 text-center">
+                <div class="text-xs font-mono text-[#64748B] font-bold uppercase tracking-wider mb-1">ÍNDICE DE RISCO CALCULADO (IRE)</div>
                 <div class="flex items-baseline justify-center gap-1">
                   <span id="previewIREValue" class="font-mono text-6xl font-bold tracking-tighter text-[#3FA87A]">85.4</span>
                   <span class="font-mono text-sm text-[#475569]">/100</span>
                 </div>
-                <div class="w-full bg-[#020617] rounded h-2.5 mt-4 overflow-hidden border border-[#1E293B]">
+                <div class="w-full bg-[#020617] rounded h-2.5 mt-3 overflow-hidden border border-[#1E293B]">
                   <div id="previewProgressBar" class="h-full rounded bg-[#3FA87A] transition-all duration-500" style="width: 85.4%;"></div>
                 </div>
               </div>
 
-              <div class="mt-6 bg-[#020617] p-4 rounded border border-[#1E293B] space-y-1.5">
-                <div class="font-mono text-[10px] font-bold text-[#64748B] uppercase tracking-wider">RESULTADO DA SIMULAÇÃO:</div>
+              <!-- Diagnostic Message Box -->
+              <div class="bg-[#020617] p-4 rounded border border-[#1E293B] space-y-1">
+                <div class="font-mono text-[10px] font-bold text-[#64748B] uppercase tracking-wider">AVALIAÇÃO DO ALGORITMO:</div>
                 <p id="previewMessageText" class="text-xs font-semibold text-[#F8FAFC] leading-relaxed">
                   "Coluna d'água estável e bem oxigenada."
                 </p>
               </div>
             </div>
 
-            <div class="mt-6 pt-3 border-t border-[#1E293B] text-[11px] font-mono text-[#64748B]">
-              DICA: CLIQUE EM <strong class="text-[#3FA87A]">"SINCRONIZAR COM MONITORAMENTO"</strong> PARA ENVIAR OS DADOS PARA A TELA PRINCIPAL.
+            <!-- Integrated Sub-Indices Mini-Pills Grid -->
+            <div class="pt-3 border-t border-[#1E293B] space-y-2">
+              <div class="text-[10px] font-mono font-bold text-[#64748B] uppercase tracking-wider">RESUMO DOS SUB-ÍNDICES (PESOS):</div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs">
+                
+                <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] space-y-0.5">
+                  <span class="text-[10px] text-[#C9A03C] font-bold block">TURBIDEZ (40%)</span>
+                  <span id="subTurbBadge" class="font-bold text-[#F8FAFC]">100.0 / 100</span>
+                </div>
+
+                <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] space-y-0.5">
+                  <span class="text-[10px] text-[#06B6D4] font-bold block">OXIGÊNIO (35%)</span>
+                  <span id="subODBadge" class="font-bold text-[#F8FAFC]">100.0 / 100</span>
+                </div>
+
+                <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] space-y-0.5">
+                  <span class="text-[10px] text-purple-400 font-bold block">pH (25%)</span>
+                  <span id="subPHBadge" class="font-bold text-[#F8FAFC]">100.0 / 100</span>
+                </div>
+
+                <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] space-y-0.5">
+                  <span class="text-[10px] text-rose-400 font-bold block">FATOR TEMP.</span>
+                  <span id="subTempBadge" class="font-bold text-[#F8FAFC]">1.0x (Normal)</span>
+                </div>
+
+              </div>
             </div>
+
           </div>
 
         </section>
 
       </div>
 
-      <!-- LIVE MATHEMATICAL CALCULATION BREAKDOWN TABLE -->
-      <section class="bg-[#0F172A] border border-[#1E293B] rounded p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
-          <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <i data-lucide="calculator" class="w-4 h-4 text-[#3FA87A]"></i>
-            Demonstrativo dos Sub-Índices Calculados em Tempo Real
-          </h3>
-          <span class="text-xs text-[#64748B] font-mono font-bold">ALGORITMO IRE</span>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse font-mono">
-            <thead>
-              <tr class="border-b border-[#1E293B] text-[#64748B] font-bold">
-                <th class="py-2.5 px-3">Parâmetro</th>
-                <th class="py-2.5 px-3">Leitura Atual</th>
-                <th class="py-2.5 px-3">Regra Aplicada</th>
-                <th class="py-2.5 px-3">Sub-índice Resultante</th>
-                <th class="py-2.5 px-3">Ponderação</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[#1E293B] text-[#F8FAFC]">
-              <tr>
-                <td class="py-3 px-3 font-bold text-[#C9A03C]">Turbidez</td>
-                <td class="py-3 px-3 font-bold" id="tableValTurb">8 NTU</td>
-                <td class="py-3 px-3 text-[#64748B]" id="tableRuleTurb">Turb <= 10 -> S_turb = 100</td>
-                <td class="py-3 px-3 text-[#C9A03C] font-bold" id="tableSubTurb">100.0 / 100</td>
-                <td class="py-3 px-3 font-bold">40% (x0.40)</td>
-              </tr>
-              <tr>
-                <td class="py-3 px-3 font-bold text-[#06B6D4]">Oxigênio Dissolvido (OD)</td>
-                <td class="py-3 px-3 font-bold" id="tableValOD">6.8 mg/L</td>
-                <td class="py-3 px-3 text-[#64748B]" id="tableRuleOD">OD >= 5.0 -> S_OD = 100</td>
-                <td class="py-3 px-3 text-[#06B6D4] font-bold" id="tableSubOD">100.0 / 100</td>
-                <td class="py-3 px-3 font-bold">35% (x0.35)</td>
-              </tr>
-              <tr>
-                <td class="py-3 px-3 font-bold text-purple-400">pH da Água</td>
-                <td class="py-3 px-3 font-bold" id="tableValPH">7.2</td>
-                <td class="py-3 px-3 text-[#64748B]" id="tableRulePH">6.5 <= pH <= 8.0 -> S_pH = 100</td>
-                <td class="py-3 px-3 text-purple-300 font-bold" id="tableSubPH">100.0 / 100</td>
-                <td class="py-3 px-3 font-bold">25% (x0.25)</td>
-              </tr>
-              <tr>
-                <td class="py-3 px-3 font-bold text-[#C55A54]">Temperatura</td>
-                <td class="py-3 px-3 font-bold" id="tableValTemp">22.4 °C</td>
-                <td class="py-3 px-3 text-[#64748B]" id="tableRuleTemp">Temp < 25 °C -> F_temp = 1.0</td>
-                <td class="py-3 px-3 text-[#C55A54] font-bold" id="tableSubTemp">1.0 (Normal)</td>
-                <td class="py-3 px-3 font-bold">Divisor F<sub>temp</sub></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
     </main>
-
-    <!-- STICKY FOOTER PRESET SCENARIOS BAR -->
-    <footer class="sticky bottom-0 bg-[#020617] border-t border-[#1E293B] z-40 px-4 py-2.5">
-      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-        
-        <div class="flex items-center gap-3">
-          <span class="font-mono text-[10px] text-[#475569] tracking-[0.09em]">CARREGAR CONJUNTO DE DADOS PRÉ-DEFINIDO</span>
-        </div>
-
-        <!-- Scenario Quick Buttons -->
-        <div class="flex items-center gap-2 flex-wrap">
-          <button id="btnQuickScenario1" type="button" class="px-3 py-1.5 rounded bg-[#0F172A] border border-[#3FA87A]/40 text-[#3FA87A] font-mono font-medium text-xs hover:border-[#3FA87A] transition-all flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#3FA87A]"></span>
-            <span>1. Água Limpa</span>
-          </button>
-
-          <button id="btnQuickScenario2" type="button" class="px-3 py-1.5 rounded bg-[#0F172A] border border-[#C9A03C]/40 text-[#C9A03C] font-mono font-medium text-xs hover:border-[#C9A03C] transition-all flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#C9A03C]"></span>
-            <span>2. Enxurrada</span>
-          </button>
-
-          <button id="btnQuickScenario3" type="button" class="px-3 py-1.5 rounded bg-[#0F172A] border border-[#C97A3C]/40 text-[#C97A3C] font-mono font-medium text-xs hover:border-[#C97A3C] transition-all flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#C97A3C]"></span>
-            <span>3. Água Verde</span>
-          </button>
-
-          <button id="btnQuickScenario4" type="button" class="px-3 py-1.5 rounded bg-[#0F172A] border border-[#C55A54]/40 text-[#C55A54] font-mono font-medium text-xs hover:border-[#C55A54] transition-all flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#C55A54]"></span>
-            <span>4. Crítico</span>
-          </button>
-        </div>
-
-      </div>
-    </footer>
 
   </div>
 
