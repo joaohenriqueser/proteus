@@ -69,10 +69,6 @@
           <i data-lucide="book-open" class="w-4 h-4 text-[#94A3B8]"></i>
           <span>Metodologia</span>
         </a>
-        <a href="sobre.html" class="sidebar-link">
-          <i data-lucide="info" class="w-4 h-4 text-[#94A3B8]"></i>
-          <span>Sobre</span>
-        </a>
       </nav>
     </div>
 
@@ -81,7 +77,7 @@
   <!-- ==================== MAIN CONTENT ==================== -->
   <div class="flex-1 flex flex-col justify-between min-w-0">
     
-    <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 space-y-3 w-full flex-grow">
+    <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 space-y-4 w-full flex-grow">
 
       <!-- TOP SECTION: HERO IRE CARD & GEOLOCATION LEAFLET MAP GRID -->
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-3">
@@ -259,6 +255,81 @@
           <div class="mt-2.5 overflow-y-auto max-h-[200px] space-y-2 pr-1" id="historyLogContainer">
             <!-- Dynamically populated -->
           </div>
+        </div>
+
+      </section>
+
+      <!-- SECTION: LIVE WATER QUALITY CONTROLS & PRESET SCENARIOS -->
+      <section class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
+        
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#1E293B] pb-3">
+          <div>
+            <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-[#06B6D4]"></i>
+              Controles de Telemetria &amp; Cenários da Água
+            </h3>
+            <p class="text-xs text-[#94A3B8] mt-0.5">
+              Selecione um cenário ecológico abaixo para simular e alterar a qualidade da água em tempo real no painel.
+            </p>
+          </div>
+
+          <button id="btnToggleTelemetry" type="button" class="px-3.5 py-2 rounded bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#CBD5E1] hover:text-white font-mono font-semibold text-xs transition-all flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="pause" class="w-3.5 h-3.5 text-[#06B6D4]"></i>
+            <span>PAUSAR SIMULAÇÃO</span>
+          </button>
+        </div>
+
+        <!-- 4 Quick Scenario Action Buttons Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          
+          <button id="btnQuickScenario1" type="button" class="p-3.5 rounded border border-[#3FA87A]/30 bg-[#020617] hover:border-[#3FA87A] text-left transition-all text-xs font-medium space-y-1">
+            <div class="text-[#3FA87A] font-mono font-bold flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#3FA87A]"></span>
+                1. Água Limpa
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#3FA87A]/15 text-[#3FA87A] font-mono font-bold">EQUILÍBRIO</span>
+            </div>
+            <div class="text-[#CBD5E1] text-xs">Condições ideais da bacia</div>
+            <div class="text-[11px] text-[#64748B] font-mono font-semibold pt-1 border-t border-[#1E293B]">pH 7.2 | 4 NTU | OD 8.6 | 22°C</div>
+          </button>
+
+          <button id="btnQuickScenario2" type="button" class="p-3.5 rounded border border-[#C9A03C]/30 bg-[#020617] hover:border-[#C9A03C] text-left transition-all text-xs font-medium space-y-1">
+            <div class="text-[#C9A03C] font-mono font-bold flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#C9A03C]"></span>
+                2. Enxurrada
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#C9A03C]/15 text-[#C9A03C] font-mono font-bold">TURBIDEZ</span>
+            </div>
+            <div class="text-[#CBD5E1] text-xs">Escoamento e sedimentos</div>
+            <div class="text-[11px] text-[#64748B] font-mono font-semibold pt-1 border-t border-[#1E293B]">pH 6.8 | 128 NTU | OD 6.1 | 24°C</div>
+          </button>
+
+          <button id="btnQuickScenario3" type="button" class="p-3.5 rounded border border-[#C97A3C]/30 bg-[#020617] hover:border-[#C97A3C] text-left transition-all text-xs font-medium space-y-1">
+            <div class="text-[#C97A3C] font-mono font-bold flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#C97A3C]"></span>
+                3. Água Verde
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#C97A3C]/15 text-[#C97A3C] font-mono font-bold">FLORAÇÃO</span>
+            </div>
+            <div class="text-[#CBD5E1] text-xs">Proliferação de microalgas</div>
+            <div class="text-[11px] text-[#64748B] font-mono font-semibold pt-1 border-t border-[#1E293B]">pH 9.1 | 34 NTU | OD 5.2 | 27°C</div>
+          </button>
+
+          <button id="btnQuickScenario4" type="button" class="p-3.5 rounded border border-[#C55A54]/30 bg-[#020617] hover:border-[#C55A54] text-left transition-all text-xs font-medium space-y-1">
+            <div class="text-[#C55A54] font-mono font-bold flex items-center justify-between">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#C55A54]"></span>
+                4. Crítico
+              </span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#C55A54]/15 text-[#C55A54] font-mono font-bold">ANOXIA</span>
+            </div>
+            <div class="text-[#CBD5E1] text-xs">Decomposição &amp; morte aquática</div>
+            <div class="text-[11px] text-[#64748B] font-mono font-semibold pt-1 border-t border-[#1E293B]">pH 6.2 | 96 NTU | OD 1.1 | 29°C</div>
+          </button>
+
         </div>
 
       </section>

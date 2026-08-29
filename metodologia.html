@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROTEUS — Metodologia & Equações</title>
-  <meta name="description" content="Fundamentação Matemática e Biológica do Algoritmo de Diagnóstico de Eutrofização no Rio Tietê (Barbosa-SP).">
+  <title>PROTEUS — Como Funciona o Diagnóstico</title>
+  <meta name="description" content="Entenda como a plataforma P.R.O.T.E.U.S. analisa a qualidade da água do Rio Tietê de forma simples e acessível.">
 
   <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,10 +62,6 @@
           <i data-lucide="book-open" class="w-4 h-4 text-[#94A3B8]"></i>
           <span>Metodologia</span>
         </a>
-        <a href="sobre.html" class="sidebar-link">
-          <i data-lucide="info" class="w-4 h-4 text-[#94A3B8]"></i>
-          <span>Sobre</span>
-        </a>
       </nav>
     </div>
 
@@ -76,196 +72,307 @@
 
     <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 space-y-6 w-full flex-grow">
 
-      <!-- PAGE HERO -->
+      <!-- PAGE HERO BANNER -->
       <div class="bg-[#0F172A] border border-[#1E293B] rounded p-5 space-y-2">
         <div class="flex items-center gap-3">
-          <div class="p-2.5 bg-purple-500/10 border border-purple-500/30 rounded text-purple-400">
-            <i data-lucide="book-open-check" class="w-6 h-6"></i>
+          <div class="p-2.5 bg-[#06B6D4]/10 border border-[#06B6D4]/30 rounded text-[#06B6D4]">
+            <i data-lucide="book-open" class="w-6 h-6"></i>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-white font-heading">
-              Metodologia &amp; Modelagem Matemática do Índice IRE
+            <h2 class="text-base sm:text-lg font-bold text-white font-heading">
+              Como Funciona a Análise da Água (Índice IRE)
             </h2>
             <p class="text-xs text-[#94A3B8] mt-0.5">
-              Entenda a formulação matemática, matriz de pesos e dinâmicas limnológicas envolvidas no diagnóstico automatizado da qualidade da água.
+              Entenda de forma simples e detalhada como medimos a saúde do Rio Tietê e calculamos a pontuação de qualidade.
             </p>
           </div>
         </div>
       </div>
 
-      <!-- SECTION 1: THE 4 MONITORED PARAMETERS -->
+      <!-- SECTION 1: THE 4 WATER INDICATORS -->
       <section class="space-y-3">
         <div class="border-b border-[#1E293B] pb-2">
-          <h3 class="text-sm font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
             <i data-lucide="activity" class="w-4 h-4 text-[#06B6D4]"></i>
-            1. Parâmetros Monitorados e Enquadramento CONAMA 357
+            1. Os 4 Indicadores Medidos na Água
           </h3>
-          <p class="text-xs text-[#64748B]">Significado ecológico de cada variável coletada pelos nós de telemetria</p>
+          <p class="text-xs text-[#64748B]">Cada sensor instalado no rio avalia um elemento essencial para a vida aquática</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           
-          <!-- Parameter 1: pH -->
-          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+          <!-- Card 1: Turbidez -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="test-tube" class="w-4 h-4 text-purple-400"></i>
-                <h4 class="font-bold text-white text-sm font-heading">Potencial Hidrogeniônico (pH)</h4>
+                <i data-lucide="droplet" class="w-4.5 h-4.5 text-[#C9A03C]"></i>
+                <h4 class="font-bold text-white text-sm font-heading">Turbidez (Transparência da Água)</h4>
               </div>
-              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-purple-300 border border-[#1E293B]">Peso: 25%</span>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-[#C9A03C] border border-[#1E293B]">Peso: 40% da Nota</span>
             </div>
 
             <p class="text-xs text-[#94A3B8] leading-relaxed">
-              Medida de acidez ou alcalinidade do meio aquático. Durante o florescimento de cianobactérias, a intensa fotossíntese consome grandes quantidades de dióxido de carbono dissolvido ($CO_2$), elevando o pH para níveis alcalinos críticos ($>8.5$).
+              Indica o quanto a água está clara ou turva. Quando a água fica muito barrenta ou cheia de microalgas, a luz do sol não consegue entrar, prejudicando o ecossistema.
             </p>
 
-            <div class="bg-[#020617] p-2 rounded border border-[#1E293B] text-xs font-mono text-[#64748B] flex justify-between">
-              <span>Limite CONAMA Classe 2:</span>
-              <span class="font-bold text-[#F8FAFC]">6.0 a 9.0</span>
+            <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] text-xs font-mono text-[#CBD5E1] flex justify-between">
+              <span class="text-[#64748B]">Situação Ideal:</span>
+              <span class="font-bold text-[#3FA87A]">Água limpa e transparente (até 10 NTU)</span>
             </div>
           </div>
 
-          <!-- Parameter 2: Turbidez -->
-          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+          <!-- Card 2: Oxigênio Dissolvido -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="droplet" class="w-4 h-4 text-[#C9A03C]"></i>
-                <h4 class="font-bold text-white text-sm font-heading">Turbidez da Água (NTU)</h4>
+                <i data-lucide="wind" class="w-4.5 h-4.5 text-[#06B6D4]"></i>
+                <h4 class="font-bold text-white text-sm font-heading">Oxigênio Dissolvido (Ar na Água)</h4>
               </div>
-              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-[#C9A03C] border border-[#1E293B]">Peso: 40%</span>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-[#06B6D4] border border-[#1E293B]">Peso: 35% da Nota</span>
             </div>
 
             <p class="text-xs text-[#94A3B8] leading-relaxed">
-              Mede o grau de atenuamento que um feixe de luz sofre ao atravessar a água devido à presença de matéria em suspensão e biomassa de microalgas. É o principal indicador de turvação física e transparência.
+              É a quantidade de oxigênio disponível para os peixes respirarem. Se a poluição aumenta ou as algas morrem em massa, o oxigênio cai a zero, causando a morte de peixes.
             </p>
 
-            <div class="bg-[#020617] p-2 rounded border border-[#1E293B] text-xs font-mono text-[#64748B] flex justify-between">
-              <span>Máximo CONAMA Classe 2:</span>
-              <span class="font-bold text-[#F8FAFC]">100 NTU</span>
+            <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] text-xs font-mono text-[#CBD5E1] flex justify-between">
+              <span class="text-[#64748B]">Situação Ideal:</span>
+              <span class="font-bold text-[#3FA87A]">Acima de 5,0 mg/L (Boa respiração)</span>
             </div>
           </div>
 
-          <!-- Parameter 3: Oxigênio Dissolvido -->
-          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+          <!-- Card 3: pH -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="wind" class="w-4 h-4 text-[#06B6D4]"></i>
-                <h4 class="font-bold text-white text-sm font-heading">Oxigênio Dissolvido (OD)</h4>
+                <i data-lucide="test-tube" class="w-4.5 h-4.5 text-purple-400"></i>
+                <h4 class="font-bold text-white text-sm font-heading">pH (Equilíbrio Químico)</h4>
               </div>
-              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-[#06B6D4] border border-[#1E293B]">Peso: 35%</span>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-purple-300 border border-[#1E293B]">Peso: 25% da Nota</span>
             </div>
 
             <p class="text-xs text-[#94A3B8] leading-relaxed">
-              Essencial para a respiração de peixes e vida aquática. Quando as microalgas morrem, a decomposição microbiana aeróbica consome o oxigênio da água, podendo causar hipóxia e anoxia ($<2.0\text{ mg/L}$).
+              Mede se a água está neutra, ácida ou alcalina. Quando ocorrem grandes surtos de "água verde", o pH sobe excessivamente (acima de 8,5), indicando alta proliferação de algas.
             </p>
 
-            <div class="bg-[#020617] p-2 rounded border border-[#1E293B] text-xs font-mono text-[#64748B] flex justify-between">
-              <span>Mínimo CONAMA Classe 2:</span>
-              <span class="font-bold text-[#F8FAFC]">5.0 mg/L</span>
+            <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] text-xs font-mono text-[#CBD5E1] flex justify-between">
+              <span class="text-[#64748B]">Situação Ideal:</span>
+              <span class="font-bold text-[#3FA87A]">Entre 6,5 e 8,0 (Faixa neutra)</span>
             </div>
           </div>
 
-          <!-- Parameter 4: Temperatura -->
-          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+          <!-- Card 4: Temperatura -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="thermometer" class="w-4 h-4 text-[#C55A54]"></i>
-                <h4 class="font-bold text-white text-sm font-heading">Temperatura da Água (°C)</h4>
+                <i data-lucide="thermometer" class="w-4.5 h-4.5 text-rose-400"></i>
+                <h4 class="font-bold text-white text-sm font-heading">Temperatura da Água</h4>
               </div>
-              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-[#C55A54] border border-[#1E293B]">Divisor F<sub>temp</sub></span>
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-[#020617] text-rose-300 border border-[#1E293B]">Fator de Atenção</span>
             </div>
 
             <p class="text-xs text-[#94A3B8] leading-relaxed">
-              Temperaturas elevadas ($\ge 25^\circ\text{C}$) aceleram metabolicamente a divisão celular das cianobactérias. No IRE, ativa o divisor de penalidade térmica de $F_{temp} = 1.2$.
+              Dias muito quentes (água acima de 25°C) fazem com que as algas se multipliquem em velocidade acelerada. Por isso, a temperatura alta aciona um alerta automático de atenção.
             </p>
 
-            <div class="bg-[#020617] p-2 rounded border border-[#1E293B] text-xs font-mono text-[#64748B] flex justify-between">
-              <span>Fator de Penalização Térmica:</span>
-              <span class="font-bold text-[#C55A54]">1.2 (se >= 25.0 °C)</span>
+            <div class="bg-[#020617] p-2.5 rounded border border-[#1E293B] text-xs font-mono text-[#CBD5E1] flex justify-between">
+              <span class="text-[#64748B]">Situação Ideal:</span>
+              <span class="font-bold text-[#3FA87A]">Abaixo de 25,0 °C</span>
             </div>
           </div>
 
         </div>
       </section>
 
-      <!-- SECTION 2: MATHEMATICAL MODEL & EQUATIONS -->
-      <section class="space-y-3">
+      <!-- SECTION 2: HOW THE SCORE IS CALCULATED (3 STEPS & FORMULA BOX) -->
+      <section class="space-y-4">
         <div class="border-b border-[#1E293B] pb-2">
-          <h3 class="text-sm font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
             <i data-lucide="calculator" class="w-4 h-4 text-[#3FA87A]"></i>
-            2. Modelagem Matemática do Algoritmo IRE
+            2. Como Calculamos a Nota Final (Índice IRE)
           </h3>
-          <p class="text-xs text-[#64748B]">Formulação dos sub-índices normalizados e índice final</p>
+          <p class="text-xs text-[#64748B]">O sistema combina os dados em 3 etapas automáticas para gerar uma pontuação de 0 a 100</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <!-- 3-Step Process -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono">
           
-          <!-- Step 1: Sub-indices -->
-          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
-            <div class="text-xs font-mono font-bold text-[#06B6D4] uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="binary" class="w-4 h-4"></i>
-              Sub-índices (0-100)
+          <!-- Step 1 -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2">
+            <div class="text-xs font-bold text-[#06B6D4] uppercase flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-full bg-[#06B6D4]/20 border border-[#06B6D4] flex items-center justify-center text-[10px]">1</span>
+              Leitura dos Sensores
             </div>
-            <div class="space-y-2 text-xs font-mono">
-              <div class="bg-[#020617] p-3 rounded border border-[#1E293B]">
-                <span class="font-bold text-[#C9A03C] block mb-1">Sub-índice Turbidez ($S_{turb}$):</span>
-                <ul class="space-y-1 text-[11px] text-[#94A3B8]">
-                  <li>• Turb <= 10 $\implies S_{turb} = 100$</li>
-                  <li>• 10 < Turb <= 100 $\implies 100 - 0.89(Turb - 10)$</li>
-                  <li>• Turb > 100 $\implies S_{turb} = 20$</li>
-                </ul>
-              </div>
-
-              <div class="bg-[#020617] p-3 rounded border border-[#1E293B]">
-                <span class="font-bold text-[#06B6D4] block mb-1">Sub-índice Oxigênio ($S_{OD}$):</span>
-                <ul class="space-y-1 text-[11px] text-[#94A3B8]">
-                  <li>• OD >= 5.0 $\implies S_{OD} = 100$</li>
-                  <li>• 2.0 <= OD < 5.0 $\implies 20 \times OD$</li>
-                  <li>• OD < 2.0 $\implies S_{OD} = 0$</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Step 2: Weighted Sum -->
-          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
-            <div class="text-xs font-mono font-bold text-[#3FA87A] uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="pie-chart" class="w-4 h-4"></i>
-              Índice Ponderado ($I_{ponderado}$)
-            </div>
-
-            <div class="bg-[#020617] p-4 rounded border border-[#1E293B] text-center">
-              <div class="text-xs text-[#64748B] mb-2 font-mono font-bold">Equação da Matriz de Pesos:</div>
-              <div class="font-mono text-sm text-[#3FA87A] font-bold leading-relaxed">
-                I<sub>ponderado</sub> = (0.40 × S<sub>turb</sub>) + (0.35 × S<sub>OD</sub>) + (0.25 × S<sub>pH</sub>)
-              </div>
-            </div>
-
-            <p class="text-xs text-[#94A3B8] leading-relaxed">
-              A atribuição de pesos reflete o peso biológico dos parâmetros no Rio Tietê: <strong class="text-[#C9A03C]">40% para Turbidez</strong>, <strong class="text-[#06B6D4]">35% para Oxigênio Dissolvido</strong> e <strong class="text-purple-300">25% para pH</strong>.
+            <p class="text-xs text-[#94A3B8] font-sans leading-relaxed">
+              Coletamos as medições de Turbidez, Oxigênio, pH e Temperatura diretamente da estação no Rio Tietê.
             </p>
           </div>
 
-          <!-- Step 3: Final IRE Score -->
-          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-3">
-            <div class="text-xs font-mono font-bold text-[#C55A54] uppercase tracking-wider flex items-center gap-1.5">
-              <i data-lucide="flame" class="w-4 h-4"></i>
-              Equação Final do IRE
+          <!-- Step 2 -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2">
+            <div class="text-xs font-bold text-[#3FA87A] uppercase flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-full bg-[#3FA87A]/20 border border-[#3FA87A] flex items-center justify-center text-[10px]">2</span>
+              Ponderação de Pesos
             </div>
+            <p class="text-xs text-[#94A3B8] font-sans leading-relaxed">
+              Combinamos a transparência (40%), o oxigênio (35%) e o equilíbrio químico (25%) em um único valor inicial.
+            </p>
+          </div>
 
-            <div class="bg-[#020617] p-4 rounded border border-[#1E293B] text-center">
-              <div class="text-xs text-[#64748B] mb-2 font-mono font-bold">Divisão por Fator Térmico:</div>
-              <div class="font-mono text-base text-[#C55A54] font-bold">
-                IRE = I<sub>ponderado</sub> / F<sub>temp</sub>
-              </div>
+          <!-- Step 3 -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2">
+            <div class="text-xs font-bold text-rose-400 uppercase flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-full bg-rose-500/20 border border-rose-500 flex items-center justify-center text-[10px]">3</span>
+              Fator Térmico &amp; Placar
             </div>
+            <p class="text-xs text-[#94A3B8] font-sans leading-relaxed">
+              Se a água estiver muito quente (≥ 25°C), aplicamos um ajuste de alerta e geramos a nota final de 0 a 100.
+            </p>
+          </div>
 
-            <div class="bg-[#020617] p-3 rounded border border-[#1E293B] text-xs font-mono text-[#94A3B8] space-y-1">
-              <div class="font-bold text-[#F8FAFC]">Regra do Fator Térmico:</div>
-              <p class="text-[11px] leading-relaxed">
-                Se $Temp \ge 25.0^\circ\text{C}$, então $F_{temp} = 1.2$. Essa penalidade reduz a pontuação em 16,7%, prevendo surtos acelerados de proliferação algal.
-              </p>
+        </div>
+
+        <!-- FORMULA HIGHLIGHT BOX -->
+        <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 text-center space-y-3">
+          <span class="text-xs font-mono font-bold text-[#06B6D4] uppercase tracking-wider block">Fórmula Geral do Cálculo:</span>
+
+          <div class="p-3.5 bg-[#020617] rounded border border-[#1E293B] inline-block max-w-full">
+            <code class="font-mono text-sm sm:text-base font-bold text-[#3FA87A]">
+              IRE = (40% S_turbidez + 35% S_oxigênio + 25% S_pH) ÷ Fator_Temperatura
+            </code>
+          </div>
+
+          <p class="text-xs text-[#94A3B8] max-w-xl mx-auto leading-relaxed">
+            Onde os sub-índices de cada parâmetro variam de 0 a 100 pontos conforme os limites técnicos ecológicos.
+          </p>
+        </div>
+
+      </section>
+
+      <!-- SECTION 3: REAL PARAMETER CALCULATION RULES (DETAILED LOGIC) -->
+      <section class="space-y-3">
+        <div class="border-b border-[#1E293B] pb-2">
+          <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="binary" class="w-4 h-4 text-[#06B6D4]"></i>
+            3. Regras dos Sub-Índices (Cálculo Físico-Químico Real)
+          </h3>
+          <p class="text-xs text-[#64748B]">Equações reais de pontuação utilizadas pelo algoritmo para cada parâmetro</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono">
+          
+          <!-- Sub-index: Turbidez -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+            <div class="text-xs font-bold text-[#C9A03C] uppercase flex items-center gap-1.5">
+              <i data-lucide="droplet" class="w-4 h-4"></i>
+              Sub-índice Turbidez (S_turb)
             </div>
+            <div class="bg-[#020617] p-3 rounded border border-[#1E293B] text-[11px] text-[#94A3B8] space-y-1.5">
+              <p>• <strong class="text-white">Turb ≤ 10 NTU</strong>:<br><span class="text-[#3FA87A]">S_turb = 100</span> (Pontuação Máxima)</p>
+              <p>• <strong class="text-white">10 &lt; Turb ≤ 100 NTU</strong>:<br><span class="text-[#C9A03C]">100 - 0.89 × (Turb - 10)</span></p>
+              <p>• <strong class="text-white">Turb &gt; 100 NTU</strong>:<br><span class="text-[#C55A54]">S_turb = 20</span> (Pontuação Mínima)</p>
+            </div>
+          </div>
+
+          <!-- Sub-index: OD -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+            <div class="text-xs font-bold text-[#06B6D4] uppercase flex items-center gap-1.5">
+              <i data-lucide="wind" class="w-4 h-4"></i>
+              Sub-índice Oxigênio (S_OD)
+            </div>
+            <div class="bg-[#020617] p-3 rounded border border-[#1E293B] text-[11px] text-[#94A3B8] space-y-1.5">
+              <p>• <strong class="text-white">OD ≥ 5.0 mg/L</strong>:<br><span class="text-[#3FA87A]">S_OD = 100</span> (Boa oxigenação)</p>
+              <p>• <strong class="text-white">2.0 ≤ OD &lt; 5.0 mg/L</strong>:<br><span class="text-[#C9A03C]">S_OD = 20 × OD</span></p>
+              <p>• <strong class="text-white">OD &lt; 2.0 mg/L</strong>:<br><span class="text-[#C55A54]">S_OD = 0</span> (Anoxia severa)</p>
+            </div>
+          </div>
+
+          <!-- Sub-index: pH -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+            <div class="text-xs font-bold text-purple-400 uppercase flex items-center gap-1.5">
+              <i data-lucide="test-tube" class="w-4 h-4"></i>
+              Sub-índice pH (S_pH)
+            </div>
+            <div class="bg-[#020617] p-3 rounded border border-[#1E293B] text-[11px] text-[#94A3B8] space-y-1.5">
+              <p>• <strong class="text-white">6.5 ≤ pH ≤ 8.0</strong>:<br><span class="text-[#3FA87A]">S_pH = 100</span> (Faixa Ideal)</p>
+              <p>• <strong class="text-white">pH &gt; 8.5 (Alcalino)</strong>:<br><span class="text-[#C97A3C]">100 - 30 × (pH - 8.5)</span></p>
+              <p>• <strong class="text-white">pH &lt; 6.0 (Ácido)</strong>:<br><span class="text-[#C55A54]">100 - 40 × (6.0 - pH)</span></p>
+            </div>
+          </div>
+
+          <!-- Sub-index: Fator Térmico -->
+          <div class="bg-[#0F172A] border border-[#1E293B] rounded p-4 space-y-2.5">
+            <div class="text-xs font-bold text-rose-400 uppercase flex items-center gap-1.5">
+              <i data-lucide="thermometer" class="w-4 h-4"></i>
+              Fator Temperatura (F_temp)
+            </div>
+            <div class="bg-[#020617] p-3 rounded border border-[#1E293B] text-[11px] text-[#94A3B8] space-y-1.5">
+              <p>• <strong class="text-white">Temp &lt; 25.0 °C</strong>:<br><span class="text-[#3FA87A]">F_temp = 1.0</span> (Sem penalidade)</p>
+              <p>• <strong class="text-white">Temp ≥ 25.0 °C</strong>:<br><span class="text-[#C55A54]">F_temp = 1.2</span> (Penalização de 16,7% na nota)</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION 4: WHAT EACH COLOR MEANS (SCORE RANGES) -->
+      <section class="space-y-3">
+        <div class="border-b border-[#1E293B] pb-2">
+          <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-[#C9A03C]"></i>
+            4. Entenda as Cores do Diagnóstico
+          </h3>
+          <p class="text-xs text-[#64748B]">O resultado indica a condição de saúde do rio de forma simples</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          
+          <!-- Score 1: Ótimo -->
+          <div class="bg-[#0F172A] border border-[#3FA87A]/40 rounded p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono font-bold text-sm text-[#3FA87A]">80 a 100</span>
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#3FA87A]/15 text-[#3FA87A] border border-[#3FA87A]/30">ÓTIMO</span>
+            </div>
+            <h4 class="font-bold text-white text-xs font-heading">Água Boa &amp; Equilibrada</h4>
+            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+              Rio limpo, bem oxigenado e transparente. Sem riscos para a fauna ou população.
+            </p>
+          </div>
+
+          <!-- Score 2: Atenção -->
+          <div class="bg-[#0F172A] border border-[#C9A03C]/40 rounded p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono font-bold text-sm text-[#C9A03C]">60 a 79</span>
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#C9A03C]/15 text-[#C9A03C] border border-[#C9A03C]/30">ATENÇÃO</span>
+            </div>
+            <h4 class="font-bold text-white text-xs font-heading">Pequena Alteração</h4>
+            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+              Aumento leve de sujeira ou enxurrada. Exige monitoramento contínuo.
+            </p>
+          </div>
+
+          <!-- Score 3: Alerta -->
+          <div class="bg-[#0F172A] border border-[#C97A3C]/40 rounded p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono font-bold text-sm text-[#C97A3C]">40 a 59</span>
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#C97A3C]/15 text-[#C97A3C] border border-[#C97A3C]/30">ALERTA</span>
+            </div>
+            <h4 class="font-bold text-white text-xs font-heading">Água Verde / Floração</h4>
+            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+              Multiplicação rápida de microalgas. Início de turvação verde intensa na superfície.
+            </p>
+          </div>
+
+          <!-- Score 4: Crítico -->
+          <div class="bg-[#0F172A] border border-[#C55A54]/40 rounded p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-mono font-bold text-sm text-[#C55A54]">0 a 39</span>
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#C55A54]/15 text-[#C55A54] border border-[#C55A54]/30">CRÍTICO</span>
+            </div>
+            <h4 class="font-bold text-white text-xs font-heading">Risco Alto para Peixes</h4>
+            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+              Falta severa de oxigênio na água. Risco de mortandade de peixes e toxinas.
+            </p>
           </div>
 
         </div>
