@@ -196,3 +196,122 @@ input[type="range"]::-webkit-slider-thumb:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
+
+/* Preset Water Status Option Buttons */
+.preset-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #1E293B;
+  background-color: #020617;
+  color: #94A3B8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.preset-pill-btn:hover {
+  border-color: #334155;
+  color: #F8FAFC;
+}
+
+.preset-pill-btn.active-ideal {
+  background-color: rgba(63, 168, 122, 0.18);
+  border-color: rgba(63, 168, 122, 0.6);
+  color: #3FA87A;
+  box-shadow: 0 0 12px rgba(63, 168, 122, 0.2);
+}
+
+.preset-pill-btn.active-regular {
+  background-color: rgba(201, 160, 60, 0.18);
+  border-color: rgba(201, 160, 60, 0.6);
+  color: #C9A03C;
+  box-shadow: 0 0 12px rgba(201, 160, 60, 0.2);
+}
+
+.preset-pill-btn.active-ruim {
+  background-color: rgba(197, 90, 84, 0.18);
+  border-color: rgba(197, 90, 84, 0.6);
+  color: #C55A54;
+  box-shadow: 0 0 12px rgba(197, 90, 84, 0.2);
+}
+
+.preset-pill-btn.active-auto {
+  background-color: rgba(6, 182, 212, 0.18);
+  border-color: rgba(6, 182, 212, 0.6);
+  color: #06B6D4;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+}
+
+/* Animated Water Container in Simulator */
+.water-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: #020617;
+  border: 1px solid #1E293B;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.water-tank-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.water-liquid-fill {
+  position: relative;
+  width: 100%;
+  height: 65%;
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.85) 0%, rgba(14, 116, 144, 0.95) 100%);
+  transition: background 0.7s ease, height 0.7s ease;
+}
+
+/* Wave overlay */
+.water-wave-svg {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  width: 200%;
+  height: 26px;
+  animation: waveSlide 7s linear infinite;
+  opacity: 0.85;
+}
+
+.water-wave-svg-back {
+  top: -28px;
+  animation: waveSlide 12s linear infinite reverse;
+  opacity: 0.45;
+}
+
+@keyframes waveSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Floating water bubble micro-animation */
+.water-bubble {
+  position: absolute;
+  bottom: -10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: bubbleRise 4s ease-in infinite;
+}
+
+@keyframes bubbleRise {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-160px) scale(1.2); opacity: 0; }
+}
+

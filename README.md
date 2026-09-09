@@ -75,11 +75,40 @@ $$\text{IRE} = \frac{(0.40 \cdot S_{turb}) + (0.35 \cdot S_{OD}) + (0.25 \cdot S
 
 ---
 
+## 📁 Estrutura do Projeto
+
+O repositório adota uma arquitetura modular profissional separando claramente o cliente, a API e a base de dados:
+
+```text
+proteus/
+├── backend/                  # Servidor Node.js / Express e APIs REST
+│   ├── routes/               # Endpoints (/api/estacoes, /api/telemetria)
+│   ├── .env                  # Configurações de porta e banco
+│   ├── db.js                 # Conexão e queries PostgreSQL
+│   ├── package.json          # Dependências do backend
+│   └── server.js             # Ponto de entrada e servidor de estáticos
+├── database/                 # Modelagem e persistência relacional
+│   └── schema.sql            # Definição das tabelas e índices SQL
+├── frontend/                 # Aplicação Web (Interface do Usuário)
+│   ├── assets/               # Vetores e logotipo SVG
+│   ├── css/                  # Estilização customizada e tokens
+│   ├── js/                   # Lógica client-side, gráficos e cálculo do IRE
+│   ├── index.html            # Painel de Monitoramento ao Vivo
+│   ├── metodologia.html      # Metodologia Técnica (Abas Resumida e Detalhada)
+│   ├── simulador.html        # Simulador Interativo de Parâmetros
+│   └── sobre.html            # Histórico do projeto e equipe
+├── .gitignore                # Regras globais de exclusão do Git
+└── README.md                 # Documentação principal do ecossistema
+```
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
-- **Estrutura & Lógica**: HTML5 Semantic, JavaScript ES6+ (Pure Client-side).
-- **Estilização**: Tailwind CSS (via CDN) & Custom Vanilla CSS (Dark Theme).
-- **Visualização de Dados**: [Chart.js](https://www.chartjs.org/) (Gráficos Temporais).
+- **Front-end**: HTML5 Semântico, CSS Custom Vanilla (Dark Mode), Tailwind CSS CDN, JavaScript ES6+.
+- **Back-end**: Node.js, Express.js, CORS, Dotenv.
+- **Banco de Dados**: PostgreSQL (tabelas de estações e telemetria limnológica).
+- **Visualização de Dados**: [Chart.js](https://www.chartjs.org/) (Gráficos Temporais Dinâmicos).
 - **Iconografia**: [Lucide Icons](https://lucide.dev/).
 
 ---

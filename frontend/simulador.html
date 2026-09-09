@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROTEUS — Simulador de Parâmetros</title>
+  <meta name="description" content="Simulador de Condições Hídricas e Parâmetros Físico-Químicos da Água.">
+
+  <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen bg-[#020617] text-[#F8FAFC] flex flex-col md:flex-row font-sans relative">
+
+  <!-- ==================== MOBILE TOP BAR (Only visible on small screens < md) ==================== -->
+  <header
+    class="md:hidden bg-[#0F172A] border-b border-[#1E293B] px-4 py-3 flex items-center justify-between sticky top-0 z-[9900]">
+    <a href="index.html" class="flex items-center gap-2">
+      <img src="assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-9 w-auto">
+    </a>
+    <button id="mobileMenuBtn" type="button"
+      class="p-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white transition-colors"
+      aria-label="Abrir Menu">
+      <i data-lucide="menu" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <!-- Mobile Backdrop Overlay -->
+  <div id="mobileMenuBackdrop" class="fixed inset-0 bg-black/70 z-[9990] hidden md:hidden transition-opacity"></div>
+
+  <!-- ==================== LEFT VERTICAL SIDEBAR / MOBILE DRAWER ==================== -->
+  <aside id="mainSidebar"
+    class="fixed md:sticky top-0 left-0 h-screen w-64 md:w-60 bg-[#0F172A] border-r border-[#1E293B] flex-none flex flex-col justify-between p-4 z-[9999] transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+
+    <!-- Top: Logo & Mobile Close Button -->
+    <div class="space-y-6">
+      <div class="px-2 py-2 flex items-center justify-between">
+        <a href="index.html" class="block hover:opacity-90 transition-opacity">
+          <img src="assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-11 w-auto block">
+        </a>
+        <button id="mobileMenuCloseBtn" type="button" class="md:hidden p-1 text-[#64748B] hover:text-white rounded"
+          aria-label="Fechar Menu">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Vertical Sidebar Nav Menu -->
+      <nav class="space-y-1">
+        <a href="index.html" class="sidebar-link">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#94A3B8]"></i>
+          <span>Monitoramento</span>
+        </a>
+        <a href="simulador.html" class="sidebar-link active">
+          <i data-lucide="sliders" class="w-4 h-4 text-[#94A3B8]"></i>
+          <span>Simulador</span>
+        </a>
+        <a href="metodologia.html" class="sidebar-link">
+          <i data-lucide="book-open" class="w-4 h-4 text-[#94A3B8]"></i>
+          <span>Metodologia</span>
+        </a>
+      </nav>
+    </div>
+
+  </aside>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <div class="flex-1 flex flex-col justify-between min-w-0">
+
+    <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 space-y-4 w-full flex-grow">
+
+      <!-- Concise Page Intro Header -->
+      <div
+        class="bg-[#0F172A] border border-[#1E293B] rounded p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-bold text-white font-heading flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4.5 h-4.5 text-[#06B6D4]"></i>
+            Simulador de Parâmetros
+          </h2>
+          <p class="text-xs text-[#94A3B8] mt-0.5">
+            Ajuste os sliders para simular diferentes condições físico-químicas e visualizar a reação da água e variação
+            do Índice (IRE).
+          </p>
+        </div>
+
+        <button id="btnReset" type="button"
+          class="px-3.5 py-2 rounded bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#CBD5E1] hover:text-white font-mono font-semibold text-xs transition-all flex items-center gap-1.5 flex-none shadow-sm">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-[#06B6D4]"></i>
+          <span>RESETAR PARÂMETROS</span>
+        </button>
+      </div>
+
+      <!-- MAIN SIMULATOR INTERACTIVE GRID (50/50 SPLIT) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+        <!-- Sliders Column (6 cols) -->
+        <section
+          class="lg:col-span-6 bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col justify-between space-y-4">
+
+          <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
+            <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="tune" class="w-4 h-4 text-[#06B6D4]"></i>
+              Controles de Telemetria
+            </h3>
+            <span class="text-xs font-mono text-[#64748B]">Ajuste em tempo real</span>
+          </div>
+
+          <div class="space-y-4 font-mono flex-grow">
+
+            <!-- Slider: pH -->
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                  <i data-lucide="test-tube" class="w-4 h-4 text-purple-400"></i>
+                  Potencial Hidrogeniônico (pH)
+                </span>
+                <span
+                  class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-purple-300 font-mono font-bold border border-[#1E293B]"
+                  id="valPHDisplay">7.2</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] text-[#475569]">0</span>
+                <input type="range" id="inputPH" min="0" max="14" step="0.1" value="7.2" class="w-full">
+                <span class="text-[10px] text-[#475569]">14</span>
+              </div>
+            </div>
+
+            <!-- Slider: Turbidez -->
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2.5C12 2.5 6 10 6 15a6 6 0 0 0 12 0c0-5-6-12.5-6-12.5z" />
+                    <path d="M9.5 14c0-1.5 1-3 2.5-3.5" stroke-width="1.5" stroke-linecap="round" />
+                  </svg>
+                  Turbidez da Água (NTU)
+                </span>
+                <span
+                  class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-amber-300 font-mono font-bold border border-[#1E293B]"
+                  id="valTurbDisplay">8 NTU</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] text-[#475569]">0</span>
+                <input type="range" id="inputTurb" min="0" max="150" step="1" value="8" class="w-full">
+                <span class="text-[10px] text-[#475569]">150 NTU</span>
+              </div>
+            </div>
+
+            <!-- Slider: OD -->
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                  <i data-lucide="wind" class="w-4 h-4 text-sky-400"></i>
+                  Oxigênio Dissolvido - OD (mg/L)
+                </span>
+                <span
+                  class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-sky-300 font-mono font-bold border border-[#1E293B]"
+                  id="valODDisplay">6.8 mg/L</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] text-[#475569]">0</span>
+                <input type="range" id="inputOD" min="0" max="12" step="0.1" value="6.8" class="w-full">
+                <span class="text-[10px] text-[#475569]">12 mg/L</span>
+              </div>
+            </div>
+
+            <!-- Slider: Temperatura -->
+            <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-bold text-[#F8FAFC] flex items-center gap-1.5">
+                  <i data-lucide="thermometer" class="w-4 h-4 text-rose-400"></i>
+                  Temperatura da Água (°C)
+                </span>
+                <span
+                  class="text-xs px-2.5 py-0.5 rounded bg-[#0F172A] text-rose-300 font-mono font-bold border border-[#1E293B]"
+                  id="valTempDisplay">22.4 °C</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-[10px] text-[#475569]">10°C</span>
+                <input type="range" id="inputTemp" min="10" max="40" step="0.5" value="22.4" class="w-full">
+                <span class="text-[10px] text-[#475569]">40°C</span>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- Dynamic Diagnostic Result Card & Animated Water Tank (6 cols) -->
+        <section class="lg:col-span-6 flex flex-col">
+
+          <div id="previewDiagnosticCard"
+            class="bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col justify-between flex-grow transition-all duration-300 relative overflow-hidden space-y-4">
+
+            <div class="space-y-4">
+              <!-- Header -->
+              <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
+                <span
+                  class="font-mono text-xs font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1.5">
+                  <i data-lucide="activity" class="w-4 h-4 text-[#06B6D4]"></i>
+                  DIAGNÓSTICO EM TEMPO REAL
+                </span>
+                <span id="previewBadge"
+                  class="px-2.5 py-1 rounded text-xs font-mono font-bold border flex items-center gap-1.5 border-[#3FA87A]/40 bg-[#3FA87A]/15 text-[#3FA87A]">
+                  <i id="previewIcon" data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                  <span id="previewStatusTitle">ÓTIMO / ÁGUA BOA</span>
+                </span>
+              </div>
+
+              <!-- ANIMATED WATER DROPLET CONTAINER -->
+              <div
+                class="bg-[#020617] border border-[#1E293B] rounded-lg p-4 flex flex-col items-center justify-center relative overflow-hidden">
+                <!-- Status Badge Header inside droplet panel -->
+                <div
+                  class="w-full flex items-center justify-between z-10 bg-[#0F172A]/90 backdrop-blur border border-[#1E293B] px-3 py-1.5 rounded mb-3">
+                  <div class="flex items-center gap-2">
+                    <span id="waterTankDot" class="w-2.5 h-2.5 rounded-full bg-[#3FA87A] animate-pulse"></span>
+                    <span class="font-mono text-xs font-bold text-[#94A3B8]">QUALIDADE DA ÁGUA</span>
+                  </div>
+                  <span id="waterQualityTag" class="font-mono text-[11px] font-bold text-[#3FA87A]">LIMPA /
+                    EXCELENTE</span>
+                </div>
+
+                <!-- Water Drop Graphic Illustration -->
+                <div class="relative w-48 h-56 flex items-center justify-center">
+                  <!-- Droplet Outline SVG + Liquid Fill -->
+                  <svg viewBox="0 0 200 250" class="w-full h-full filter drop-shadow-[0_8px_22px_rgba(6,182,212,0.25)]">
+                    <defs>
+                      <clipPath id="dropletShapeClip">
+                        <path
+                          d="M 100 16 C 100 45 168 115 168 162 C 168 206 138 238 100 238 C 62 238 32 206 32 162 C 32 115 100 45 100 16 Z" />
+                      </clipPath>
+                    </defs>
+
+                    <!-- Droplet Glass Backboard & Contour Border -->
+                    <path
+                      d="M 100 16 C 100 45 168 115 168 162 C 168 206 138 238 100 238 C 62 238 32 206 32 162 C 32 115 100 45 100 16 Z"
+                      fill="#090F1E" stroke="#38BDF8" stroke-opacity="0.6" stroke-width="3" />
+
+                    <!-- Liquid Inside Droplet Clip -->
+                    <g clip-path="url(#dropletShapeClip)">
+                      <foreignObject x="0" y="0" width="200" height="250">
+                        <div class="w-full h-full relative flex flex-col justify-end">
+                          <div id="simulatedWaterLiquid" class="water-liquid-fill" style="height: 65%;">
+                            <!-- Waves -->
+                            <svg class="water-wave-svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                              <path d="M0,0 C150,90 350,-40 500,40 C650,120 900,-30 1200,30 L1200,120 L0,120 Z"
+                                fill="rgba(255,255,255,0.3)"></path>
+                            </svg>
+                            <svg class="water-wave-svg water-wave-svg-back" viewBox="0 0 1200 120"
+                              preserveAspectRatio="none">
+                              <path d="M0,40 C200,-30 450,80 700,10 C950,-50 1100,50 1200,20 L1200,120 L0,120 Z"
+                                fill="rgba(255,255,255,0.18)"></path>
+                            </svg>
+                            <!-- Bubbles -->
+                            <div class="water-bubble" style="left: 30%; animation-delay: 0s; width: 6px; height: 6px;">
+                            </div>
+                            <div class="water-bubble"
+                              style="left: 60%; animation-delay: 1.5s; width: 9px; height: 9px;"></div>
+                          </div>
+                        </div>
+                      </foreignObject>
+                    </g>
+
+                    <!-- Droplet Glass Reflex Reflection Highlight -->
+                    <path d="M 94 36 C 88 55 52 110 48 152 C 46 160 42 155 44 140 C 48 108 84 50 94 36 Z" fill="#FFFFFF"
+                      opacity="0.25" />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Score Center Display -->
+              <div class="my-2 text-center">
+                <div class="text-[11px] font-mono text-[#64748B] font-bold uppercase tracking-wider mb-1">ÍNDICE DE
+                  RISCO CALCULADO (IRE)</div>
+                <div class="flex items-baseline justify-center gap-1">
+                  <span id="previewIREValue"
+                    class="font-mono text-5xl font-bold tracking-tighter text-[#3FA87A]">85.4</span>
+                  <span class="font-mono text-xs text-[#475569]">/100</span>
+                </div>
+                <div class="w-full bg-[#020617] rounded h-2 mt-2 overflow-hidden border border-[#1E293B]">
+                  <div id="previewProgressBar" class="h-full rounded bg-[#3FA87A] transition-all duration-500"
+                    style="width: 85.4%;"></div>
+                </div>
+              </div>
+
+              <!-- Diagnostic Message Box -->
+              <div class="bg-[#020617] p-3.5 rounded border border-[#1E293B] space-y-1">
+                <div class="font-mono text-[10px] font-bold text-[#64748B] uppercase tracking-wider">AVALIAÇÃO DO
+                  ALGORITMO:</div>
+                <p id="previewMessageText" class="text-xs font-semibold text-[#F8FAFC] leading-relaxed">
+                  "Coluna d'água estável e bem oxigenada."
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer
+      class="bg-[#0F172A] border-t border-[#1E293B] py-3.5 px-4 text-center text-xs text-[#64748B] font-mono mt-auto">
+      © 2026 PROTEUS. Todos os direitos reservados.
+    </footer>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/shared.js"></script>
+  <script src="js/ire_engine.js"></script>
+  <script src="js/simulator.js"></script>
+</body>
+
+</html>

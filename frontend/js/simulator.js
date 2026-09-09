@@ -28,19 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const previewIcon = document.getElementById('previewIcon');
   const previewStatusTitle = document.getElementById('previewStatusTitle');
   const previewIREValue = document.getElementById('previewIREValue');
+  const previewProgressBar = document.getElementById('previewProgressBar');
   const previewMessageText = document.getElementById('previewMessageText');
 
-  // SVG Water Droplet Liquid Fill Gauge Elements
-  const dropletLiquidFill = document.getElementById('dropletLiquidFill');
-  const dropletBorderGlow = document.getElementById('dropletBorderGlow');
-  const dropletGradStop1 = document.getElementById('dropletGradStop1');
-  const dropletGradStop2 = document.getElementById('dropletGradStop2');
+  // Animated Liquid Water Tank Elements
+  const simulatedWaterLiquid = document.getElementById('simulatedWaterLiquid');
+  const waterTankDot = document.getElementById('waterTankDot');
+  const waterQualityTag = document.getElementById('waterQualityTag');
 
   // Reset Button
   const btnReset = document.getElementById('btnReset');
 
   /**
-   * Main Simulator Update Render (Pure Local Calculation & Water Droplet Gauge)
+   * Main Simulator Update Render (Pure Local Calculation)
    */
   function updateSimulatorUI() {
     if (!window.IREEngine) return;
@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Preview Diagnostic Card
     previewIREValue.textContent = diag.ire;
+    previewProgressBar.style.width = `${Math.min(100, Math.max(0, diag.ireNum))}%`;
+    previewProgressBar.style.backgroundColor = diag.status.accentColor;
     previewDiagnosticCard.className = `bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col justify-between flex-grow transition-all duration-300 relative overflow-hidden space-y-4 ${diag.status.colorClass}`;
 
     previewStatusTitle.textContent = diag.status.title;
@@ -69,46 +71,43 @@ document.addEventListener('DOMContentLoaded', () => {
       previewIcon.setAttribute('data-lucide', diag.status.iconName);
     }
 
-    // 3. SVG Water Droplet Liquid Fill & Color Gauge Logic
-    const irePct = Math.min(100, Math.max(0, diag.ireNum));
-    // Calculate SVG rect Y coordinate: 110 = 0% (empty), 10 = 100% (full)
-    const rectY = 110 - (irePct / 100) * 100;
+    // 3. Dynamic Water Tank Liquid Reaction
+    if (simulatedWaterLiquid && waterQualityTag) {
+      const ire = diag.ireNum;
+      let liquidBg = '';
+      let qualityText = '';
+      let dotColor = '#3FA87A';
 
-    if (dropletLiquidFill) {
-      dropletLiquidFill.setAttribute('y', rectY.toFixed(1));
+      if (ire >= 80) {
+        liquidBg = 'linear-gradient(180deg, rgba(6, 182, 212, 0.85) 0%, rgba(14, 116, 144, 0.95) 100%)';
+        qualityText = 'LIMPA / CRISTALINA';
+        dotColor = '#3FA87A';
+      } else if (ire >= 60) {
+        liquidBg = 'linear-gradient(180deg, rgba(34, 197, 94, 0.85) 0%, rgba(21, 128, 61, 0.95) 100%)';
+        qualityText = 'BOA / ACEITÁVEL';
+        dotColor = '#3FA87A';
+      } else if (ire >= 40) {
+        liquidBg = 'linear-gradient(180deg, rgba(234, 179, 8, 0.85) 0%, rgba(161, 98, 7, 0.95) 100%)';
+        qualityText = 'ATENÇÃO / TURVA';
+        dotColor = '#C9A03C';
+      } else if (ire >= 20) {
+        liquidBg = 'linear-gradient(180deg, rgba(202, 138, 4, 0.9) 0%, rgba(133, 77, 14, 0.95) 100%)';
+        qualityText = 'ALERTA / ÁGUA VERDE';
+        dotColor = '#C97A3C';
+      } else {
+        liquidBg = 'linear-gradient(180deg, rgba(239, 68, 68, 0.9) 0%, rgba(153, 27, 27, 0.95) 100%)';
+        qualityText = 'CRÍTICA / POLUÍDA';
+        dotColor = '#C55A54';
+      }
+
+      simulatedWaterLiquid.style.background = liquidBg;
+      const fillHeight = Math.min(85, Math.max(35, 40 + (ire * 0.45)));
+      simulatedWaterLiquid.style.height = `${fillHeight}%`;
+
+      waterQualityTag.textContent = qualityText;
+      waterQualityTag.style.color = dotColor;
+      if (waterTankDot) waterTankDot.style.backgroundColor = dotColor;
     }
-
-    // Dynamic Liquid Gradient Colors & Glow based on Diagnosis Status
-    let stop1Color = '#3FA87A';
-    let stop2Color = '#06B6D4';
-    let borderGlowColor = '#3FA87A';
-
-    switch (diag.status.code) {
-      case 'CRITICO':
-        stop1Color = '#C55A54';
-        stop2Color = '#EF4444';
-        borderGlowColor = '#C55A54';
-        break;
-      case 'ALERTA':
-        stop1Color = '#C97A3C';
-        stop2Color = '#F97316';
-        borderGlowColor = '#C97A3C';
-        break;
-      case 'ATENCAO':
-        stop1Color = '#C9A03C';
-        stop2Color = '#EAB308';
-        borderGlowColor = '#C9A03C';
-        break;
-      default: // OTIMO
-        stop1Color = '#3FA87A';
-        stop2Color = '#06B6D4';
-        borderGlowColor = '#3FA87A';
-        break;
-    }
-
-    if (dropletGradStop1) dropletGradStop1.setAttribute('stop-color', stop1Color);
-    if (dropletGradStop2) dropletGradStop2.setAttribute('stop-color', stop2Color);
-    if (dropletBorderGlow) dropletBorderGlow.setAttribute('stroke', borderGlowColor);
 
     if (window.lucide) {
       lucide.createIcons();

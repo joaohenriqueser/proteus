@@ -1,0 +1,33 @@
+# Dependências Node.js
+node_modules/
+**/node_modules/
+
+# Variáveis de Ambiente e Segredos
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporários e Backups
+*.tmp
+*.bak
+*.swp

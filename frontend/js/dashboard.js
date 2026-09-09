@@ -48,6 +48,130 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnToggleTelemetry = document.getElementById('btnToggleTelemetry');
   const mapOverlayStatus = document.getElementById('mapOverlayStatus');
 
+  // Station DOM Elements & Map Picker Variables
+  const stationSelect = document.getElementById('stationSelect');
+  const stationNameDisplay = document.getElementById('stationNameDisplay');
+  const mapStationLabel = document.getElementById('mapStationLabel');
+  const addStationModal = document.getElementById('addStationModal');
+  const btnAddStationModal = document.getElementById('btnAddStationModal');
+  const btnEditStation = document.getElementById('btnEditStation');
+  const btnDeleteStation = document.getElementById('btnDeleteStation');
+  const btnCloseStationModal = document.getElementById('btnCloseStationModal');
+  const btnCancelStationModal = document.getElementById('btnCancelStationModal');
+  const formAddStation = document.getElementById('formAddStation');
+  const inputEditingStationId = document.getElementById('inputEditingStationId');
+  const modalStationTitle = document.getElementById('modalStationTitle');
+
+  const mapPickBanner = document.getElementById('mapPickBanner');
+  const btnCancelMapPick = document.getElementById('btnCancelMapPick');
+  const btnPickPointOnMap = document.getElementById('btnPickPointOnMap');
+
+  let allStationMarkers = [];
+  let isMapPickMode = false;
+  let tempPickerMarker = null;
+
+  /**
+   * Active Station Helper
+   */
+  function getActiveStation() {
+    if (!Array.isArray(state.stations) || state.stations.length === 0) {
+      state.stations = app.getDefaultStations();
+    }
+    let st = state.stations.find(s => s.id === state.activeStationId);
+    if (!st) {
+      st = state.stations[0];
+      state.activeStationId = st.id;
+    }
+    return st;
+  }
+
+  function updateStationUI() {
+    const currentSt = getActiveStation();
+
+    if (stationSelect) {
+      stationSelect.innerHTML = state.stations.map(st => 
+        `<option value="${st.id}" ${st.id === currentSt.id ? 'selected' : ''}>${st.name}</option>`
+      ).join('');
+    }
+
+    if (stationNameDisplay) {
+      stationNameDisplay.textContent = currentSt.name;
+    }
+    if (mapStationLabel) {
+      mapStationLabel.textContent = currentSt.river;
+    }
+
+    if (mapInstance && currentSt.coords) {
+      mapInstance.flyTo(currentSt.coords, 13);
+    }
+
+    renderAllStationMarkers();
+  }
+
+  function switchStation(stationId) {
+    const st = state.stations.find(s => s.id === stationId);
+    if (!st) return;
+
+    state.activeStationId = st.id;
+    if (st.params) {
+      state.params = { ...st.params };
+    }
+    if (st.scenarioTag) {
+      state.activeScenarioTag = st.scenarioTag;
+    }
+    app.saveState(state);
+
+    updateStationUI();
+    renderDashboard();
+  }
+
+  function renderAllStationMarkers() {
+    if (!mapInstance || !window.L) return;
+
+    // Clear existing markers
+    allStationMarkers.forEach(m => mapInstance.removeLayer(m));
+    allStationMarkers = [];
+
+    const currentSt = getActiveStation();
+    const currentDiag = engine.diagnose(state.params);
+    const activeColor = getStatusColor(currentDiag.status.code);
+
+    state.stations.forEach(st => {
+      const isActive = st.id === currentSt.id;
+      const stParams = st.params || { ph: 7.2, turb: 8, od: 6.8, temp: 22.4 };
+      const stDiag = engine.diagnose(stParams);
+      const stColor = getStatusColor(stDiag.status.code);
+
+      if (isActive) {
+        if (mapHalo) {
+          mapHalo.setLatLng(st.coords);
+          mapHalo.setStyle({ color: activeColor, fillColor: activeColor });
+        }
+        if (mapMarker) {
+          mapMarker.setLatLng(st.coords);
+          mapMarker.setStyle({ color: activeColor, fillColor: '#020617' });
+          mapMarker.setPopupContent(`<b>Estação Ativa: ${st.name}</b><br>${st.river}<br>IRE: ${currentDiag.ire} — ${currentDiag.status.title}`);
+        }
+      } else {
+        const marker = L.circleMarker(st.coords, {
+          radius: 6,
+          color: stColor,
+          weight: 2,
+          fillColor: '#0F172A',
+          fillOpacity: 0.85
+        }).addTo(mapInstance);
+
+        marker.bindPopup(`<b>Estação ${st.name}</b><br>${st.river}<br>IRE Estimado: ${stDiag.ire}<br><span style="color:#06B6D4">Clique para selecionar</span>`);
+
+        marker.on('click', () => {
+          switchStation(st.id);
+        });
+
+        allStationMarkers.push(marker);
+      }
+    });
+  }
+
   /**
    * Color Palette Helper
    */
@@ -88,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
       diagSummaryText.textContent = status.message;
     }
     if (scenarioTagDisplay) {
-      scenarioTagDisplay.textContent = state.activeScenarioTag || '[MOCK] 1 · ÁGUA LIMPA';
+      scenarioTagDisplay.textContent = state.activeScenarioTag || '[MOCK] ÁGUA IDEAL';
     }
     if (lastReadTimestamp) {
       const now = new Date();
@@ -168,11 +292,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const mapContainer = document.getElementById('leafletMap');
     if (!mapContainer || mapInstance || !window.L) return;
 
+    const currentSt = getActiveStation();
+    const coords = currentSt.coords;
+
     mapInstance = L.map(mapContainer, {
       zoomControl: true,
       attributionControl: true,
       scrollWheelZoom: false
-    }).setView(BARBOSA_COORDS, 13);
+    }).setView(coords, 13);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '© OpenStreetMap · © CARTO · TILES REAIS / DADOS MOCKADOS',
@@ -180,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).addTo(mapInstance);
 
     const initialColor = getStatusColor('OTIMO');
-    mapHalo = L.circle(BARBOSA_COORDS, {
+    mapHalo = L.circle(coords, {
       radius: 900,
       color: initialColor,
       weight: 1,
@@ -188,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fillOpacity: 0.12
     }).addTo(mapInstance);
 
-    mapMarker = L.circleMarker(BARBOSA_COORDS, {
+    mapMarker = L.circleMarker(coords, {
       radius: 6,
       color: initialColor,
       weight: 2,
@@ -196,19 +323,186 @@ document.addEventListener('DOMContentLoaded', () => {
       fillOpacity: 1
     }).addTo(mapInstance);
 
-    mapMarker.bindPopup(`<b>Ponto de Coleta (SIMULADO) - Barbosa-SP</b><br>IRE 85.4 / 100 — ÓTIMO / ÁGUA BOA`);
+    mapMarker.bindPopup(`<b>Estação ${currentSt.name}</b><br>${currentSt.river}`);
+
+    // Map Click Listener for Station Picker Mode
+    mapInstance.on('click', handleMapClick);
+
     setTimeout(() => mapInstance.invalidateSize(), 200);
   }
 
   function syncMap(colorHex, statusTitle) {
     if (!mapInstance || !mapMarker || !mapHalo) return;
+    const currentSt = getActiveStation();
     mapHalo.setStyle({ color: colorHex, fillColor: colorHex });
     mapMarker.setStyle({ color: colorHex });
-    mapMarker.setPopupContent(`<b>Ponto de Coleta (SIMULADO) - Barbosa-SP</b><br>IRE ${state.params.ph.toFixed(1)} — ${statusTitle}<br>${state.activeScenarioTag}`);
+    mapMarker.setPopupContent(`<b>Estação ${currentSt.name}</b><br>IRE ${state.params.ph.toFixed(1)} — ${statusTitle}<br>${state.activeScenarioTag}`);
     if (mapOverlayStatus) {
       mapOverlayStatus.textContent = statusTitle;
       mapOverlayStatus.style.color = colorHex;
     }
+  }
+
+  /**
+   * Map Point Picker Mode Controller
+   */
+  function enableMapPickMode() {
+    isMapPickMode = true;
+    if (addStationModal) addStationModal.classList.add('hidden');
+    if (mapPickBanner) mapPickBanner.classList.remove('hidden');
+    const container = document.getElementById('leafletMap');
+    if (container) container.style.cursor = 'crosshair';
+  }
+
+  function disableMapPickMode() {
+    isMapPickMode = false;
+    if (mapPickBanner) mapPickBanner.classList.add('hidden');
+    const container = document.getElementById('leafletMap');
+    if (container) container.style.cursor = '';
+  }
+
+  function handleMapClick(e) {
+    if (!isMapPickMode) return;
+
+    const lat = parseFloat(e.latlng.lat.toFixed(4));
+    const lng = parseFloat(e.latlng.lng.toFixed(4));
+
+    const inputLat = document.getElementById('inputStationLat');
+    const inputLng = document.getElementById('inputStationLng');
+    if (inputLat) inputLat.value = lat;
+    if (inputLng) inputLng.value = lng;
+
+    if (tempPickerMarker && mapInstance) {
+      mapInstance.removeLayer(tempPickerMarker);
+    }
+
+    if (window.L && mapInstance) {
+      tempPickerMarker = L.circleMarker([lat, lng], {
+        radius: 8,
+        color: '#22D3EE',
+        fillColor: '#06B6D4',
+        fillOpacity: 0.9,
+        weight: 3
+      }).addTo(mapInstance);
+      tempPickerMarker.bindPopup(`<b>Ponto Selecionado</b><br>Lat: ${lat}, Lng: ${lng}`).openPopup();
+    }
+
+    disableMapPickMode();
+    openStationModal(!!(inputEditingStationId && inputEditingStationId.value));
+  }
+
+  /**
+   * Station Modal Controller
+   */
+  function openStationModal(isEdit = false) {
+    const currentSt = getActiveStation();
+    if (isEdit && currentSt) {
+      if (inputEditingStationId) inputEditingStationId.value = currentSt.id;
+      if (modalStationTitle) modalStationTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-[#06B6D4]"></i> Editar Estação de Telemetria`;
+
+      const inputName = document.getElementById('inputStationName');
+      const inputLat = document.getElementById('inputStationLat');
+      const inputLng = document.getElementById('inputStationLng');
+      const inputRiver = document.getElementById('inputStationRiver');
+
+      if (inputName) inputName.value = currentSt.name;
+      if (inputLat) inputLat.value = currentSt.coords[0];
+      if (inputLng) inputLng.value = currentSt.coords[1];
+      if (inputRiver) inputRiver.value = currentSt.river;
+    } else {
+      if (inputEditingStationId) inputEditingStationId.value = '';
+      if (modalStationTitle) modalStationTitle.innerHTML = `<i data-lucide="map-pin-plus" class="w-4 h-4 text-[#06B6D4]"></i> Cadastrar Nova Estação de Telemetria`;
+      if (formAddStation) formAddStation.reset();
+    }
+
+    if (addStationModal) addStationModal.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function closeStationModal() {
+    if (addStationModal) addStationModal.classList.add('hidden');
+    if (formAddStation) formAddStation.reset();
+    if (tempPickerMarker && mapInstance) {
+      mapInstance.removeLayer(tempPickerMarker);
+      tempPickerMarker = null;
+    }
+  }
+
+  function deleteActiveStation() {
+    if (!Array.isArray(state.stations) || state.stations.length <= 1) {
+      alert('Você deve manter pelo menos uma estação cadastrada.');
+      return;
+    }
+    const currentSt = getActiveStation();
+    if (!currentSt) return;
+
+    if (confirm(`Tem certeza que deseja remover a estação "${currentSt.name}"?`)) {
+      state.stations = state.stations.filter(s => s.id !== currentSt.id);
+      const nextStation = state.stations[0];
+      switchStation(nextStation.id);
+    }
+  }
+
+  if (btnAddStationModal) btnAddStationModal.onclick = () => openStationModal(false);
+  if (btnEditStation) btnEditStation.onclick = () => openStationModal(true);
+  if (btnDeleteStation) btnDeleteStation.onclick = deleteActiveStation;
+  if (btnCloseStationModal) btnCloseStationModal.onclick = closeStationModal;
+  if (btnCancelStationModal) btnCancelStationModal.onclick = closeStationModal;
+
+  if (btnPickPointOnMap) btnPickPointOnMap.onclick = enableMapPickMode;
+  if (btnCancelMapPick) {
+    btnCancelMapPick.onclick = () => {
+      disableMapPickMode();
+      openStationModal(!!(inputEditingStationId && inputEditingStationId.value));
+    };
+  }
+
+  if (stationSelect) {
+    stationSelect.onchange = (e) => {
+      switchStation(e.target.value);
+    };
+  }
+
+  if (formAddStation) {
+    formAddStation.onsubmit = (e) => {
+      e.preventDefault();
+      const editingId = inputEditingStationId ? inputEditingStationId.value : '';
+      const name = document.getElementById('inputStationName').value.trim();
+      const lat = parseFloat(document.getElementById('inputStationLat').value);
+      const lng = parseFloat(document.getElementById('inputStationLng').value);
+      const river = document.getElementById('inputStationRiver').value.trim();
+
+      if (!name || isNaN(lat) || isNaN(lng) || !river) return;
+
+      if (editingId) {
+        const st = state.stations.find(s => s.id === editingId);
+        if (st) {
+          st.name = name;
+          st.coords = [lat, lng];
+          st.river = river;
+        }
+        switchStation(editingId);
+      } else {
+        const newId = 'STATION_' + Date.now();
+        const newStation = {
+          id: newId,
+          name,
+          river,
+          coords: [lat, lng],
+          params: { ph: 7.2, turb: 10, od: 7.0, temp: 23.0 },
+          scenarioTag: '[MOCK] NOVA ESTAÇÃO'
+        };
+
+        state.stations.push(newStation);
+        switchStation(newId);
+      }
+
+      if (tempPickerMarker && mapInstance) {
+        mapInstance.removeLayer(tempPickerMarker);
+        tempPickerMarker = null;
+      }
+      closeStationModal();
+    };
   }
 
   /**
@@ -423,30 +717,55 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Preset Scenario Quick Buttons Function
-  function applyPresetScenario(ph, turb, od, temp, tag) {
+  function applyPresetScenario(ph, turb, od, temp, tag, btnElement, activeClass) {
+    if (simIntervalId) {
+      clearInterval(simIntervalId);
+      simIntervalId = null;
+      state.isLoopRunning = false;
+    }
     state.params = { ph, turb, od, temp };
     state.activeScenarioTag = tag;
     app.saveState(state);
+
+    // Update Pill Buttons Highlight
+    [sc1, sc2, sc4, btnToggleTelemetry].forEach(b => {
+      if (b) {
+        b.className = 'preset-pill-btn';
+      }
+    });
+
+    if (btnElement && activeClass) {
+      btnElement.classList.add(activeClass);
+    }
+
+    if (btnToggleTelemetry) {
+      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-[#06B6D4]"></i> <span>Simulação Automática</span>`;
+    }
+
+    const diag = engine.diagnose(state.params);
+    addHistoryLogEntry(state.params, diag);
     renderDashboard();
+    if (window.lucide) lucide.createIcons();
   }
 
   // Bind Quick Buttons
   const sc1 = document.getElementById('btnQuickScenario1');
   const sc2 = document.getElementById('btnQuickScenario2');
-  const sc3 = document.getElementById('btnQuickScenario3');
   const sc4 = document.getElementById('btnQuickScenario4');
 
-  if (sc1) sc1.onclick = () => applyPresetScenario(7.2, 4.1, 8.6, 22.4, '[MOCK] 1 · ÁGUA LIMPA');
-  if (sc2) sc2.onclick = () => applyPresetScenario(6.8, 128, 6.1, 24.1, '[MOCK] 2 · ENXURRADA');
-  if (sc3) sc3.onclick = () => applyPresetScenario(9.1, 34, 5.2, 27.8, '[MOCK] 3 · ÁGUA VERDE');
-  if (sc4) sc4.onclick = () => applyPresetScenario(6.2, 96, 1.1, 29.6, '[MOCK] 4 · CRÍTICO');
+  if (sc1) sc1.onclick = () => applyPresetScenario(7.2, 4.0, 8.6, 22.4, '[MOCK] ÁGUA IDEAL', sc1, 'active-ideal');
+  if (sc2) sc2.onclick = () => applyPresetScenario(8.4, 48.0, 3.8, 26.5, '[MOCK] ÁGUA REGULAR', sc2, 'active-regular');
+  if (sc4) sc4.onclick = () => applyPresetScenario(9.2, 120.0, 1.1, 29.5, '[MOCK] ÁGUA RUIM / CRÍTICA', sc4, 'active-ruim');
 
   // Action Buttons
   if (btnToggleTelemetry) {
     btnToggleTelemetry.onclick = () => {
+      [sc1, sc2, sc4].forEach(b => { if (b) b.className = 'preset-pill-btn'; });
       if (state.isLoopRunning && simIntervalId) {
         stopSimLoop();
+        btnToggleTelemetry.className = 'preset-pill-btn';
       } else {
+        btnToggleTelemetry.className = 'preset-pill-btn active-auto';
         runSimulationStep();
         startSimLoop();
       }
@@ -470,6 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Boot & Initial Run
   initMap();
   initChart();
+  updateStationUI();
   renderDashboard();
   startSimLoop();
 });
