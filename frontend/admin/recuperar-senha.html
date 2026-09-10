@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROTEUS — Recuperação de Senha</title>
+  <meta name="description" content="Recuperação de acesso à área administrativa do sistema PROTEUS.">
+
+  <!-- Google Fonts: IBM Plex Sans & Mono -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body { font-family: 'IBM Plex Sans', sans-serif; }
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+  </style>
+</head>
+<body class="bg-[#020617] text-[#F8FAFC] min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+  <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#06B6D4]/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#3FA87A]/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="max-w-md w-full relative z-10 space-y-6">
+
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl p-6 sm:p-8 shadow-2xl space-y-6 backdrop-blur-md">
+      
+      <!-- Topo -->
+      <div class="text-center space-y-2">
+        <a href="../index.html" class="inline-block hover:opacity-80 transition-opacity">
+          <img src="../assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-12 w-auto mx-auto mb-2">
+        </a>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-mono text-[11px] font-semibold tracking-wider uppercase">
+          <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
+          Segurança
+        </div>
+        <h1 id="pageTitle" class="text-lg font-bold text-white tracking-tight">Recuperar Senha</h1>
+        <p id="pageSubtitle" class="text-xs text-[#94A3B8]">Informe seu e-mail para receber as instruções de redefinição.</p>
+      </div>
+
+      <!-- Alerta -->
+      <div id="alertBox" class="hidden p-3 rounded text-xs font-mono border flex items-start gap-2">
+        <i id="alertIcon" data-lucide="alert-circle" class="w-4 h-4 flex-none mt-0.5"></i>
+        <span id="alertMsg"></span>
+      </div>
+
+      <!-- Formulário 1: Solicitar Link de Recuperação -->
+      <form id="formSolicitar" class="space-y-4">
+        <div>
+          <label for="inputEmail" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+            E-mail Cadastrado:
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="email" 
+              id="inputEmail" 
+              placeholder="seu-email@proteus.com" 
+              required
+              autocomplete="email"
+              class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+            >
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="btnSolicitar"
+          class="w-full py-2.5 px-4 rounded-lg bg-[#06B6D4] hover:bg-[#22D3EE] text-[#020617] font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+        >
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>ENVIAR INSTRUÇÕES</span>
+        </button>
+      </form>
+
+      <!-- Formulário 2: Redefinir Nova Senha (Aparece se houver ?token=... na URL) -->
+      <form id="formRedefinir" class="space-y-4 hidden">
+        <div>
+          <label for="inputNovaSenha" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+            Nova Senha (mínimo 6 caracteres):
+          </label>
+          <input 
+            type="password" 
+            id="inputNovaSenha" 
+            placeholder="••••••••" 
+            required
+            class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+          >
+        </div>
+
+        <div>
+          <label for="inputConfirmarSenha" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+            Confirmar Nova Senha:
+          </label>
+          <input 
+            type="password" 
+            id="inputConfirmarSenha" 
+            placeholder="••••••••" 
+            required
+            class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+          >
+        </div>
+
+        <button 
+          type="submit" 
+          id="btnRedefinir"
+          class="w-full py-2.5 px-4 rounded-lg bg-[#3FA87A] hover:bg-[#4bc791] text-[#020617] font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+        >
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>SALVAR NOVA SENHA</span>
+        </button>
+      </form>
+
+      <!-- Rodapé -->
+      <div class="pt-4 border-t border-[#1E293B] flex items-center justify-between text-xs text-[#64748B] font-mono">
+        <a href="login.html" class="hover:text-white flex items-center gap-1 transition-colors">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          Voltar ao Login
+        </a>
+        <a href="../index.html" class="hover:text-white transition-colors">
+          Portal Público
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenUrl = urlParams.get('token');
+
+    const formSolicitar = document.getElementById('formSolicitar');
+    const formRedefinir = document.getElementById('formRedefinir');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+    const alertBox = document.getElementById('alertBox');
+    const alertMsg = document.getElementById('alertMsg');
+    const alertIcon = document.getElementById('alertIcon');
+
+    function showAlert(msg, isError = true) {
+      alertBox.classList.remove('hidden', 'bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]', 'bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+      if (isError) {
+        alertBox.classList.add('bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]');
+        alertIcon.setAttribute('data-lucide', 'alert-circle');
+      } else {
+        alertBox.classList.add('bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+        alertIcon.setAttribute('data-lucide', 'check-circle-2');
+      }
+      alertMsg.innerHTML = msg;
+      lucide.createIcons();
+    }
+
+    // Se a URL já tiver o token (ex: clicou no link recebido), mostra formulário de redefinição
+    if (tokenUrl) {
+      formSolicitar.classList.add('hidden');
+      formRedefinir.classList.remove('hidden');
+      pageTitle.textContent = 'Criar Nova Senha';
+      pageSubtitle.textContent = 'Digite sua nova senha de acesso administrativo.';
+    }
+
+    // Ação: Solicitar Link
+    formSolicitar.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('inputEmail').value.trim();
+
+      const btn = document.getElementById('btnSolicitar');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Processando...`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/auth/recuperar-senha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+
+        let extraDev = '';
+        if (data.devToken) {
+          extraDev = `<br><br><span class="font-bold text-[#06B6D4]">Ambiente de Desenvolvimento:</span><br><a href="recuperar-senha.html?token=${data.devToken}" class="underline hover:text-white">Clique aqui para redefinir agora com seu token de teste</a>`;
+        }
+
+        showAlert((data.message || 'Instruções enviadas com sucesso!') + extraDev, false);
+      } catch (err) {
+        showAlert('Erro de conexão ao solicitar recuperação.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> ENVIAR INSTRUÇÕES`;
+        lucide.createIcons();
+      }
+    });
+
+    // Ação: Redefinir Senha com Token
+    formRedefinir.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const novaSenha = document.getElementById('inputNovaSenha').value;
+      const confirmarSenha = document.getElementById('inputConfirmarSenha').value;
+
+      if (novaSenha.length < 6) {
+        showAlert('A nova senha deve conter pelo menos 6 caracteres.');
+        return;
+      }
+
+      if (novaSenha !== confirmarSenha) {
+        showAlert('As senhas digitadas não coincidem.');
+        return;
+      }
+
+      const btn = document.getElementById('btnRedefinir');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Redefinindo...`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/auth/redefinir-senha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: tokenUrl, novaSenha })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showAlert(data.message + ' Redirecionando para o login...', false);
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        } else {
+          showAlert(data.error || 'Erro ao alterar a senha.');
+          btn.disabled = false;
+          btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> SALVAR NOVA SENHA`;
+          lucide.createIcons();
+        }
+      } catch (err) {
+        showAlert('Erro de conexão ao redefinir a senha.');
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> SALVAR NOVA SENHA`;
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

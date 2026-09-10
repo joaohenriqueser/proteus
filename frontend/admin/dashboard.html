@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROTEUS — Painel Administrativo</title>
+  <meta name="description" content="Painel de Controle e Gestão da Plataforma P.R.O.T.E.U.S.">
+
+  <!-- Google Fonts: IBM Plex Sans & Mono -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body { font-family: 'IBM Plex Sans', sans-serif; }
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+    
+    .tab-btn.active {
+      background-color: #0F172A;
+      border-color: #06B6D4;
+      color: #06B6D4;
+    }
+  </style>
+</head>
+<body class="bg-[#020617] text-[#F8FAFC] min-h-screen flex flex-col">
+
+  <!-- ==================== HEADER ADMIN ==================== -->
+  <header class="bg-[#0F172A] border-b border-[#1E293B] sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="../index.html" class="flex items-center gap-2 hover:opacity-90">
+        <img src="../assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-9 w-auto">
+      </a>
+      <div class="h-5 w-[1px] bg-[#1E293B] hidden sm:block"></div>
+      <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-mono text-xs font-bold uppercase tracking-wider">
+        <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+        Painel de Gestão
+      </div>
+    </div>
+
+    <!-- Info Usuário & Ações -->
+    <div class="flex items-center gap-3">
+      <a href="../index.html" target="_blank" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#020617] border border-[#1E293B] text-xs font-mono text-[#94A3B8] hover:text-white hover:border-[#06B6D4] transition-all">
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        <span>Ver Portal Público</span>
+      </a>
+
+      <!-- Card do Usuário Logado -->
+      <div class="flex items-center gap-2 bg-[#020617] border border-[#1E293B] px-3 py-1 rounded-lg">
+        <div class="w-2 h-2 rounded-full bg-[#3FA87A] animate-pulse"></div>
+        <div class="text-left font-mono leading-tight">
+          <div id="userNomeDisplay" class="text-xs font-bold text-white">Carregando...</div>
+          <div id="userLoginDisplay" class="text-[10px] text-[#06B6D4]">@admin</div>
+        </div>
+      </div>
+
+      <!-- Botão Sair -->
+      <button id="btnLogout" type="button" title="Sair do Sistema" class="p-2 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-[#C55A54] text-[#94A3B8] hover:text-[#C55A54] transition-all">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- Toast Notification (Mensagens flutuantes) -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-lg shadow-2xl border font-mono text-xs flex items-center gap-2 transition-all">
+      <i id="toastIcon" data-lucide="check-circle-2" class="w-4 h-4"></i>
+      <span id="toastMessage">Operação realizada com sucesso!</span>
+    </div>
+
+    <!-- Navegação em Abas -->
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1E293B] pb-3">
+      <div class="flex items-center gap-2 overflow-x-auto">
+        <button type="button" class="tab-btn active px-4 py-2 rounded-lg border border-[#1E293B] font-mono text-xs font-bold flex items-center gap-2 transition-all" data-tab="tabEstacoes">
+          <i data-lucide="radio" class="w-4 h-4"></i>
+          <span>Estações de Coleta</span>
+          <span id="badgeCountEstacoes" class="px-1.5 py-0.2 rounded bg-[#020617] text-[10px] text-white">0</span>
+        </button>
+
+        <button type="button" class="tab-btn px-4 py-2 rounded-lg border border-[#1E293B] font-mono text-xs font-bold text-[#94A3B8] hover:text-white flex items-center gap-2 transition-all" data-tab="tabEquipamentos">
+          <i data-lucide="cpu" class="w-4 h-4"></i>
+          <span>Equipamentos IoT (ESP32)</span>
+          <span id="badgeCountEquipamentos" class="px-1.5 py-0.2 rounded bg-[#020617] text-[10px] text-white">0</span>
+        </button>
+
+        <button type="button" class="tab-btn px-4 py-2 rounded-lg border border-[#1E293B] font-mono text-xs font-bold text-[#94A3B8] hover:text-white flex items-center gap-2 transition-all" data-tab="tabUsuarios">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Administradores</span>
+          <span id="badgeCountUsuarios" class="px-1.5 py-0.2 rounded bg-[#020617] text-[10px] text-white">0</span>
+        </button>
+      </div>
+
+      <!-- Botão de Ação Primária Dinâmico -->
+      <div id="tabActionContainer">
+        <!-- Renderizado dinamicamente conforme a aba ativa -->
+      </div>
+    </div>
+
+    <!-- ==================== ABA 1: ESTAÇÕES ==================== -->
+    <section id="tabEstacoes" class="tab-content space-y-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0F172A] border border-[#1E293B] rounded-lg p-4">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+            <i data-lucide="map-pin" class="w-4 h-4 text-[#06B6D4]"></i>
+            Gestão de Estações de Monitoramento
+          </h2>
+          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre e gerencie os pontos físicos de coleta instalados no Rio Tietê e afluentes.</p>
+        </div>
+        <button id="btnOpenModalNovaEstacao" type="button" class="px-3.5 py-2 rounded-lg bg-[#06B6D4] hover:bg-[#22D3EE] text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>NOVA ESTAÇÃO</span>
+        </button>
+      </div>
+
+      <!-- Tabela de Estações -->
+      <div class="bg-[#0F172A] border border-[#1E293B] rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left font-mono text-xs">
+            <thead class="bg-[#020617] border-b border-[#1E293B] text-[#94A3B8] uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Código</th>
+                <th class="py-3 px-4">Nome da Estação</th>
+                <th class="py-3 px-4">Corpo Hídrico / Rio</th>
+                <th class="py-3 px-4">Cidade/UF</th>
+                <th class="py-3 px-4">Coordenadas</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyEstacoes" class="divide-y divide-[#1E293B] text-[#F8FAFC]">
+              <tr>
+                <td colspan="7" class="py-8 text-center text-[#64748B]">Carregando estações cadastradas...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 2: EQUIPAMENTOS ESP32 ==================== -->
+    <section id="tabEquipamentos" class="tab-content space-y-4 hidden">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0F172A] border border-[#1E293B] rounded-lg p-4">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+            <i data-lucide="cpu" class="w-4 h-4 text-[#3FA87A]"></i>
+            Equipamentos de Telemetria (ESP32 & Sondas)
+          </h2>
+          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre o endereço MAC das placas microcontroladoras e obtenha a API Key para envio de leituras.</p>
+        </div>
+        <button id="btnOpenModalNovoEquipamento" type="button" class="px-3.5 py-2 rounded-lg bg-[#3FA87A] hover:bg-[#4bc791] text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>NOVO ESP32</span>
+        </button>
+      </div>
+
+      <!-- Tabela de Equipamentos -->
+      <div class="bg-[#0F172A] border border-[#1E293B] rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left font-mono text-xs">
+            <thead class="bg-[#020617] border-b border-[#1E293B] text-[#94A3B8] uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Dispositivo</th>
+                <th class="py-3 px-4">MAC Address</th>
+                <th class="py-3 px-4">Estação Vinculada</th>
+                <th class="py-3 px-4">API Key de Envio</th>
+                <th class="py-3 px-4">Firmware</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyEquipamentos" class="divide-y divide-[#1E293B] text-[#F8FAFC]">
+              <tr>
+                <td colspan="7" class="py-8 text-center text-[#64748B]">Carregando equipamentos cadastrados...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ABA 3: ADMINISTRADORES ==================== -->
+    <section id="tabUsuarios" class="tab-content space-y-4 hidden">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0F172A] border border-[#1E293B] rounded-lg p-4">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+            <i data-lucide="user-check" class="w-4 h-4 text-[#A855F7]"></i>
+            Gestão de Administradores e Pesquisadores
+          </h2>
+          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre e gerencie os membros autorizados da equipe PROTEUS para acessar este painel.</p>
+        </div>
+        <button id="btnOpenModalNovoAdmin" type="button" class="px-3.5 py-2 rounded-lg bg-[#A855F7] hover:bg-[#b56ef8] text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow transition-all">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          <span>NOVO ADMINISTRADOR</span>
+        </button>
+      </div>
+
+      <!-- Tabela de Usuários -->
+      <div class="bg-[#0F172A] border border-[#1E293B] rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left font-mono text-xs">
+            <thead class="bg-[#020617] border-b border-[#1E293B] text-[#94A3B8] uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Nome</th>
+                <th class="py-3 px-4">Usuário (@)</th>
+                <th class="py-3 px-4">E-mail</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4">Cadastrado em</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyUsuarios" class="divide-y divide-[#1E293B] text-[#F8FAFC]">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-[#64748B]">Carregando administradores...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL: ESTAÇÃO (CRIAR / EDITAR COM MAPA INTERATIVO) ==================== -->
+  <div id="modalEstacao" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl max-w-3xl w-full p-5 sm:p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
+        <h3 id="modalEstacaoTitle" class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="radio" class="w-4 h-4 text-[#06B6D4]"></i>
+          <span>Cadastrar Nova Estação</span>
+        </h3>
+        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded" data-modal="modalEstacao">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="formEstacao" class="space-y-4 font-mono text-xs">
+        <input type="hidden" id="inputEstacaoDbId" value="">
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[#94A3B8] mb-1">Código Identificador *</label>
+            <input type="text" id="inputEstacaoCodigo" placeholder="Ex: BRB-04" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-[#94A3B8] mb-1">Nome Oficial da Estação *</label>
+            <input type="text" id="inputEstacaoNome" placeholder="Ex: BRB-04 · Barbosa-SP" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-[#94A3B8] mb-1">Corpo D'água / Ponto do Rio *</label>
+            <input type="text" id="inputEstacaoRio" placeholder="Ex: Rio Tietê · Trecho Ponte Barbosa" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+          </div>
+          <div>
+            <label class="block text-[#94A3B8] mb-1">Status Operacional</label>
+            <select id="inputEstacaoStatus" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+              <option value="Ativo">Ativo</option>
+              <option value="Manutenção">Manutenção</option>
+              <option value="Inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[#94A3B8] mb-1">Cidade *</label>
+            <input type="text" id="inputEstacaoCidade" placeholder="Barbosa" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+          </div>
+          <div>
+            <label class="block text-[#94A3B8] mb-1">Estado (UF) *</label>
+            <input type="text" id="inputEstacaoEstado" placeholder="SP" maxlength="2" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white uppercase focus:outline-none focus:border-[#06B6D4]">
+          </div>
+          <div>
+            <label class="block text-[#94A3B8] mb-1">Bacia Hidrográfica</label>
+            <input type="text" id="inputEstacaoBacia" placeholder="Ex: Baixo Tietê" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+          </div>
+        </div>
+
+        <!-- SEÇÃO: MAPA INTERATIVO & RANGE SLIDER DE COBERTURA -->
+        <div class="space-y-2.5 pt-3 border-t border-[#1E293B]">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-white flex items-center gap-1.5 text-xs">
+              <i data-lucide="map-pin" class="w-4 h-4 text-[#06B6D4]"></i>
+              Localização no Mapa e Raio de Abrangência
+            </label>
+            <span class="text-[10px] text-[#06B6D4] font-semibold bg-[#06B6D4]/10 border border-[#06B6D4]/30 px-2 py-0.5 rounded flex items-center gap-1">
+              <i data-lucide="crosshair" class="w-3 h-3"></i>
+              Clique no mapa para marcar ou arraste o ponto
+            </span>
+          </div>
+
+          <!-- Container do Mapa Leaflet -->
+          <div id="modalMapPicker" class="w-full h-64 rounded-lg border border-[#1E293B] overflow-hidden relative shadow-inner z-10"></div>
+
+          <!-- Controle do Raio (Range Slider com Círculo Dinâmico) -->
+          <div class="bg-[#020617] border border-[#1E293B] rounded-lg p-3 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[#94A3B8] font-semibold flex items-center gap-1.5 text-xs">
+                <i data-lucide="radar" class="w-4 h-4 text-[#06B6D4]"></i>
+                Raio de Abrangência da Estação:
+              </span>
+              <span id="labelRaioDisplay" class="text-[#06B6D4] font-bold text-xs bg-[#06B6D4]/10 px-2.5 py-0.5 rounded border border-[#06B6D4]/30">
+                1000 metros (1.0 km)
+              </span>
+            </div>
+            <input type="range" id="inputEstacaoRaio" min="100" max="10000" step="100" value="1000" class="w-full accent-[#06B6D4] cursor-pointer">
+            <div class="flex justify-between text-[10px] text-[#64748B]">
+              <span>100m (Ponto local)</span>
+              <span>1.000m (1 km)</span>
+              <span>5.000m (5 km)</span>
+              <span>10.000m (10 km)</span>
+            </div>
+          </div>
+
+          <!-- Coordenadas Geográficas (Preenchidas automaticamente pelo clique no mapa) -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[#64748B] text-[10px] mb-0.5">Latitude (Coordenada Decimal):</label>
+              <input type="number" step="0.000001" id="inputEstacaoLat" placeholder="-21.2662" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#06B6D4]">
+            </div>
+            <div>
+              <label class="block text-[#64748B] text-[10px] mb-0.5">Longitude (Coordenada Decimal):</label>
+              <input type="number" step="0.000001" id="inputEstacaoLng" placeholder="-49.9482" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#06B6D4]">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#1E293B]">
+          <button type="button" class="btn-close-modal px-4 py-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalEstacao">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSalvarEstacao" class="px-5 py-2 rounded bg-[#06B6D4] text-[#020617] font-bold hover:bg-[#22D3EE] transition-colors flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Salvar Estação</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EQUIPAMENTO (ESP32) ==================== -->
+  <div id="modalEquipamento" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
+        <h3 id="modalEquipamentoTitle" class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="cpu" class="w-4 h-4 text-[#3FA87A]"></i>
+          <span>Cadastrar Equipamento ESP32</span>
+        </h3>
+        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded" data-modal="modalEquipamento">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="formEquipamento" class="space-y-3 font-mono text-xs">
+        <input type="hidden" id="inputEquipamentoId" value="">
+
+        <div>
+          <label class="block text-[#94A3B8] mb-1">Endereço MAC da Placa (Físico) *</label>
+          <input type="text" id="inputEquipamentoMac" placeholder="Ex: 24:6F:28:7A:B9:4C" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white uppercase focus:outline-none focus:border-[#3FA87A]">
+          <p class="text-[10px] text-[#64748B] mt-0.5">Identificador único de fábrica gravado no chip Wi-Fi do ESP32.</p>
+        </div>
+
+        <div>
+          <label class="block text-[#94A3B8] mb-1">Nome de Identificação *</label>
+          <input type="text" id="inputEquipamentoNome" placeholder="Ex: ESP32-Sonda-Barbosa-01" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[#94A3B8] mb-1">Modelo da Placa</label>
+            <input type="text" id="inputEquipamentoModelo" placeholder="ESP32 DevKit V1" value="ESP32 DevKit V1" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+          </div>
+          <div>
+            <label class="block text-[#94A3B8] mb-1">Versão Firmware</label>
+            <input type="text" id="inputEquipamentoFirmware" placeholder="1.0.0" value="1.0.0" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[#94A3B8] mb-1">Estação Vinculada (Local de Instalação)</label>
+          <select id="selectEquipamentoEstacao" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+            <option value="">-- Nenhuma (Em estoque / Não vinculada) --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[#94A3B8] mb-1">Status Operacional</label>
+          <select id="selectEquipamentoStatus" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+            <option value="Ativo">Ativo</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Offline">Offline</option>
+          </select>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#1E293B]">
+          <button type="button" class="btn-close-modal px-3.5 py-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalEquipamento">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSalvarEquipamento" class="px-4 py-2 rounded bg-[#3FA87A] text-[#020617] font-bold hover:bg-[#4bc791] transition-colors">
+            Salvar Equipamento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADMINISTRADOR (CRIAR) ==================== -->
+  <div id="modalAdmin" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
+        <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4 text-[#A855F7]"></i>
+          <span>Cadastrar Novo Administrador</span>
+        </h3>
+        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded" data-modal="modalAdmin">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form id="formAdmin" class="space-y-3 font-mono text-xs">
+        <div>
+          <label class="block text-[#94A3B8] mb-1">Nome Completo *</label>
+          <input type="text" id="inputAdminNome" placeholder="Ex: Cauã Cristal Lemes" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#A855F7]">
+        </div>
+
+        <div>
+          <label class="block text-[#94A3B8] mb-1">Nome de Usuário (@) *</label>
+          <input type="text" id="inputAdminUsuario" placeholder="Ex: caua" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white lowercase focus:outline-none focus:border-[#A855F7]">
+          <p class="text-[10px] text-[#64748B] mt-0.5">Usado para fazer login (sem espaços ou acentos).</p>
+        </div>
+
+        <div>
+          <label class="block text-[#94A3B8] mb-1">E-mail Profissional *</label>
+          <input type="email" id="inputAdminEmail" placeholder="caua@proteus.com" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#A855F7]">
+        </div>
+
+        <div>
+          <label class="block text-[#94A3B8] mb-1">Senha Provisória (Mínimo 6 dígitos) *</label>
+          <input type="password" id="inputAdminSenha" placeholder="••••••••" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#A855F7]">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#1E293B]">
+          <button type="button" class="btn-close-modal px-3.5 py-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalAdmin">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSalvarAdmin" class="px-4 py-2 rounded bg-[#A855F7] text-[#020617] font-bold hover:bg-[#b56ef8] transition-colors">
+            Cadastrar Membro
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== SCRIPTS JS ==================== -->
+  <script>
+    // 1. Verificação de Autenticação Inicial
+    const token = localStorage.getItem('proteus_admin_token');
+    const userJson = localStorage.getItem('proteus_admin_user');
+
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    let usuarioLogado = {};
+    try {
+      usuarioLogado = JSON.parse(userJson || '{}');
+      document.getElementById('userNomeDisplay').textContent = usuarioLogado.nome || 'Administrador';
+      document.getElementById('userLoginDisplay').textContent = '@' + (usuarioLogado.usuario || 'admin');
+    } catch(e) {}
+
+    // Valida o token no servidor
+    fetch('/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(r => r.json())
+    .then(r => {
+      if (!r.success) {
+        localStorage.removeItem('proteus_admin_token');
+        localStorage.removeItem('proteus_admin_user');
+        window.location.href = 'login.html';
+      }
+    })
+    .catch(() => {});
+
+    // Logout
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      if (confirm('Deseja realmente encerrar a sessão administrativa?')) {
+        localStorage.removeItem('proteus_admin_token');
+        localStorage.removeItem('proteus_admin_user');
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Toasts
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toast.classList.remove('hidden', 'bg-[#0F172A]', 'border-[#3FA87A]', 'text-[#3FA87A]', 'border-[#C55A54]', 'text-[#C55A54]');
+      toast.classList.add('bg-[#0F172A]');
+      
+      if (isError) {
+        toast.classList.add('border-[#C55A54]', 'text-[#C55A54]');
+        toastIcon.setAttribute('data-lucide', 'alert-circle');
+      } else {
+        toast.classList.add('border-[#3FA87A]', 'text-[#3FA87A]');
+        toastIcon.setAttribute('data-lucide', 'check-circle-2');
+      }
+
+      toastMsg.textContent = msg;
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    // Gerenciador de Abas
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+
+        tabBtns.forEach(b => b.classList.remove('active', 'text-[#06B6D4]'));
+        tabBtns.forEach(b => b.classList.add('text-[#94A3B8]'));
+        btn.classList.add('active', 'text-[#06B6D4]');
+        btn.classList.remove('text-[#94A3B8]');
+
+        tabContents.forEach(tc => tc.classList.add('hidden'));
+        document.getElementById(targetTab).classList.remove('hidden');
+      });
+    });
+
+    // Modais - Fechamento genérico
+    document.querySelectorAll('.btn-close-modal').forEach(b => {
+      b.addEventListener('click', () => {
+        const modalId = b.getAttribute('data-modal');
+        document.getElementById(modalId).classList.add('hidden');
+      });
+    });
+
+    // ==========================================
+    // SEÇÃO 1: ESTAÇÕES DE MONITORAMENTO
+    // ==========================================
+    let cacheEstacoes = [];
+
+    async function carregarEstacoes() {
+      try {
+        const res = await fetch('/api/estacoes');
+        const data = await res.json();
+
+        if (data.success) {
+          cacheEstacoes = data.data;
+          document.getElementById('badgeCountEstacoes').textContent = cacheEstacoes.length;
+          renderizarTabelaEstacoes(cacheEstacoes);
+          preencherSelectEstacoes(cacheEstacoes);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar estações:', err);
+      }
+    }
+
+    function renderizarTabelaEstacoes(lista) {
+      const tbody = document.getElementById('tbodyEstacoes');
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-[#64748B]">Nenhuma estação cadastrada. Clique em "Nova Estação".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = lista.map(st => `
+        <tr class="hover:bg-[#020617]/50 transition-colors">
+          <td class="py-3 px-4 font-bold text-[#06B6D4]">${st.id}</td>
+          <td class="py-3 px-4">
+            <div class="font-semibold text-white">${st.name}</div>
+            <div class="text-[10px] text-[#06B6D4] font-semibold mt-0.5 flex items-center gap-1">
+              <i data-lucide="radar" class="w-3 h-3"></i>
+              Raio: ${st.raio_metros || 1000}m (${((st.raio_metros || 1000)/1000).toFixed(1)} km)
+            </div>
+          </td>
+          <td class="py-3 px-4 text-[#94A3B8]">${st.river}</td>
+          <td class="py-3 px-4">${st.cidade} - ${st.estado}</td>
+          <td class="py-3 px-4 text-[11px] text-[#64748B]">${st.coords[0].toFixed(4)}, ${st.coords[1].toFixed(4)}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+              st.status === 'Ativo' ? 'bg-[#3FA87A]/10 text-[#3FA87A] border border-[#3FA87A]/30' : 
+              st.status === 'Manutenção' ? 'bg-[#E5A93C]/10 text-[#E5A93C] border border-[#E5A93C]/30' : 
+              'bg-[#64748B]/10 text-[#94A3B8] border border-[#64748B]/30'
+            }">${st.status || 'Ativo'}</span>
+          </td>
+          <td class="py-3 px-4 text-right space-x-1">
+            <button onclick="editarEstacao('${st.id}')" class="p-1.5 rounded hover:bg-[#020617] text-[#06B6D4] hover:text-white" title="Editar">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="excluirEstacao('${st.id}')" class="p-1.5 rounded hover:bg-[#020617] text-[#C55A54] hover:text-white" title="Excluir">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // MAPA INTERATIVO NO MODAL (LEAFLET PICKER)
+    // ==========================================
+    let pickerMap = null;
+    let pickerMarker = null;
+    let pickerCircle = null;
+
+    function initPickerMap() {
+      if (!pickerMap) {
+        pickerMap = L.map('modalMapPicker', {
+          zoomControl: true,
+          attributionControl: false
+        }).setView([-21.2662, -49.9482], 12);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19
+        }).addTo(pickerMap);
+
+        // Ao clicar no mapa, move o ponto e o círculo
+        pickerMap.on('click', (e) => {
+          atualizarPosicaoMapa(e.latlng.lat, e.latlng.lng);
+        });
+      }
+    }
+
+    function atualizarPosicaoMapa(lat, lng, forcarZoom = false) {
+      const inputLat = document.getElementById('inputEstacaoLat');
+      const inputLng = document.getElementById('inputEstacaoLng');
+      const inputRaio = document.getElementById('inputEstacaoRaio');
+      const raio = parseInt(inputRaio.value, 10) || 1000;
+
+      inputLat.value = parseFloat(lat).toFixed(6);
+      inputLng.value = parseFloat(lng).toFixed(6);
+
+      // Marcador do Ponto
+      if (!pickerMarker) {
+        const customIcon = L.divIcon({
+          className: 'custom-picker-pin',
+          html: `<div style="background-color: #06B6D4; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 12px #06B6D4;"></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+
+        pickerMarker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(pickerMap);
+        pickerMarker.on('dragend', (ev) => {
+          const pos = ev.target.getLatLng();
+          atualizarPosicaoMapa(pos.lat, pos.lng);
+        });
+      } else {
+        pickerMarker.setLatLng([lat, lng]);
+      }
+
+      // Círculo Translúcido do Raio de Cobertura
+      if (!pickerCircle) {
+        pickerCircle = L.circle([lat, lng], {
+          radius: raio,
+          color: '#06B6D4',
+          weight: 2,
+          fillColor: '#06B6D4',
+          fillOpacity: 0.22,
+          dashArray: '4, 4'
+        }).addTo(pickerMap);
+      } else {
+        pickerCircle.setLatLng([lat, lng]);
+        pickerCircle.setRadius(raio);
+      }
+
+      if (forcarZoom) {
+        pickerMap.setView([lat, lng], 13);
+      }
+    }
+
+    // Slider de Raio em Tempo Real
+    document.getElementById('inputEstacaoRaio').addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      const km = (val / 1000).toFixed(1);
+      document.getElementById('labelRaioDisplay').textContent = `${val} metros (${km} km)`;
+      if (pickerCircle) {
+        pickerCircle.setRadius(val);
+      }
+    });
+
+    document.getElementById('btnOpenModalNovaEstacao').addEventListener('click', () => {
+      document.getElementById('modalEstacaoTitle').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-[#06B6D4]"></i> <span>Cadastrar Nova Estação</span>`;
+      document.getElementById('formEstacao').reset();
+      document.getElementById('inputEstacaoDbId').value = '';
+      document.getElementById('inputEstacaoCodigo').readOnly = false;
+      document.getElementById('inputEstacaoRaio').value = 1000;
+      document.getElementById('labelRaioDisplay').textContent = '1000 metros (1.0 km)';
+      document.getElementById('modalEstacao').classList.remove('hidden');
+      lucide.createIcons();
+
+      // Inicializa o mapa com animação suave e ponto padrão (Barbosa/Rio Tietê)
+      setTimeout(() => {
+        initPickerMap();
+        pickerMap.invalidateSize();
+        const defaultLat = -21.2662;
+        const defaultLng = -49.9482;
+        atualizarPosicaoMapa(defaultLat, defaultLng, true);
+      }, 250);
+    });
+
+    window.editarEstacao = function(codigo) {
+      const st = cacheEstacoes.find(s => s.id === codigo);
+      if (!st) return;
+
+      document.getElementById('modalEstacaoTitle').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-[#06B6D4]"></i> <span>Editar Estação ${st.id}</span>`;
+      document.getElementById('inputEstacaoDbId').value = st.id;
+      document.getElementById('inputEstacaoCodigo').value = st.id;
+      document.getElementById('inputEstacaoCodigo').readOnly = true;
+      document.getElementById('inputEstacaoNome').value = st.name;
+      document.getElementById('inputEstacaoRio').value = st.river;
+      document.getElementById('inputEstacaoCidade').value = st.cidade;
+      document.getElementById('inputEstacaoEstado').value = st.estado;
+      document.getElementById('inputEstacaoBacia').value = st.bacia || 'Baixo Tietê';
+      document.getElementById('inputEstacaoStatus').value = st.status || 'Ativo';
+
+      const raioVal = st.raio_metros || 1000;
+      document.getElementById('inputEstacaoRaio').value = raioVal;
+      document.getElementById('labelRaioDisplay').textContent = `${raioVal} metros (${(raioVal/1000).toFixed(1)} km)`;
+
+      document.getElementById('modalEstacao').classList.remove('hidden');
+      lucide.createIcons();
+
+      setTimeout(() => {
+        initPickerMap();
+        pickerMap.invalidateSize();
+        atualizarPosicaoMapa(st.coords[0], st.coords[1], true);
+      }, 250);
+    };
+
+    document.getElementById('formEstacao').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const editingId = document.getElementById('inputEstacaoDbId').value;
+      const codigo = document.getElementById('inputEstacaoCodigo').value.trim();
+      const nome = document.getElementById('inputEstacaoNome').value.trim();
+      const rio_local = document.getElementById('inputEstacaoRio').value.trim();
+      const cidade = document.getElementById('inputEstacaoCidade').value.trim();
+      const estado = document.getElementById('inputEstacaoEstado').value.trim();
+      const latitude = parseFloat(document.getElementById('inputEstacaoLat').value);
+      const longitude = parseFloat(document.getElementById('inputEstacaoLng').value);
+      const raio_cobertura_metros = parseInt(document.getElementById('inputEstacaoRaio').value, 10);
+      const bacia_hidrografica = document.getElementById('inputEstacaoBacia').value.trim();
+      const status_operacional = document.getElementById('inputEstacaoStatus').value;
+
+      const payload = { 
+        codigo, 
+        nome, 
+        rio_local, 
+        cidade, 
+        estado, 
+        latitude, 
+        longitude, 
+        raio_cobertura_metros,
+        bacia_hidrografica, 
+        status_operacional 
+      };
+
+      try {
+        const url = editingId ? `/api/estacoes/${editingId}` : '/api/estacoes';
+        const method = editingId ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(data.message || 'Estação salva com sucesso!');
+          document.getElementById('modalEstacao').classList.add('hidden');
+          carregarEstacoes();
+        } else {
+          showToast(data.error || 'Erro ao salvar estação.', true);
+        }
+      } catch (err) {
+        showToast('Erro de comunicação com a API.', true);
+      }
+    });
+
+    window.excluirEstacao = async function(codigo) {
+      if (!confirm(`Tem certeza que deseja excluir a estação ${codigo}? Esta ação não pode ser desfeita.`)) return;
+
+      try {
+        const res = await fetch(`/api/estacoes/${codigo}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showToast('Estação excluída com sucesso!');
+          carregarEstacoes();
+        } else {
+          showToast(data.error || 'Erro ao excluir estação.', true);
+        }
+      } catch (err) {
+        showToast('Erro ao excluir estação.', true);
+      }
+    };
+
+    function preencherSelectEstacoes(estacoes) {
+      const select = document.getElementById('selectEquipamentoEstacao');
+      select.innerHTML = '<option value="">-- Nenhuma (Em estoque / Não vinculada) --</option>';
+      estacoes.forEach(s => {
+        select.innerHTML += `<option value="${s.db_id}">${s.id} — ${s.name} (${s.cidade})</option>`;
+      });
+    }
+
+    // ==========================================
+    // SEÇÃO 2: EQUIPAMENTOS ESP32
+    // ==========================================
+    let cacheEquipamentos = [];
+
+    async function carregarEquipamentos() {
+      try {
+        const res = await fetch('/api/equipamentos', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          cacheEquipamentos = data.data;
+          document.getElementById('badgeCountEquipamentos').textContent = cacheEquipamentos.length;
+          renderizarTabelaEquipamentos(cacheEquipamentos);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar equipamentos:', err);
+      }
+    }
+
+    function renderizarTabelaEquipamentos(lista) {
+      const tbody = document.getElementById('tbodyEquipamentos');
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-[#64748B]">Nenhum equipamento cadastrado. Clique em "Novo ESP32".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = lista.map(eq => `
+        <tr class="hover:bg-[#020617]/50 transition-colors">
+          <td class="py-3 px-4">
+            <div class="font-bold text-white">${eq.nome_dispositivo}</div>
+            <div class="text-[10px] text-[#64748B]">${eq.modelo || 'ESP32'}</div>
+          </td>
+          <td class="py-3 px-4 font-mono font-semibold text-[#06B6D4]">${eq.mac_address}</td>
+          <td class="py-3 px-4">
+            ${eq.estacao_codigo ? `
+              <span class="px-2 py-0.5 rounded bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-bold">
+                ${eq.estacao_codigo}
+              </span>
+              <span class="text-[#94A3B8] text-[11px] block mt-0.5">${eq.estacao_nome || ''}</span>
+            ` : `<span class="text-[#64748B] italic">Sem estação vinculada</span>`}
+          </td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-1.5">
+              <input type="password" value="${eq.api_key}" readonly class="bg-[#020617] border border-[#1E293B] rounded px-2 py-1 text-[11px] text-[#94A3B8] w-24">
+              <button onclick="copiarApiKey('${eq.api_key}')" class="p-1 rounded bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#06B6D4]" title="Copiar API Key">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="regenerarApiKey(${eq.id})" class="p-1 rounded bg-[#020617] border border-[#1E293B] hover:border-[#E5A93C] text-[#E5A93C]" title="Regenerar Chave">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </td>
+          <td class="py-3 px-4 text-[#94A3B8]">v${eq.firmware_versao || '1.0.0'}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+              eq.status === 'Ativo' ? 'bg-[#3FA87A]/10 text-[#3FA87A] border border-[#3FA87A]/30' : 
+              eq.status === 'Manutenção' ? 'bg-[#E5A93C]/10 text-[#E5A93C] border border-[#E5A93C]/30' : 
+              'bg-[#64748B]/10 text-[#94A3B8] border border-[#64748B]/30'
+            }">${eq.status || 'Ativo'}</span>
+          </td>
+          <td class="py-3 px-4 text-right space-x-1">
+            <button onclick="editarEquipamento(${eq.id})" class="p-1.5 rounded hover:bg-[#020617] text-[#06B6D4] hover:text-white" title="Editar">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="excluirEquipamento(${eq.id})" class="p-1.5 rounded hover:bg-[#020617] text-[#C55A54] hover:text-white" title="Excluir">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    window.copiarApiKey = function(key) {
+      navigator.clipboard.writeText(key).then(() => {
+        showToast('API Key copiada para a área de transferência!');
+      });
+    };
+
+    window.regenerarApiKey = async function(id) {
+      if (!confirm('Deseja realmente gerar uma nova API Key? O código no ESP32 precisará ser atualizado com a nova chave.')) return;
+      try {
+        const res = await fetch(`/api/equipamentos/${id}/regenerar-chave`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Nova API Key gerada com sucesso!');
+          carregarEquipamentos();
+        } else {
+          showToast(data.error || 'Erro ao gerar nova chave.', true);
+        }
+      } catch (err) {
+        showToast('Erro de comunicação.', true);
+      }
+    };
+
+    document.getElementById('btnOpenModalNovoEquipamento').addEventListener('click', () => {
+      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-[#3FA87A]"></i> <span>Cadastrar Equipamento ESP32</span>`;
+      document.getElementById('formEquipamento').reset();
+      document.getElementById('inputEquipamentoId').value = '';
+      document.getElementById('inputEquipamentoMac').readOnly = false;
+      document.getElementById('modalEquipamento').classList.remove('hidden');
+      lucide.createIcons();
+    });
+
+    window.editarEquipamento = function(id) {
+      const eq = cacheEquipamentos.find(item => item.id === id);
+      if (!eq) return;
+
+      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-[#3FA87A]"></i> <span>Editar Equipamento ${eq.nome_dispositivo}</span>`;
+      document.getElementById('inputEquipamentoId').value = eq.id;
+      document.getElementById('inputEquipamentoMac').value = eq.mac_address;
+      document.getElementById('inputEquipamentoMac').readOnly = true;
+      document.getElementById('inputEquipamentoNome').value = eq.nome_dispositivo;
+      document.getElementById('inputEquipamentoModelo').value = eq.modelo || 'ESP32 DevKit V1';
+      document.getElementById('inputEquipamentoFirmware').value = eq.firmware_versao || '1.0.0';
+      document.getElementById('selectEquipamentoEstacao').value = eq.estacao_id || '';
+      document.getElementById('selectEquipamentoStatus').value = eq.status || 'Ativo';
+
+      document.getElementById('modalEquipamento').classList.remove('hidden');
+      lucide.createIcons();
+    };
+
+    document.getElementById('formEquipamento').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('inputEquipamentoId').value;
+      const mac_address = document.getElementById('inputEquipamentoMac').value.trim();
+      const nome_dispositivo = document.getElementById('inputEquipamentoNome').value.trim();
+      const modelo = document.getElementById('inputEquipamentoModelo').value.trim();
+      const firmware_versao = document.getElementById('inputEquipamentoFirmware').value.trim();
+      const estacao_id = document.getElementById('selectEquipamentoEstacao').value || null;
+      const status = document.getElementById('selectEquipamentoStatus').value;
+
+      const payload = { mac_address, nome_dispositivo, modelo, firmware_versao, estacao_id, status };
+
+      try {
+        const url = id ? `/api/equipamentos/${id}` : '/api/equipamentos';
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(data.message || 'Equipamento salvo com sucesso!');
+          document.getElementById('modalEquipamento').classList.add('hidden');
+          carregarEquipamentos();
+        } else {
+          showToast(data.error || 'Erro ao salvar equipamento.', true);
+        }
+      } catch (err) {
+        showToast('Erro de comunicação com o servidor.', true);
+      }
+    });
+
+    window.excluirEquipamento = async function(id) {
+      if (!confirm('Deseja realmente remover este equipamento ESP32 do sistema?')) return;
+
+      try {
+        const res = await fetch(`/api/equipamentos/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast('Equipamento excluído com sucesso!');
+          carregarEquipamentos();
+        } else {
+          showToast(data.error || 'Erro ao excluir equipamento.', true);
+        }
+      } catch (err) {
+        showToast('Erro ao excluir equipamento.', true);
+      }
+    };
+
+    // ==========================================
+    // SEÇÃO 3: ADMINISTRADORES
+    // ==========================================
+    let cacheUsuarios = [];
+
+    async function carregarUsuarios() {
+      try {
+        const res = await fetch('/api/auth/usuarios', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          cacheUsuarios = data.data;
+          document.getElementById('badgeCountUsuarios').textContent = cacheUsuarios.length;
+          renderizarTabelaUsuarios(cacheUsuarios);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar usuários:', err);
+      }
+    }
+
+    function renderizarTabelaUsuarios(lista) {
+      const tbody = document.getElementById('tbodyUsuarios');
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-[#64748B]">Nenhum usuário cadastrado.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = lista.map(u => `
+        <tr class="hover:bg-[#020617]/50 transition-colors">
+          <td class="py-3 px-4 font-bold text-white">${u.nome}</td>
+          <td class="py-3 px-4 font-semibold text-[#06B6D4]">@${u.usuario || 'admin'}</td>
+          <td class="py-3 px-4 text-[#94A3B8]">${u.email}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+              u.ativo ? 'bg-[#3FA87A]/10 text-[#3FA87A] border border-[#3FA87A]/30' : 'bg-[#C55A54]/10 text-[#C55A54] border border-[#C55A54]/30'
+            }">${u.ativo ? 'Ativo' : 'Inativo'}</span>
+          </td>
+          <td class="py-3 px-4 text-[11px] text-[#64748B]">
+            ${new Date(u.criado_em).toLocaleDateString('pt-BR')}
+          </td>
+          <td class="py-3 px-4 text-right">
+            ${u.id !== usuarioLogado.id ? `
+              <button onclick="alternarStatusUsuario(${u.id}, ${!u.ativo})" class="px-2 py-1 rounded bg-[#020617] border border-[#1E293B] hover:border-white text-[10px] font-bold ${u.ativo ? 'text-[#C55A54]' : 'text-[#3FA87A]'}">
+                ${u.ativo ? 'Desativar' : 'Ativar'}
+              </button>
+            ` : `<span class="text-[10px] text-[#06B6D4] italic font-semibold">(Você)</span>`}
+          </td>
+        </tr>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    document.getElementById('btnOpenModalNovoAdmin').addEventListener('click', () => {
+      document.getElementById('formAdmin').reset();
+      document.getElementById('modalAdmin').classList.remove('hidden');
+      lucide.createIcons();
+    });
+
+    document.getElementById('formAdmin').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('inputAdminNome').value.trim();
+      const usuario = document.getElementById('inputAdminUsuario').value.trim();
+      const email = document.getElementById('inputAdminEmail').value.trim();
+      const senha = document.getElementById('inputAdminSenha').value;
+
+      try {
+        const res = await fetch('/api/auth/usuarios', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ nome, usuario, email, senha })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast('Novo administrador cadastrado com sucesso!');
+          document.getElementById('modalAdmin').classList.add('hidden');
+          carregarUsuarios();
+        } else {
+          showToast(data.error || 'Erro ao cadastrar administrador.', true);
+        }
+      } catch (err) {
+        showToast('Erro de comunicação.', true);
+      }
+    });
+
+    window.alternarStatusUsuario = async function(id, novoStatus) {
+      try {
+        const res = await fetch(`/api/auth/usuarios/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ ativo: novoStatus })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(data.message || 'Status alterado com sucesso!');
+          carregarUsuarios();
+        } else {
+          showToast(data.error || 'Erro ao alterar status.', true);
+        }
+      } catch (err) {
+        showToast('Erro ao atualizar status do usuário.', true);
+      }
+    };
+
+    // Inicialização ao Carregar a Página
+    carregarEstacoes();
+    carregarEquipamentos();
+    carregarUsuarios();
+  </script>
+</body>
+</html>

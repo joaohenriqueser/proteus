@@ -1,10 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+const authRoutes = require('./routes/auth');
 require('dotenv').config();
 
 const path = require('path');
 const estacoesRoutes = require('./routes/estacoes');
 const telemetriaRoutes = require('./routes/telemetria');
+
+const equipamentosRoutes = require('./routes/equipamentos');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +19,9 @@ app.use(express.json()); // Suporte a payload JSON nas requisições
 // Rotas da API
 app.use('/api/estacoes', estacoesRoutes);
 app.use('/api/telemetria', telemetriaRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/equipamentos', equipamentosRoutes);
+
 
 // Rota de Healthcheck / Status
 app.get('/api/health', (req, res) => {

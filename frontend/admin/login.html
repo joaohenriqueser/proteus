@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROTEUS — Acesso Administrativo</title>
+  <meta name="description" content="Acesso restrito à área administrativa do sistema PROTEUS.">
+
+  <!-- Google Fonts: IBM Plex Sans & Mono -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    .font-mono {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+  </style>
+</head>
+<body class="bg-[#020617] text-[#F8FAFC] min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+  <!-- Subtle glow background effects -->
+  <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#06B6D4]/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#3FA87A]/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <div class="max-w-md w-full relative z-10 space-y-6">
+
+    <!-- Card de Login -->
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl p-6 sm:p-8 shadow-2xl space-y-6 backdrop-blur-md">
+      
+      <!-- Logo e Título -->
+      <div class="text-center space-y-2">
+        <a href="../index.html" class="inline-block hover:opacity-80 transition-opacity">
+          <img src="../assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-12 w-auto mx-auto mb-2">
+        </a>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-mono text-[11px] font-semibold tracking-wider uppercase">
+          <i data-lucide="shield-lock" class="w-3.5 h-3.5"></i>
+          Área Restrita
+        </div>
+        <h1 class="text-lg font-bold text-white tracking-tight">Acesso Administrativo</h1>
+        <p class="text-xs text-[#94A3B8]">Gestão de estações, equipamentos IoT (ESP32) e telemetria.</p>
+      </div>
+
+      <!-- Alerta de Feedback (Mensagens de Erro / Sucesso) -->
+      <div id="loginAlert" class="hidden p-3 rounded text-xs font-mono border flex items-start gap-2">
+        <i id="alertIcon" data-lucide="alert-circle" class="w-4 h-4 flex-none mt-0.5"></i>
+        <span id="alertMsg"></span>
+      </div>
+
+      <!-- Formulário de Login -->
+      <form id="formLogin" class="space-y-4">
+        <div>
+          <label for="inputLogin" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+            Usuário ou E-mail:
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="text" 
+              id="inputLogin" 
+              name="login"
+              placeholder="admin ou admin@proteus.com" 
+              required
+              autocomplete="username"
+              class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+            >
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="inputSenha" class="block font-mono text-xs font-medium text-[#94A3B8]">
+              Senha:
+            </label>
+            <a href="recuperar-senha.html" class="text-xs font-mono text-[#06B6D4] hover:underline">
+              Esqueceu a senha?
+            </a>
+          </div>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="password" 
+              id="inputSenha" 
+              name="senha"
+              placeholder="••••••••" 
+              required
+              autocomplete="current-password"
+              class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-9 pr-10 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+            >
+            <button 
+              type="button" 
+              id="btnToggleSenha"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-white"
+              title="Mostrar/Ocultar Senha"
+            >
+              <i id="iconToggleSenha" data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="btnSubmitLogin"
+          class="w-full py-2.5 px-4 rounded-lg bg-[#06B6D4] hover:bg-[#22D3EE] text-[#020617] font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-[#06B6D4]/20 active:scale-[0.99]"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>ENTRAR NO SISTEMA</span>
+        </button>
+      </form>
+
+      <!-- Rodapé do Card -->
+      <div class="pt-4 border-t border-[#1E293B] flex items-center justify-between text-xs text-[#64748B] font-mono">
+        <a href="../index.html" class="hover:text-white flex items-center gap-1 transition-colors">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          Voltar ao Portal
+        </a>
+        <span>PROTEUS v1.0</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Inicializa ícones Lucide
+    lucide.createIcons();
+
+    // Alternar visualização da senha
+    const btnToggleSenha = document.getElementById('btnToggleSenha');
+    const inputSenha = document.getElementById('inputSenha');
+    const iconToggleSenha = document.getElementById('iconToggleSenha');
+
+    btnToggleSenha.addEventListener('click', () => {
+      const isPassword = inputSenha.type === 'password';
+      inputSenha.type = isPassword ? 'text' : 'password';
+      iconToggleSenha.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+      lucide.createIcons();
+    });
+
+    // Submissão do Formulário de Login
+    const formLogin = document.getElementById('formLogin');
+    const btnSubmitLogin = document.getElementById('btnSubmitLogin');
+    const loginAlert = document.getElementById('loginAlert');
+    const alertMsg = document.getElementById('alertMsg');
+    const alertIcon = document.getElementById('alertIcon');
+
+    function showAlert(msg, isError = true) {
+      loginAlert.classList.remove('hidden', 'bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]', 'bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+      if (isError) {
+        loginAlert.classList.add('bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]');
+        alertIcon.setAttribute('data-lucide', 'alert-circle');
+      } else {
+        loginAlert.classList.add('bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+        alertIcon.setAttribute('data-lucide', 'check-circle-2');
+      }
+      alertMsg.textContent = msg;
+      lucide.createIcons();
+    }
+
+    formLogin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const login = document.getElementById('inputLogin').value.trim();
+      const senha = document.getElementById('inputSenha').value;
+
+      if (!login || !senha) {
+        showAlert('Preencha todos os campos.');
+        return;
+      }
+
+      btnSubmitLogin.disabled = true;
+      btnSubmitLogin.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Autenticando...`;
+      lucide.createIcons();
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ login, senha })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          showAlert('Login aprovado! Redirecionando...', false);
+          
+          // Guarda o token e dados do usuário logado
+          localStorage.setItem('proteus_admin_token', data.token);
+          localStorage.setItem('proteus_admin_user', JSON.stringify(data.usuario));
+
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 800);
+        } else {
+          showAlert(data.error || 'Credenciais inválidas.');
+          btnSubmitLogin.disabled = false;
+          btnSubmitLogin.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> ENTRAR NO SISTEMA`;
+          lucide.createIcons();
+        }
+      } catch (err) {
+        console.error('Erro na requisição:', err);
+        showAlert('Erro ao conectar ao servidor. Verifique se o backend está ativo.');
+        btnSubmitLogin.disabled = false;
+        btnSubmitLogin.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> ENTRAR NO SISTEMA`;
+        lucide.createIcons();
+      }
+    });
+
+    // Se já estiver com token salvo válido, redireciona direto
+    const tokenExistente = localStorage.getItem('proteus_admin_token');
+    if (tokenExistente) {
+      fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${tokenExistente}` }
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          window.location.href = 'dashboard.html';
+        }
+      })
+      .catch(() => {});
+    }
+  </script>
+</body>
+</html>

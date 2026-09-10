@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>PROTEUS Admin</title>
+  <script>
+    const token = localStorage.getItem('proteus_admin_token');
+    if (token) {
+      window.location.replace('dashboard.html');
+    } else {
+      window.location.replace('login.html');
+    }
+  </script>
+</head>
+<body style="background-color: #020617; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+  <p>Redirecionando para o Painel Administrativo PROTEUS...</p>
+</body>
+</html>

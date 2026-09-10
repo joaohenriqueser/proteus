@@ -335,8 +335,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!mapInstance || !mapMarker || !mapHalo) return;
     const currentSt = getActiveStation();
     mapHalo.setStyle({ color: colorHex, fillColor: colorHex });
+    if (currentSt && currentSt.raio_metros) {
+      mapHalo.setRadius(currentSt.raio_metros);
+    }
     mapMarker.setStyle({ color: colorHex });
-    mapMarker.setPopupContent(`<b>Estação ${currentSt.name}</b><br>IRE ${state.params.ph.toFixed(1)} — ${statusTitle}<br>${state.activeScenarioTag}`);
+    mapMarker.setPopupContent(`<b>Estação ${currentSt.name}</b><br>Raio de Cobertura: ${currentSt.raio_metros || 1000}m<br>IRE ${state.params.ph.toFixed(1)} — ${statusTitle}<br>${state.activeScenarioTag}`);
     if (mapOverlayStatus) {
       mapOverlayStatus.textContent = statusTitle;
       mapOverlayStatus.style.color = colorHex;

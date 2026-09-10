@@ -7,7 +7,7 @@
 
 -- 1. TABELA DE ESTAÇÕES / LOCAIS DE MONITORAMENTO
 CREATE TABLE IF NOT EXISTS estacoes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     codigo VARCHAR(20) UNIQUE NOT NULL,           -- Ex: 'BRB-04', 'PNP-02', 'ARÇ-01'
     nome VARCHAR(100) NOT NULL,                   -- Ex: 'BRB-04 · Barbosa-SP'
     rio_local VARCHAR(150) NOT NULL,              -- Ex: 'Rio Tietê · Barbosa-SP'
@@ -15,14 +15,15 @@ CREATE TABLE IF NOT EXISTS estacoes (
     estado VARCHAR(2) DEFAULT 'SP',               -- Ex: 'SP'
     latitude DECIMAL(10, 8) NOT NULL,             -- Coordenada Lat: -21.26620000
     longitude DECIMAL(11, 8) NOT NULL,            -- Coordenada Lng: -49.94820000
+    raio_cobertura_metros INT DEFAULT 1000,        -- Raio de monitoramento/abrangência em metros (ex: 1000m)
     bacia_hidrografica VARCHAR(100) DEFAULT 'Baixo Tietê',
     status_operacional VARCHAR(20) DEFAULT 'Ativo', -- 'Ativo', 'Manutenção', 'Inativo'
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
 
 -- 2. TABELA DE LEITURAS / TELEMETRIA DA QUALIDADE DA ÁGUA
 CREATE TABLE IF NOT EXISTS leituras_telemetria (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     estacao_id INT NOT NULL,
     data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     
@@ -42,7 +43,51 @@ CREATE TABLE IF NOT EXISTS leituras_telemetria (
     sinal_rssi INT,                               -- Força do sinal Wi-Fi/4G (dBm)
 
     FOREIGN KEY (estacao_id) REFERENCES estacoes(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+);
+
+-- ============================================================
+-- 3. TABELA DE USUÁRIOS ADMINISTRATIVOS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS usuarios_admin (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    usuario VARCHAR(50) UNIQUE,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    senha_hash VARCHAR(255) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- 4. TOKENS DE RECUPERAÇÃO DE SENHA (ESQUECI MINHA SENHA)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS tokens_recuperacao_senha (
+    id SERIAL PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expira_em TIMESTAMP NOT NULL,
+    usado BOOLEAN DEFAULT FALSE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios_admin(id) ON DELETE CASCADE
+);
+
+-- ============================================================
+-- 5. EQUIPAMENTOS DE LEITURA (ESP32 / SENSORES NAS ESTAÇÕES)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS equipamentos (
+    id SERIAL PRIMARY KEY,
+    mac_address VARCHAR(17) UNIQUE NOT NULL,       -- Ex: '24:6F:28:7A:B9:4C' (Identificador único de fábrica)
+    nome_dispositivo VARCHAR(100) NOT NULL,        -- Ex: 'ESP32-Sonda-Barbosa-01'
+    modelo VARCHAR(50) DEFAULT 'ESP32 DevKit V1',  -- Modelo da placa
+    estacao_id INT,                                -- Estação onde o ESP32 está instalado fisicamente
+    api_key VARCHAR(64) UNIQUE NOT NULL,           -- Chave secreta que o ESP32 envia no cabeçalho HTTP
+    firmware_versao VARCHAR(20) DEFAULT '1.0.0',   -- Versão do código gravado na placa
+    status VARCHAR(20) DEFAULT 'Ativo',            -- 'Ativo', 'Manutenção', 'Offline'
+    ultima_comunicacao TIMESTAMP NULL,             -- Última vez que o ESP32 enviou dados
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (estacao_id) REFERENCES estacoes(id) ON DELETE SET NULL
+);
+
 
 -- ============================================================
 -- DADOS INICIAIS (SEED) PARA TESTAR E VISUALIZAR NO DBEAVER
