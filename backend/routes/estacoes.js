@@ -52,6 +52,8 @@ router.get('/', async (req, res) => {
       estado: r.estado,
       coords: [parseFloat(r.latitude), parseFloat(r.longitude)],
       raio_metros: parseInt(r.raio_cobertura_metros || 1000, 10),
+      bacia: r.bacia || 'Baixo Tietê',
+      status: r.status || 'Ativo',
       params: {
         ph: r.ph !== null ? parseFloat(r.ph) : 7.2,
         turb: r.turb !== null ? parseFloat(r.turb) : 4.0,

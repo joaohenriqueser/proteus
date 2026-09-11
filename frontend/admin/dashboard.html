@@ -24,46 +24,119 @@
     body { font-family: 'IBM Plex Sans', sans-serif; }
     .font-mono { font-family: 'IBM Plex Mono', monospace; }
     
-    .tab-btn.active {
-      background-color: #0F172A;
-      border-color: #06B6D4;
+    /* Scrollbars customizados */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Custom Leaflet Popups em Dark Theme */
+    .leaflet-popup-content-wrapper {
+      background: #0F172A !important;
+      border: 1px solid #1E293B !important;
+      color: #F8FAFC !important;
+      border-radius: 10px !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+      padding: 4px !important;
+    }
+    .leaflet-popup-tip {
+      background: #0F172A !important;
+      border: 1px solid #1E293B !important;
+    }
+    .leaflet-popup-close-button {
+      color: #94A3B8 !important;
+      padding: 6px 8px !important;
+    }
+    .leaflet-popup-close-button:hover {
+      color: #F8FAFC !important;
+    }
+
+    /* Animação suave para cards e botões */
+    .metric-card {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.8) 0%, rgba(2, 6, 23, 0.9) 100%);
+      transition: all 0.25s ease;
+    }
+    .metric-card:hover {
+      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(6, 182, 212, 0.12);
+    }
+
+    /* Segmented Control Tabs */
+    .tab-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-btn.active-tab-estacoes {
+      background: rgba(6, 182, 212, 0.12);
+      border-color: rgba(6, 182, 212, 0.5);
       color: #06B6D4;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.18);
+    }
+    .tab-btn.active-tab-equipamentos {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #10B981;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.18);
+    }
+    .tab-btn.active-tab-usuarios {
+      background: rgba(168, 85, 247, 0.12);
+      border-color: rgba(168, 85, 247, 0.5);
+      color: #A855F7;
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.18);
+    }
+
+    /* Marcador do Leaflet para Estações Existentes */
+    .existing-st-pin {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .existing-st-pin:hover {
+      transform: scale(1.12);
+      z-index: 1000 !important;
     }
   </style>
 </head>
-<body class="bg-[#020617] text-[#F8FAFC] min-h-screen flex flex-col">
+<body class="bg-[#020617] text-[#F8FAFC] min-h-screen flex flex-col selection:bg-[#06B6D4]/30 selection:text-white">
 
-  <!-- ==================== HEADER ADMIN ==================== -->
-  <header class="bg-[#0F172A] border-b border-[#1E293B] sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between">
+  <!-- ==================== HEADER ADMIN MODERNO ==================== -->
+  <header class="bg-[#0F172A]/85 backdrop-blur-md border-b border-[#1E293B] sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <a href="../index.html" class="flex items-center gap-2 hover:opacity-90">
+      <a href="../index.html" class="flex items-center gap-2 hover:opacity-90 transition-opacity">
         <img src="../assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-9 w-auto">
       </a>
       <div class="h-5 w-[1px] bg-[#1E293B] hidden sm:block"></div>
-      <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-mono text-xs font-bold uppercase tracking-wider">
+      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-mono text-[11px] font-bold uppercase tracking-wider">
         <i data-lucide="shield" class="w-3.5 h-3.5"></i>
-        Painel de Gestão
+        <span>Painel de Gestão</span>
+      </div>
+      <!-- Badge de Sistema Online -->
+      <div class="hidden lg:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[10px]">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 -ml-3"></span>
+        <span>SISTEMA OPERACIONAL</span>
       </div>
     </div>
 
     <!-- Info Usuário & Ações -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2.5 sm:gap-3">
       <a href="../index.html" target="_blank" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#020617] border border-[#1E293B] text-xs font-mono text-[#94A3B8] hover:text-white hover:border-[#06B6D4] transition-all">
-        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        <i data-lucide="external-link" class="w-3.5 h-3.5 text-[#06B6D4]"></i>
         <span>Ver Portal Público</span>
       </a>
 
       <!-- Card do Usuário Logado -->
-      <div class="flex items-center gap-2 bg-[#020617] border border-[#1E293B] px-3 py-1 rounded-lg">
-        <div class="w-2 h-2 rounded-full bg-[#3FA87A] animate-pulse"></div>
+      <div class="flex items-center gap-2.5 bg-[#020617] border border-[#1E293B] px-3 py-1.5 rounded-lg">
+        <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[#06B6D4] to-[#3FA87A] flex items-center justify-center font-mono font-bold text-xs text-[#020617]" id="userAvatarLetter">
+          A
+        </div>
         <div class="text-left font-mono leading-tight">
-          <div id="userNomeDisplay" class="text-xs font-bold text-white">Carregando...</div>
+          <div id="userNomeDisplay" class="text-xs font-bold text-white max-w-[130px] truncate">Carregando...</div>
           <div id="userLoginDisplay" class="text-[10px] text-[#06B6D4]">@admin</div>
         </div>
       </div>
 
       <!-- Botão Sair -->
-      <button id="btnLogout" type="button" title="Sair do Sistema" class="p-2 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-[#C55A54] text-[#94A3B8] hover:text-[#C55A54] transition-all">
+      <button id="btnLogout" type="button" title="Sair do Sistema" class="p-2 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-[#C55A54] text-[#94A3B8] hover:text-[#C55A54] transition-all active:scale-95">
         <i data-lucide="log-out" class="w-4 h-4"></i>
       </button>
     </div>
@@ -73,71 +146,138 @@
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
     <!-- Toast Notification (Mensagens flutuantes) -->
-    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-lg shadow-2xl border font-mono text-xs flex items-center gap-2 transition-all">
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-xl shadow-2xl border font-mono text-xs flex items-center gap-2.5 backdrop-blur-md transition-all">
       <i id="toastIcon" data-lucide="check-circle-2" class="w-4 h-4"></i>
       <span id="toastMessage">Operação realizada com sucesso!</span>
     </div>
 
-    <!-- Navegação em Abas -->
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1E293B] pb-3">
-      <div class="flex items-center gap-2 overflow-x-auto">
-        <button type="button" class="tab-btn active px-4 py-2 rounded-lg border border-[#1E293B] font-mono text-xs font-bold flex items-center gap-2 transition-all" data-tab="tabEstacoes">
-          <i data-lucide="radio" class="w-4 h-4"></i>
-          <span>Estações de Coleta</span>
-          <span id="badgeCountEstacoes" class="px-1.5 py-0.2 rounded bg-[#020617] text-[10px] text-white">0</span>
-        </button>
-
-        <button type="button" class="tab-btn px-4 py-2 rounded-lg border border-[#1E293B] font-mono text-xs font-bold text-[#94A3B8] hover:text-white flex items-center gap-2 transition-all" data-tab="tabEquipamentos">
-          <i data-lucide="cpu" class="w-4 h-4"></i>
-          <span>Equipamentos IoT (ESP32)</span>
-          <span id="badgeCountEquipamentos" class="px-1.5 py-0.2 rounded bg-[#020617] text-[10px] text-white">0</span>
-        </button>
-
-        <button type="button" class="tab-btn px-4 py-2 rounded-lg border border-[#1E293B] font-mono text-xs font-bold text-[#94A3B8] hover:text-white flex items-center gap-2 transition-all" data-tab="tabUsuarios">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          <span>Administradores</span>
-          <span id="badgeCountUsuarios" class="px-1.5 py-0.2 rounded bg-[#020617] text-[10px] text-white">0</span>
-        </button>
+    <!-- ==================== CARDS ANALÍTICOS (KPIS) ==================== -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <!-- Card 1: Estações -->
+      <div class="metric-card border border-[#1E293B] rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[#94A3B8]">Estações de Coleta</span>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="kpiEstacoesTotal" class="text-2xl font-mono font-bold text-white">0</span>
+            <span id="kpiEstacoesAtivas" class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">0 ativas</span>
+          </div>
+          <span class="text-[10px] text-[#64748B] block mt-1">Pontos físicos no Rio Tietê</span>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-[#06B6D4]/10 border border-[#06B6D4]/25 flex items-center justify-center text-[#06B6D4]">
+          <i data-lucide="radio" class="w-5 h-5"></i>
+        </div>
       </div>
 
-      <!-- Botão de Ação Primária Dinâmico -->
-      <div id="tabActionContainer">
-        <!-- Renderizado dinamicamente conforme a aba ativa -->
+      <!-- Card 2: Sensores IoT ESP32 -->
+      <div class="metric-card border border-[#1E293B] rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[#94A3B8]">Dispositivos IoT ESP32</span>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="kpiEquipamentosTotal" class="text-2xl font-mono font-bold text-white">0</span>
+            <span id="kpiEquipamentosAtivos" class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">0 operando</span>
+          </div>
+          <span class="text-[10px] text-[#64748B] block mt-1">Sondas e microcontroladores</span>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+          <i data-lucide="cpu" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <!-- Card 3: Cobertura Hídrica -->
+      <div class="metric-card border border-[#1E293B] rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[#94A3B8]">Raio Coberto Estimado</span>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="kpiCoberturaTotal" class="text-2xl font-mono font-bold text-white">0.0</span>
+            <span class="text-xs font-mono text-[#06B6D4]">km</span>
+          </div>
+          <span class="text-[10px] text-[#64748B] block mt-1">Abrangência física somada</span>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-400">
+          <i data-lucide="activity" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <!-- Card 4: Administradores -->
+      <div class="metric-card border border-[#1E293B] rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[#94A3B8]">Membros da Equipe</span>
+          <div class="flex items-baseline gap-2 mt-1">
+            <span id="kpiUsuariosTotal" class="text-2xl font-mono font-bold text-white">0</span>
+            <span class="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20">Admin</span>
+          </div>
+          <span class="text-[10px] text-[#64748B] block mt-1">Contas com acesso autorizado</span>
+        </div>
+        <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== NAVEGAÇÃO EM ABAS (SEGMENTED CONTROL) ==================== -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-[#1E293B] pb-3">
+      <div class="bg-[#0F172A]/70 p-1.5 rounded-xl border border-[#1E293B] flex items-center gap-1.5 overflow-x-auto">
+        <button type="button" class="tab-btn active-tab-estacoes px-3.5 py-2 rounded-lg border border-transparent font-mono text-xs font-bold flex items-center gap-2" data-tab="tabEstacoes">
+          <i data-lucide="radio" class="w-4 h-4 text-[#06B6D4]"></i>
+          <span>Estações de Coleta</span>
+          <span id="badgeCountEstacoes" class="px-1.5 py-0.2 rounded-full bg-[#020617] text-[10px] font-mono text-white border border-[#1E293B]">0</span>
+        </button>
+
+        <button type="button" class="tab-btn px-3.5 py-2 rounded-lg border border-transparent font-mono text-xs font-bold text-[#94A3B8] hover:text-white flex items-center gap-2" data-tab="tabEquipamentos">
+          <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+          <span>Equipamentos IoT (ESP32)</span>
+          <span id="badgeCountEquipamentos" class="px-1.5 py-0.2 rounded-full bg-[#020617] text-[10px] font-mono text-white border border-[#1E293B]">0</span>
+        </button>
+
+        <button type="button" class="tab-btn px-3.5 py-2 rounded-lg border border-transparent font-mono text-xs font-bold text-[#94A3B8] hover:text-white flex items-center gap-2" data-tab="tabUsuarios">
+          <i data-lucide="users" class="w-4 h-4 text-purple-400"></i>
+          <span>Administradores</span>
+          <span id="badgeCountUsuarios" class="px-1.5 py-0.2 rounded-full bg-[#020617] text-[10px] font-mono text-white border border-[#1E293B]">0</span>
+        </button>
       </div>
     </div>
 
     <!-- ==================== ABA 1: ESTAÇÕES ==================== -->
     <section id="tabEstacoes" class="tab-content space-y-4">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0F172A] border border-[#1E293B] rounded-lg p-4">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#0F172A]/80 border border-[#1E293B] rounded-xl p-4">
         <div>
           <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
             <i data-lucide="map-pin" class="w-4 h-4 text-[#06B6D4]"></i>
             Gestão de Estações de Monitoramento
           </h2>
-          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre e gerencie os pontos físicos de coleta instalados no Rio Tietê e afluentes.</p>
+          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre, edite e localize os pontos de monitoramento no Rio Tietê e afluentes.</p>
         </div>
-        <button id="btnOpenModalNovaEstacao" type="button" class="px-3.5 py-2 rounded-lg bg-[#06B6D4] hover:bg-[#22D3EE] text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow transition-all">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>NOVA ESTAÇÃO</span>
-        </button>
+
+        <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <!-- Campo de Busca em Tempo Real -->
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="searchEstacoes" placeholder="Buscar estação, rio, cidade..." class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-8 pr-3 py-2 text-xs font-mono text-white placeholder-[#64748B] focus:outline-none focus:border-[#06B6D4] transition-colors">
+          </div>
+
+          <button id="btnOpenModalNovaEstacao" type="button" class="flex-shrink-0 px-4 py-2 rounded-lg bg-[#06B6D4] hover:bg-[#22D3EE] text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-[#06B6D4]/20 transition-all active:scale-95">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>NOVA ESTAÇÃO</span>
+          </button>
+        </div>
       </div>
 
       <!-- Tabela de Estações -->
-      <div class="bg-[#0F172A] border border-[#1E293B] rounded-lg overflow-hidden">
+      <div class="bg-[#0F172A]/70 border border-[#1E293B] rounded-xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left font-mono text-xs">
             <thead class="bg-[#020617] border-b border-[#1E293B] text-[#94A3B8] uppercase text-[10px] tracking-wider">
               <tr>
-                <th class="py-3 px-4">Código</th>
-                <th class="py-3 px-4">Nome da Estação</th>
-                <th class="py-3 px-4">Corpo Hídrico / Rio</th>
-                <th class="py-3 px-4">Cidade/UF</th>
-                <th class="py-3 px-4">Coordenadas</th>
-                <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4 text-right">Ações</th>
+                <th class="py-3.5 px-4">Código</th>
+                <th class="py-3.5 px-4">Nome da Estação</th>
+                <th class="py-3.5 px-4">Corpo Hídrico / Rio</th>
+                <th class="py-3.5 px-4">Cidade/UF</th>
+                <th class="py-3.5 px-4">Coordenadas</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="tbodyEstacoes" class="divide-y divide-[#1E293B] text-[#F8FAFC]">
+            <tbody id="tbodyEstacoes" class="divide-y divide-[#1E293B]/70 text-[#F8FAFC]">
               <tr>
                 <td colspan="7" class="py-8 text-center text-[#64748B]">Carregando estações cadastradas...</td>
               </tr>
@@ -149,36 +289,44 @@
 
     <!-- ==================== ABA 2: EQUIPAMENTOS ESP32 ==================== -->
     <section id="tabEquipamentos" class="tab-content space-y-4 hidden">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0F172A] border border-[#1E293B] rounded-lg p-4">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#0F172A]/80 border border-[#1E293B] rounded-xl p-4">
         <div>
           <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
-            <i data-lucide="cpu" class="w-4 h-4 text-[#3FA87A]"></i>
+            <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
             Equipamentos de Telemetria (ESP32 & Sondas)
           </h2>
-          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre o endereço MAC das placas microcontroladoras e obtenha a API Key para envio de leituras.</p>
+          <p class="text-xs text-[#94A3B8] mt-0.5">Vincule placas microcontroladoras às estações e gerencie chaves de telemetria.</p>
         </div>
-        <button id="btnOpenModalNovoEquipamento" type="button" class="px-3.5 py-2 rounded-lg bg-[#3FA87A] hover:bg-[#4bc791] text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow transition-all">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>NOVO ESP32</span>
-        </button>
+
+        <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="searchEquipamentos" placeholder="Buscar dispositivo, MAC..." class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-8 pr-3 py-2 text-xs font-mono text-white placeholder-[#64748B] focus:outline-none focus:border-emerald-500 transition-colors">
+          </div>
+
+          <button id="btnOpenModalNovoEquipamento" type="button" class="flex-shrink-0 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all active:scale-95">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>NOVO ESP32</span>
+          </button>
+        </div>
       </div>
 
       <!-- Tabela de Equipamentos -->
-      <div class="bg-[#0F172A] border border-[#1E293B] rounded-lg overflow-hidden">
+      <div class="bg-[#0F172A]/70 border border-[#1E293B] rounded-xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left font-mono text-xs">
             <thead class="bg-[#020617] border-b border-[#1E293B] text-[#94A3B8] uppercase text-[10px] tracking-wider">
               <tr>
-                <th class="py-3 px-4">Dispositivo</th>
-                <th class="py-3 px-4">MAC Address</th>
-                <th class="py-3 px-4">Estação Vinculada</th>
-                <th class="py-3 px-4">API Key de Envio</th>
-                <th class="py-3 px-4">Firmware</th>
-                <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4 text-right">Ações</th>
+                <th class="py-3.5 px-4">Dispositivo</th>
+                <th class="py-3.5 px-4">MAC Address</th>
+                <th class="py-3.5 px-4">Estação Vinculada</th>
+                <th class="py-3.5 px-4">API Key de Envio</th>
+                <th class="py-3.5 px-4">Firmware</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="tbodyEquipamentos" class="divide-y divide-[#1E293B] text-[#F8FAFC]">
+            <tbody id="tbodyEquipamentos" class="divide-y divide-[#1E293B]/70 text-[#F8FAFC]">
               <tr>
                 <td colspan="7" class="py-8 text-center text-[#64748B]">Carregando equipamentos cadastrados...</td>
               </tr>
@@ -190,35 +338,43 @@
 
     <!-- ==================== ABA 3: ADMINISTRADORES ==================== -->
     <section id="tabUsuarios" class="tab-content space-y-4 hidden">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#0F172A] border border-[#1E293B] rounded-lg p-4">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-[#0F172A]/80 border border-[#1E293B] rounded-xl p-4">
         <div>
           <h2 class="text-sm font-bold text-white font-mono flex items-center gap-2">
-            <i data-lucide="user-check" class="w-4 h-4 text-[#A855F7]"></i>
+            <i data-lucide="shield-check" class="w-4 h-4 text-purple-400"></i>
             Gestão de Administradores e Pesquisadores
           </h2>
-          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre e gerencie os membros autorizados da equipe PROTEUS para acessar este painel.</p>
+          <p class="text-xs text-[#94A3B8] mt-0.5">Cadastre os membros autorizados com acesso ao painel de controle.</p>
         </div>
-        <button id="btnOpenModalNovoAdmin" type="button" class="px-3.5 py-2 rounded-lg bg-[#A855F7] hover:bg-[#b56ef8] text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow transition-all">
-          <i data-lucide="user-plus" class="w-4 h-4"></i>
-          <span>NOVO ADMINISTRADOR</span>
-        </button>
+
+        <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-[#64748B] absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="searchUsuarios" placeholder="Buscar nome, usuário, e-mail..." class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-8 pr-3 py-2 text-xs font-mono text-white placeholder-[#64748B] focus:outline-none focus:border-purple-500 transition-colors">
+          </div>
+
+          <button id="btnOpenModalNovoAdmin" type="button" class="flex-shrink-0 px-4 py-2 rounded-lg bg-purple-500 hover:bg-purple-400 text-[#020617] font-mono font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-purple-500/20 transition-all active:scale-95">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>NOVO ADMINISTRADOR</span>
+          </button>
+        </div>
       </div>
 
       <!-- Tabela de Usuários -->
-      <div class="bg-[#0F172A] border border-[#1E293B] rounded-lg overflow-hidden">
+      <div class="bg-[#0F172A]/70 border border-[#1E293B] rounded-xl overflow-hidden shadow-xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left font-mono text-xs">
             <thead class="bg-[#020617] border-b border-[#1E293B] text-[#94A3B8] uppercase text-[10px] tracking-wider">
               <tr>
-                <th class="py-3 px-4">Nome</th>
-                <th class="py-3 px-4">Usuário (@)</th>
-                <th class="py-3 px-4">E-mail</th>
-                <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4">Cadastrado em</th>
-                <th class="py-3 px-4 text-right">Ações</th>
+                <th class="py-3.5 px-4">Nome</th>
+                <th class="py-3.5 px-4">Usuário (@)</th>
+                <th class="py-3.5 px-4">E-mail</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4">Cadastrado em</th>
+                <th class="py-3.5 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="tbodyUsuarios" class="divide-y divide-[#1E293B] text-[#F8FAFC]">
+            <tbody id="tbodyUsuarios" class="divide-y divide-[#1E293B]/70 text-[#F8FAFC]">
               <tr>
                 <td colspan="6" class="py-8 text-center text-[#64748B]">Carregando administradores...</td>
               </tr>
@@ -230,15 +386,17 @@
 
   </main>
 
-  <!-- ==================== MODAL: ESTAÇÃO (CRIAR / EDITAR COM MAPA INTERATIVO) ==================== -->
-  <div id="modalEstacao" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl max-w-3xl w-full p-5 sm:p-6 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+  <!-- ==================== MODAL: ESTAÇÃO COM MAPA INTERATIVO & ESTAÇÕES EXISTENTES ==================== -->
+  <div id="modalEstacao" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-2xl max-w-3xl w-full p-5 sm:p-6 space-y-4 shadow-2xl max-h-[94vh] overflow-y-auto">
+      
+      <!-- Cabeçalho do Modal -->
       <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
         <h3 id="modalEstacaoTitle" class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <i data-lucide="radio" class="w-4 h-4 text-[#06B6D4]"></i>
           <span>Cadastrar Nova Estação</span>
         </h3>
-        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded" data-modal="modalEstacao">
+        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded-lg hover:bg-[#1E293B] transition-colors" data-modal="modalEstacao">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -249,22 +407,22 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-[#94A3B8] mb-1">Código Identificador *</label>
-            <input type="text" id="inputEstacaoCodigo" placeholder="Ex: BRB-04" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+            <input type="text" id="inputEstacaoCodigo" placeholder="Ex: BRB-04" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4] focus:ring-1 focus:ring-[#06B6D4]/50 transition-all">
           </div>
           <div class="sm:col-span-2">
             <label class="block text-[#94A3B8] mb-1">Nome Oficial da Estação *</label>
-            <input type="text" id="inputEstacaoNome" placeholder="Ex: BRB-04 · Barbosa-SP" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+            <input type="text" id="inputEstacaoNome" placeholder="Ex: BRB-04 · Barbosa-SP" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4] focus:ring-1 focus:ring-[#06B6D4]/50 transition-all">
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
-            <label class="block text-[#94A3B8] mb-1">Corpo D'água / Ponto do Rio *</label>
-            <input type="text" id="inputEstacaoRio" placeholder="Ex: Rio Tietê · Trecho Ponte Barbosa" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+            <label class="block text-[#94A3B8] mb-1">Corpo D'água / Trecho do Rio *</label>
+            <input type="text" id="inputEstacaoRio" placeholder="Ex: Rio Tietê · Trecho Ponte Barbosa" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4] focus:ring-1 focus:ring-[#06B6D4]/50 transition-all">
           </div>
           <div>
             <label class="block text-[#94A3B8] mb-1">Status Operacional</label>
-            <select id="inputEstacaoStatus" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+            <select id="inputEstacaoStatus" class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4] transition-all">
               <option value="Ativo">Ativo</option>
               <option value="Manutenção">Manutenção</option>
               <option value="Inativo">Inativo</option>
@@ -275,42 +433,53 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label class="block text-[#94A3B8] mb-1">Cidade *</label>
-            <input type="text" id="inputEstacaoCidade" placeholder="Barbosa" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+            <input type="text" id="inputEstacaoCidade" placeholder="Barbosa" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4] transition-all">
           </div>
           <div>
             <label class="block text-[#94A3B8] mb-1">Estado (UF) *</label>
-            <input type="text" id="inputEstacaoEstado" placeholder="SP" maxlength="2" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white uppercase focus:outline-none focus:border-[#06B6D4]">
+            <input type="text" id="inputEstacaoEstado" placeholder="SP" maxlength="2" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white uppercase focus:outline-none focus:border-[#06B6D4] transition-all">
           </div>
           <div>
             <label class="block text-[#94A3B8] mb-1">Bacia Hidrográfica</label>
-            <input type="text" id="inputEstacaoBacia" placeholder="Ex: Baixo Tietê" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4]">
+            <input type="text" id="inputEstacaoBacia" placeholder="Ex: Baixo Tietê" class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#06B6D4] transition-all">
           </div>
         </div>
 
-        <!-- SEÇÃO: MAPA INTERATIVO & RANGE SLIDER DE COBERTURA -->
+        <!-- ==================== SEÇÃO DO MAPA INTERATIVO ==================== -->
         <div class="space-y-2.5 pt-3 border-t border-[#1E293B]">
-          <div class="flex items-center justify-between">
-            <label class="font-bold text-white flex items-center gap-1.5 text-xs">
-              <i data-lucide="map-pin" class="w-4 h-4 text-[#06B6D4]"></i>
-              Localização no Mapa e Raio de Abrangência
+          
+          <!-- Top bar do mapa com legenda e toggle de estações existentes -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#020617] p-2.5 rounded-lg border border-[#1E293B]">
+            <div class="flex items-center gap-3 text-[11px]">
+              <div class="flex items-center gap-1.5 text-[#06B6D4] font-semibold">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#06B6D4] border border-white"></span>
+                <span>Ponto da Estação (Arrastável)</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span>Estações Existentes</span>
+              </div>
+            </div>
+
+            <!-- Toggle para exibir/ocultar estações existentes -->
+            <label class="flex items-center gap-2 cursor-pointer select-none text-[11px] text-[#94A3B8] hover:text-white transition-colors">
+              <input type="checkbox" id="chkToggleExistingStations" checked class="w-3.5 h-3.5 accent-[#06B6D4] rounded cursor-pointer">
+              <span>Mostrar estações no mapa</span>
+              <span id="badgeExistingCount" class="px-1.5 py-0.2 rounded-full bg-[#0F172A] text-[10px] text-emerald-400 border border-emerald-500/30 font-bold">0</span>
             </label>
-            <span class="text-[10px] text-[#06B6D4] font-semibold bg-[#06B6D4]/10 border border-[#06B6D4]/30 px-2 py-0.5 rounded flex items-center gap-1">
-              <i data-lucide="crosshair" class="w-3 h-3"></i>
-              Clique no mapa para marcar ou arraste o ponto
-            </span>
           </div>
 
           <!-- Container do Mapa Leaflet -->
-          <div id="modalMapPicker" class="w-full h-64 rounded-lg border border-[#1E293B] overflow-hidden relative shadow-inner z-10"></div>
+          <div id="modalMapPicker" class="w-full h-72 rounded-xl border border-[#1E293B] overflow-hidden relative shadow-inner z-10"></div>
 
-          <!-- Controle do Raio (Range Slider com Círculo Dinâmico) -->
-          <div class="bg-[#020617] border border-[#1E293B] rounded-lg p-3 space-y-2">
+          <!-- Controle do Raio (Range Slider) -->
+          <div class="bg-[#020617] border border-[#1E293B] rounded-xl p-3 space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-[#94A3B8] font-semibold flex items-center gap-1.5 text-xs">
                 <i data-lucide="radar" class="w-4 h-4 text-[#06B6D4]"></i>
-                Raio de Abrangência da Estação:
+                Raio de Abrangência de Coleta:
               </span>
-              <span id="labelRaioDisplay" class="text-[#06B6D4] font-bold text-xs bg-[#06B6D4]/10 px-2.5 py-0.5 rounded border border-[#06B6D4]/30">
+              <span id="labelRaioDisplay" class="text-[#06B6D4] font-bold text-xs bg-[#06B6D4]/10 px-2.5 py-0.5 rounded-full border border-[#06B6D4]/30">
                 1000 metros (1.0 km)
               </span>
             </div>
@@ -323,24 +492,24 @@
             </div>
           </div>
 
-          <!-- Coordenadas Geográficas (Preenchidas automaticamente pelo clique no mapa) -->
+          <!-- Coordenadas Geográficas -->
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-[#64748B] text-[10px] mb-0.5">Latitude (Coordenada Decimal):</label>
-              <input type="number" step="0.000001" id="inputEstacaoLat" placeholder="-21.2662" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#06B6D4]">
+              <input type="number" step="0.000001" id="inputEstacaoLat" placeholder="-21.2662" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#06B6D4]">
             </div>
             <div>
               <label class="block text-[#64748B] text-[10px] mb-0.5">Longitude (Coordenada Decimal):</label>
-              <input type="number" step="0.000001" id="inputEstacaoLng" placeholder="-49.9482" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#06B6D4]">
+              <input type="number" step="0.000001" id="inputEstacaoLng" placeholder="-49.9482" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#06B6D4]">
             </div>
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#1E293B]">
-          <button type="button" class="btn-close-modal px-4 py-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalEstacao">
+          <button type="button" class="btn-close-modal px-4 py-2 rounded-lg bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white transition-colors" data-modal="modalEstacao">
             Cancelar
           </button>
-          <button type="submit" id="btnSalvarEstacao" class="px-5 py-2 rounded bg-[#06B6D4] text-[#020617] font-bold hover:bg-[#22D3EE] transition-colors flex items-center gap-1.5">
+          <button type="submit" id="btnSalvarEstacao" class="px-5 py-2 rounded-lg bg-[#06B6D4] text-[#020617] font-bold hover:bg-[#22D3EE] shadow-lg shadow-[#06B6D4]/20 transition-all flex items-center gap-1.5 active:scale-95">
             <i data-lucide="check" class="w-4 h-4"></i>
             <span>Salvar Estação</span>
           </button>
@@ -350,53 +519,53 @@
   </div>
 
   <!-- ==================== MODAL: EQUIPAMENTO (ESP32) ==================== -->
-  <div id="modalEquipamento" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+  <div id="modalEquipamento" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
         <h3 id="modalEquipamentoTitle" class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="cpu" class="w-4 h-4 text-[#3FA87A]"></i>
+          <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
           <span>Cadastrar Equipamento ESP32</span>
         </h3>
-        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded" data-modal="modalEquipamento">
+        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded-lg hover:bg-[#1E293B]" data-modal="modalEquipamento">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <form id="formEquipamento" class="space-y-3 font-mono text-xs">
+      <form id="formEquipamento" class="space-y-3.5 font-mono text-xs">
         <input type="hidden" id="inputEquipamentoId" value="">
 
         <div>
           <label class="block text-[#94A3B8] mb-1">Endereço MAC da Placa (Físico) *</label>
-          <input type="text" id="inputEquipamentoMac" placeholder="Ex: 24:6F:28:7A:B9:4C" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white uppercase focus:outline-none focus:border-[#3FA87A]">
+          <input type="text" id="inputEquipamentoMac" placeholder="Ex: 24:6F:28:7A:B9:4C" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white uppercase focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50">
           <p class="text-[10px] text-[#64748B] mt-0.5">Identificador único de fábrica gravado no chip Wi-Fi do ESP32.</p>
         </div>
 
         <div>
           <label class="block text-[#94A3B8] mb-1">Nome de Identificação *</label>
-          <input type="text" id="inputEquipamentoNome" placeholder="Ex: ESP32-Sonda-Barbosa-01" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+          <input type="text" id="inputEquipamentoNome" placeholder="Ex: ESP32-Sonda-Barbosa-01" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[#94A3B8] mb-1">Modelo da Placa</label>
-            <input type="text" id="inputEquipamentoModelo" placeholder="ESP32 DevKit V1" value="ESP32 DevKit V1" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+            <input type="text" id="inputEquipamentoModelo" placeholder="ESP32 DevKit V1" value="ESP32 DevKit V1" class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
           </div>
           <div>
             <label class="block text-[#94A3B8] mb-1">Versão Firmware</label>
-            <input type="text" id="inputEquipamentoFirmware" placeholder="1.0.0" value="1.0.0" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+            <input type="text" id="inputEquipamentoFirmware" placeholder="1.0.0" value="1.0.0" class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
           </div>
         </div>
 
         <div>
           <label class="block text-[#94A3B8] mb-1">Estação Vinculada (Local de Instalação)</label>
-          <select id="selectEquipamentoEstacao" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+          <select id="selectEquipamentoEstacao" class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
             <option value="">-- Nenhuma (Em estoque / Não vinculada) --</option>
           </select>
         </div>
 
         <div>
           <label class="block text-[#94A3B8] mb-1">Status Operacional</label>
-          <select id="selectEquipamentoStatus" class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#3FA87A]">
+          <select id="selectEquipamentoStatus" class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
             <option value="Ativo">Ativo</option>
             <option value="Manutenção">Manutenção</option>
             <option value="Offline">Offline</option>
@@ -404,11 +573,12 @@
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#1E293B]">
-          <button type="button" class="btn-close-modal px-3.5 py-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalEquipamento">
+          <button type="button" class="btn-close-modal px-3.5 py-2 rounded-lg bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalEquipamento">
             Cancelar
           </button>
-          <button type="submit" id="btnSalvarEquipamento" class="px-4 py-2 rounded bg-[#3FA87A] text-[#020617] font-bold hover:bg-[#4bc791] transition-colors">
-            Salvar Equipamento
+          <button type="submit" id="btnSalvarEquipamento" class="px-5 py-2 rounded-lg bg-emerald-500 text-[#020617] font-bold hover:bg-emerald-400 shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Salvar Equipamento</span>
           </button>
         </div>
       </form>
@@ -416,46 +586,47 @@
   </div>
 
   <!-- ==================== MODAL: ADMINISTRADOR (CRIAR) ==================== -->
-  <div id="modalAdmin" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+  <div id="modalAdmin" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0F172A] border border-[#1E293B] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-[#1E293B] pb-3">
         <h3 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="user-plus" class="w-4 h-4 text-[#A855F7]"></i>
+          <i data-lucide="user-plus" class="w-4 h-4 text-purple-400"></i>
           <span>Cadastrar Novo Administrador</span>
         </h3>
-        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded" data-modal="modalAdmin">
+        <button type="button" class="btn-close-modal text-[#64748B] hover:text-white p-1 rounded-lg hover:bg-[#1E293B]" data-modal="modalAdmin">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <form id="formAdmin" class="space-y-3 font-mono text-xs">
+      <form id="formAdmin" class="space-y-3.5 font-mono text-xs">
         <div>
           <label class="block text-[#94A3B8] mb-1">Nome Completo *</label>
-          <input type="text" id="inputAdminNome" placeholder="Ex: Cauã Cristal Lemes" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#A855F7]">
+          <input type="text" id="inputAdminNome" placeholder="Ex: Cauã Cristal Lemes" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50">
         </div>
 
         <div>
           <label class="block text-[#94A3B8] mb-1">Nome de Usuário (@) *</label>
-          <input type="text" id="inputAdminUsuario" placeholder="Ex: caua" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white lowercase focus:outline-none focus:border-[#A855F7]">
+          <input type="text" id="inputAdminUsuario" placeholder="Ex: caua" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white lowercase focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50">
           <p class="text-[10px] text-[#64748B] mt-0.5">Usado para fazer login (sem espaços ou acentos).</p>
         </div>
 
         <div>
           <label class="block text-[#94A3B8] mb-1">E-mail Profissional *</label>
-          <input type="email" id="inputAdminEmail" placeholder="caua@proteus.com" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#A855F7]">
+          <input type="email" id="inputAdminEmail" placeholder="caua@proteus.com" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50">
         </div>
 
         <div>
           <label class="block text-[#94A3B8] mb-1">Senha Provisória (Mínimo 6 dígitos) *</label>
-          <input type="password" id="inputAdminSenha" placeholder="••••••••" required class="w-full bg-[#020617] border border-[#1E293B] rounded px-3 py-2 text-white focus:outline-none focus:border-[#A855F7]">
+          <input type="password" id="inputAdminSenha" placeholder="••••••••" required class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50">
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#1E293B]">
-          <button type="button" class="btn-close-modal px-3.5 py-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalAdmin">
+          <button type="button" class="btn-close-modal px-3.5 py-2 rounded-lg bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white" data-modal="modalAdmin">
             Cancelar
           </button>
-          <button type="submit" id="btnSalvarAdmin" class="px-4 py-2 rounded bg-[#A855F7] text-[#020617] font-bold hover:bg-[#b56ef8] transition-colors">
-            Cadastrar Membro
+          <button type="submit" id="btnSalvarAdmin" class="px-5 py-2 rounded-lg bg-purple-500 text-[#020617] font-bold hover:bg-purple-400 shadow-lg shadow-purple-500/20 transition-all flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Cadastrar Membro</span>
           </button>
         </div>
       </form>
@@ -477,6 +648,10 @@
       usuarioLogado = JSON.parse(userJson || '{}');
       document.getElementById('userNomeDisplay').textContent = usuarioLogado.nome || 'Administrador';
       document.getElementById('userLoginDisplay').textContent = '@' + (usuarioLogado.usuario || 'admin');
+      
+      const firstLetter = (usuarioLogado.nome || 'A').charAt(0).toUpperCase();
+      const avatarEl = document.getElementById('userAvatarLetter');
+      if (avatarEl) avatarEl.textContent = firstLetter;
     } catch(e) {}
 
     // Valida o token no servidor
@@ -508,14 +683,14 @@
       const toastMsg = document.getElementById('toastMessage');
       const toastIcon = document.getElementById('toastIcon');
 
-      toast.classList.remove('hidden', 'bg-[#0F172A]', 'border-[#3FA87A]', 'text-[#3FA87A]', 'border-[#C55A54]', 'text-[#C55A54]');
-      toast.classList.add('bg-[#0F172A]');
+      toast.classList.remove('hidden', 'bg-[#0F172A]/95', 'border-emerald-500/40', 'text-emerald-400', 'border-rose-500/40', 'text-rose-400');
+      toast.classList.add('bg-[#0F172A]/95');
       
       if (isError) {
-        toast.classList.add('border-[#C55A54]', 'text-[#C55A54]');
+        toast.classList.add('border-rose-500/40', 'text-rose-400');
         toastIcon.setAttribute('data-lucide', 'alert-circle');
       } else {
-        toast.classList.add('border-[#3FA87A]', 'text-[#3FA87A]');
+        toast.classList.add('border-emerald-500/40', 'text-emerald-400');
         toastIcon.setAttribute('data-lucide', 'check-circle-2');
       }
 
@@ -527,7 +702,7 @@
       }, 3500);
     }
 
-    // Gerenciador de Abas
+    // Gerenciador de Abas Modernizado
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -535,10 +710,15 @@
       btn.addEventListener('click', () => {
         const targetTab = btn.getAttribute('data-tab');
 
-        tabBtns.forEach(b => b.classList.remove('active', 'text-[#06B6D4]'));
-        tabBtns.forEach(b => b.classList.add('text-[#94A3B8]'));
-        btn.classList.add('active', 'text-[#06B6D4]');
+        tabBtns.forEach(b => {
+          b.classList.remove('active-tab-estacoes', 'active-tab-equipamentos', 'active-tab-usuarios');
+          b.classList.add('text-[#94A3B8]');
+        });
+
         btn.classList.remove('text-[#94A3B8]');
+        if (targetTab === 'tabEstacoes') btn.classList.add('active-tab-estacoes');
+        else if (targetTab === 'tabEquipamentos') btn.classList.add('active-tab-equipamentos');
+        else if (targetTab === 'tabUsuarios') btn.classList.add('active-tab-usuarios');
 
         tabContents.forEach(tc => tc.classList.add('hidden'));
         document.getElementById(targetTab).classList.remove('hidden');
@@ -554,6 +734,32 @@
     });
 
     // ==========================================
+    // MÉTRICAS KPI DO TOPO
+    // ==========================================
+    function atualizarMetricasKPI() {
+      // Estações
+      const totalEst = cacheEstacoes.length;
+      const ativasEst = cacheEstacoes.filter(s => (s.status || 'Ativo') === 'Ativo').length;
+      document.getElementById('kpiEstacoesTotal').textContent = totalEst;
+      document.getElementById('kpiEstacoesAtivas').textContent = `${ativasEst} ativas`;
+
+      // Raio Coberto
+      const raioTotalMetros = cacheEstacoes.reduce((acc, s) => acc + (s.raio_metros || 1000), 0);
+      const raioKm = (raioTotalMetros / 1000).toFixed(1);
+      document.getElementById('kpiCoberturaTotal').textContent = raioKm;
+
+      // Equipamentos
+      const totalEq = cacheEquipamentos.length;
+      const ativosEq = cacheEquipamentos.filter(e => (e.status || 'Ativo') === 'Ativo').length;
+      document.getElementById('kpiEquipamentosTotal').textContent = totalEq;
+      document.getElementById('kpiEquipamentosAtivos').textContent = `${ativosEq} operando`;
+
+      // Usuários
+      const totalUsr = cacheUsuarios.length;
+      document.getElementById('kpiUsuariosTotal').textContent = totalUsr;
+    }
+
+    // ==========================================
     // SEÇÃO 1: ESTAÇÕES DE MONITORAMENTO
     // ==========================================
     let cacheEstacoes = [];
@@ -566,8 +772,10 @@
         if (data.success) {
           cacheEstacoes = data.data;
           document.getElementById('badgeCountEstacoes').textContent = cacheEstacoes.length;
+          document.getElementById('badgeExistingCount').textContent = cacheEstacoes.length;
           renderizarTabelaEstacoes(cacheEstacoes);
           preencherSelectEstacoes(cacheEstacoes);
+          atualizarMetricasKPI();
         }
       } catch (err) {
         console.error('Erro ao buscar estações:', err);
@@ -577,61 +785,92 @@
     function renderizarTabelaEstacoes(lista) {
       const tbody = document.getElementById('tbodyEstacoes');
       if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-[#64748B]">Nenhuma estação cadastrada. Clique em "Nova Estação".</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-[#64748B] font-mono">Nenhuma estação encontrada.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = lista.map(st => `
-        <tr class="hover:bg-[#020617]/50 transition-colors">
-          <td class="py-3 px-4 font-bold text-[#06B6D4]">${st.id}</td>
-          <td class="py-3 px-4">
-            <div class="font-semibold text-white">${st.name}</div>
-            <div class="text-[10px] text-[#06B6D4] font-semibold mt-0.5 flex items-center gap-1">
-              <i data-lucide="radar" class="w-3 h-3"></i>
-              Raio: ${st.raio_metros || 1000}m (${((st.raio_metros || 1000)/1000).toFixed(1)} km)
-            </div>
-          </td>
-          <td class="py-3 px-4 text-[#94A3B8]">${st.river}</td>
-          <td class="py-3 px-4">${st.cidade} - ${st.estado}</td>
-          <td class="py-3 px-4 text-[11px] text-[#64748B]">${st.coords[0].toFixed(4)}, ${st.coords[1].toFixed(4)}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
-              st.status === 'Ativo' ? 'bg-[#3FA87A]/10 text-[#3FA87A] border border-[#3FA87A]/30' : 
-              st.status === 'Manutenção' ? 'bg-[#E5A93C]/10 text-[#E5A93C] border border-[#E5A93C]/30' : 
-              'bg-[#64748B]/10 text-[#94A3B8] border border-[#64748B]/30'
-            }">${st.status || 'Ativo'}</span>
-          </td>
-          <td class="py-3 px-4 text-right space-x-1">
-            <button onclick="editarEstacao('${st.id}')" class="p-1.5 rounded hover:bg-[#020617] text-[#06B6D4] hover:text-white" title="Editar">
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            </button>
-            <button onclick="excluirEstacao('${st.id}')" class="p-1.5 rounded hover:bg-[#020617] text-[#C55A54] hover:text-white" title="Excluir">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = lista.map(st => {
+        const coordsText = Array.isArray(st.coords) ? `${st.coords[0].toFixed(4)}, ${st.coords[1].toFixed(4)}` : '--, --';
+        const raioKm = ((st.raio_metros || 1000) / 1000).toFixed(1);
+        
+        const statusVal = st.status || 'Ativo';
+        let statusBadge = '';
+        if (statusVal === 'Ativo') {
+          statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Ativo</span>';
+        } else if (statusVal === 'Manutenção') {
+          statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Manutenção</span>';
+        } else {
+          statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Inativo</span>';
+        }
+
+        return `
+          <tr class="hover:bg-[#020617]/70 transition-colors border-b border-[#1E293B]/40">
+            <td class="py-3.5 px-4 font-bold text-[#06B6D4] font-mono">${st.id}</td>
+            <td class="py-3.5 px-4">
+              <div class="font-semibold text-white">${st.name}</div>
+              <div class="text-[10px] text-[#06B6D4] font-semibold mt-0.5 flex items-center gap-1">
+                <i data-lucide="radar" class="w-3 h-3"></i>
+                Raio: ${st.raio_metros || 1000}m (${raioKm} km)
+              </div>
+            </td>
+            <td class="py-3.5 px-4 text-[#94A3B8]">${st.river}</td>
+            <td class="py-3.5 px-4">${st.cidade} - ${st.estado}</td>
+            <td class="py-3.5 px-4 text-[11px] text-[#64748B] font-mono">${coordsText}</td>
+            <td class="py-3.5 px-4">${statusBadge}</td>
+            <td class="py-3.5 px-4 text-right space-x-1">
+              <button onclick="editarEstacao('${st.id}')" class="p-1.5 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#06B6D4] hover:text-white transition-colors" title="Editar Estação">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="excluirEstacao('${st.id}')" class="p-1.5 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-rose-500 text-rose-400 hover:text-white transition-colors" title="Excluir Estação">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
 
       lucide.createIcons();
     }
 
-    // ==========================================
-    // MAPA INTERATIVO NO MODAL (LEAFLET PICKER)
-    // ==========================================
+    // Busca rápida em Estações
+    document.getElementById('searchEstacoes').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        renderizarTabelaEstacoes(cacheEstacoes);
+        return;
+      }
+      const filtradas = cacheEstacoes.filter(st => 
+        (st.id && st.id.toLowerCase().includes(q)) ||
+        (st.name && st.name.toLowerCase().includes(q)) ||
+        (st.river && st.river.toLowerCase().includes(q)) ||
+        (st.cidade && st.cidade.toLowerCase().includes(q))
+      );
+      renderizarTabelaEstacoes(filtradas);
+    });
+
+    // =======================================================
+    // MAPA INTERATIVO NO MODAL (COM ESTAÇÕES EXISTENTES)
+    // =======================================================
     let pickerMap = null;
     let pickerMarker = null;
     let pickerCircle = null;
+    let existingStationsLayer = null;
+    let showExistingStations = true;
 
     function initPickerMap() {
       if (!pickerMap) {
         pickerMap = L.map('modalMapPicker', {
           zoomControl: true,
-          attributionControl: false
+          attributionControl: false,
+          scrollWheelZoom: true
         }).setView([-21.2662, -49.9482], 12);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_3hu5_1_ebaa2039325b61a89a78caef', {
           maxZoom: 19
         }).addTo(pickerMap);
+
+        // Layer Group dedicado para estações existentes
+        existingStationsLayer = L.layerGroup().addTo(pickerMap);
 
         // Ao clicar no mapa, move o ponto e o círculo
         pickerMap.on('click', (e) => {
@@ -639,6 +878,76 @@
         });
       }
     }
+
+    /**
+     * Renderiza no mapa todas as estações já cadastradas (exceto a que está sendo editada)
+     */
+    function renderizarEstacoesExistentesNoMapa(currentEditingId = null) {
+      if (!existingStationsLayer) return;
+      existingStationsLayer.clearLayers();
+
+      if (!showExistingStations || !cacheEstacoes || cacheEstacoes.length === 0) return;
+
+      cacheEstacoes.forEach(st => {
+        // Se estivermos editando esta mesma estação, não a renderiza como existente
+        if (currentEditingId && String(st.id) === String(currentEditingId)) return;
+
+        if (!Array.isArray(st.coords) || st.coords.length < 2) return;
+        const lat = st.coords[0];
+        const lng = st.coords[1];
+        const raio = st.raio_metros || 1000;
+        const isAtivo = (st.status || 'Ativo') === 'Ativo';
+        const color = isAtivo ? '#10B981' : '#F59E0B';
+
+        // 1. Círculo Translúcido de Cobertura da Estação Existente
+        const stCircle = L.circle([lat, lng], {
+          radius: raio,
+          color: color,
+          weight: 1.5,
+          dashArray: '4, 6',
+          fillColor: color,
+          fillOpacity: 0.08
+        });
+
+        // 2. Marcador Elegante com Badge do Código
+        const customExistingIcon = L.divIcon({
+          className: 'existing-st-pin',
+          html: `
+            <div style="background: rgba(2, 6, 23, 0.92); border: 1.5px solid ${color}; color: ${color}; padding: 2px 7px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.6); font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: bold; white-space: nowrap;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: ${color};"></span>
+              <span>${st.id}</span>
+            </div>
+          `,
+          iconSize: [60, 22],
+          iconAnchor: [30, 11]
+        });
+
+        const stMarker = L.marker([lat, lng], { icon: customExistingIcon });
+
+        // Tooltip e Popup Informativo
+        stMarker.bindPopup(`
+          <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.45; min-width: 170px;">
+            <div style="font-weight:bold; color:#06B6D4; font-size:12px; margin-bottom:4px; border-bottom:1px solid #1E293B; padding-bottom:3px;">
+              ${st.id} — ${st.name}
+            </div>
+            <div style="color:#94A3B8;">Corpo Hídrico: <span style="color:#F8FAFC; font-weight:500;">${st.river}</span></div>
+            <div style="color:#94A3B8;">Cidade: <span style="color:#F8FAFC;">${st.cidade} - ${st.estado}</span></div>
+            <div style="color:#94A3B8;">Raio Coberto: <span style="color:${color}; font-weight:bold;">${raio}m (${(raio/1000).toFixed(1)} km)</span></div>
+            <div style="color:#94A3B8; margin-top:3px;">Status: <span style="color:${color}; font-weight:bold;">${st.status || 'Ativo'}</span></div>
+          </div>
+        `);
+
+        existingStationsLayer.addLayer(stCircle);
+        existingStationsLayer.addLayer(stMarker);
+      });
+    }
+
+    // Toggle de exibição das estações existentes
+    document.getElementById('chkToggleExistingStations').addEventListener('change', (e) => {
+      showExistingStations = e.target.checked;
+      const currentEditingId = document.getElementById('inputEstacaoDbId').value;
+      renderizarEstacoesExistentesNoMapa(currentEditingId);
+    });
 
     function atualizarPosicaoMapa(lat, lng, forcarZoom = false) {
       const inputLat = document.getElementById('inputEstacaoLat');
@@ -649,16 +958,16 @@
       inputLat.value = parseFloat(lat).toFixed(6);
       inputLng.value = parseFloat(lng).toFixed(6);
 
-      // Marcador do Ponto
+      // Marcador do Ponto (Ciano Brilhante, Arrastável)
       if (!pickerMarker) {
         const customIcon = L.divIcon({
           className: 'custom-picker-pin',
-          html: `<div style="background-color: #06B6D4; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 12px #06B6D4;"></div>`,
-          iconSize: [14, 14],
-          iconAnchor: [7, 7]
+          html: `<div style="background-color: #06B6D4; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 16px #06B6D4, 0 0 4px #06B6D4;"></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
         });
 
-        pickerMarker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(pickerMap);
+        pickerMarker = L.marker([lat, lng], { icon: customIcon, draggable: true, zIndexOffset: 2000 }).addTo(pickerMap);
         pickerMarker.on('dragend', (ev) => {
           const pos = ev.target.getLatLng();
           atualizarPosicaoMapa(pos.lat, pos.lng);
@@ -667,7 +976,7 @@
         pickerMarker.setLatLng([lat, lng]);
       }
 
-      // Círculo Translúcido do Raio de Cobertura
+      // Círculo Translúcido do Raio de Cobertura do Novo Ponto
       if (!pickerCircle) {
         pickerCircle = L.circle([lat, lng], {
           radius: raio,
@@ -697,6 +1006,7 @@
       }
     });
 
+    // Abrir Modal de Nova Estação
     document.getElementById('btnOpenModalNovaEstacao').addEventListener('click', () => {
       document.getElementById('modalEstacaoTitle').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-[#06B6D4]"></i> <span>Cadastrar Nova Estação</span>`;
       document.getElementById('formEstacao').reset();
@@ -707,16 +1017,18 @@
       document.getElementById('modalEstacao').classList.remove('hidden');
       lucide.createIcons();
 
-      // Inicializa o mapa com animação suave e ponto padrão (Barbosa/Rio Tietê)
       setTimeout(() => {
         initPickerMap();
         pickerMap.invalidateSize();
+        renderizarEstacoesExistentesNoMapa(null);
+        
         const defaultLat = -21.2662;
         const defaultLng = -49.9482;
         atualizarPosicaoMapa(defaultLat, defaultLng, true);
       }, 250);
     });
 
+    // Editar Estação
     window.editarEstacao = function(codigo) {
       const st = cacheEstacoes.find(s => s.id === codigo);
       if (!st) return;
@@ -742,10 +1054,13 @@
       setTimeout(() => {
         initPickerMap();
         pickerMap.invalidateSize();
+        // Renderiza todas as outras estações como referência, exceto a atual
+        renderizarEstacoesExistentesNoMapa(st.id);
         atualizarPosicaoMapa(st.coords[0], st.coords[1], true);
       }, 250);
     };
 
+    // Submissão do Formulário de Estação
     document.getElementById('formEstacao').addEventListener('submit', async (e) => {
       e.preventDefault();
       const editingId = document.getElementById('inputEstacaoDbId').value;
@@ -844,6 +1159,7 @@
           cacheEquipamentos = data.data;
           document.getElementById('badgeCountEquipamentos').textContent = cacheEquipamentos.length;
           renderizarTabelaEquipamentos(cacheEquipamentos);
+          atualizarMetricasKPI();
         }
       } catch (err) {
         console.error('Erro ao carregar equipamentos:', err);
@@ -853,57 +1169,78 @@
     function renderizarTabelaEquipamentos(lista) {
       const tbody = document.getElementById('tbodyEquipamentos');
       if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-[#64748B]">Nenhum equipamento cadastrado. Clique em "Novo ESP32".</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-[#64748B] font-mono">Nenhum equipamento cadastrado.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = lista.map(eq => `
-        <tr class="hover:bg-[#020617]/50 transition-colors">
-          <td class="py-3 px-4">
-            <div class="font-bold text-white">${eq.nome_dispositivo}</div>
-            <div class="text-[10px] text-[#64748B]">${eq.modelo || 'ESP32'}</div>
-          </td>
-          <td class="py-3 px-4 font-mono font-semibold text-[#06B6D4]">${eq.mac_address}</td>
-          <td class="py-3 px-4">
-            ${eq.estacao_codigo ? `
-              <span class="px-2 py-0.5 rounded bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-bold">
-                ${eq.estacao_codigo}
-              </span>
-              <span class="text-[#94A3B8] text-[11px] block mt-0.5">${eq.estacao_nome || ''}</span>
-            ` : `<span class="text-[#64748B] italic">Sem estação vinculada</span>`}
-          </td>
-          <td class="py-3 px-4">
-            <div class="flex items-center gap-1.5">
-              <input type="password" value="${eq.api_key}" readonly class="bg-[#020617] border border-[#1E293B] rounded px-2 py-1 text-[11px] text-[#94A3B8] w-24">
-              <button onclick="copiarApiKey('${eq.api_key}')" class="p-1 rounded bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#06B6D4]" title="Copiar API Key">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+      tbody.innerHTML = lista.map(eq => {
+        let statusBadge = '';
+        if (eq.status === 'Ativo') {
+          statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Ativo</span>';
+        } else if (eq.status === 'Manutenção') {
+          statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Manutenção</span>';
+        } else {
+          statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Offline</span>';
+        }
+
+        return `
+          <tr class="hover:bg-[#020617]/70 transition-colors border-b border-[#1E293B]/40">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-white">${eq.nome_dispositivo}</div>
+              <div class="text-[10px] text-[#64748B]">${eq.modelo || 'ESP32'}</div>
+            </td>
+            <td class="py-3.5 px-4 font-mono font-semibold text-[#06B6D4]">${eq.mac_address}</td>
+            <td class="py-3.5 px-4">
+              ${eq.estacao_codigo ? `
+                <span class="px-2 py-0.5 rounded-md bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-bold text-[11px]">
+                  ${eq.estacao_codigo}
+                </span>
+                <span class="text-[#94A3B8] text-[11px] block mt-0.5">${eq.estacao_nome || ''}</span>
+              ` : `<span class="text-[#64748B] italic">Sem estação vinculada</span>`}
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="flex items-center gap-1.5">
+                <input type="password" value="${eq.api_key}" readonly class="bg-[#020617] border border-[#1E293B] rounded-md px-2 py-1 text-[11px] text-[#94A3B8] w-24">
+                <button onclick="copiarApiKey('${eq.api_key}')" class="p-1 rounded-md bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#06B6D4] transition-colors" title="Copiar API Key">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="regenerarApiKey(${eq.id})" class="p-1 rounded-md bg-[#020617] border border-[#1E293B] hover:border-amber-400 text-amber-400 transition-colors" title="Regenerar Chave">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 text-[#94A3B8]">v${eq.firmware_versao || '1.0.0'}</td>
+            <td class="py-3.5 px-4">${statusBadge}</td>
+            <td class="py-3.5 px-4 text-right space-x-1">
+              <button onclick="editarEquipamento(${eq.id})" class="p-1.5 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-[#06B6D4] text-[#06B6D4] hover:text-white transition-colors" title="Editar">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
               </button>
-              <button onclick="regenerarApiKey(${eq.id})" class="p-1 rounded bg-[#020617] border border-[#1E293B] hover:border-[#E5A93C] text-[#E5A93C]" title="Regenerar Chave">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <button onclick="excluirEquipamento(${eq.id})" class="p-1.5 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-rose-500 text-rose-400 hover:text-white transition-colors" title="Excluir">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
-            </div>
-          </td>
-          <td class="py-3 px-4 text-[#94A3B8]">v${eq.firmware_versao || '1.0.0'}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
-              eq.status === 'Ativo' ? 'bg-[#3FA87A]/10 text-[#3FA87A] border border-[#3FA87A]/30' : 
-              eq.status === 'Manutenção' ? 'bg-[#E5A93C]/10 text-[#E5A93C] border border-[#E5A93C]/30' : 
-              'bg-[#64748B]/10 text-[#94A3B8] border border-[#64748B]/30'
-            }">${eq.status || 'Ativo'}</span>
-          </td>
-          <td class="py-3 px-4 text-right space-x-1">
-            <button onclick="editarEquipamento(${eq.id})" class="p-1.5 rounded hover:bg-[#020617] text-[#06B6D4] hover:text-white" title="Editar">
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            </button>
-            <button onclick="excluirEquipamento(${eq.id})" class="p-1.5 rounded hover:bg-[#020617] text-[#C55A54] hover:text-white" title="Excluir">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
+            </td>
+          </tr>
+        `;
+      }).join('');
 
       lucide.createIcons();
     }
+
+    // Busca rápida em Equipamentos
+    document.getElementById('searchEquipamentos').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        renderizarTabelaEquipamentos(cacheEquipamentos);
+        return;
+      }
+      const filtrados = cacheEquipamentos.filter(eq => 
+        (eq.nome_dispositivo && eq.nome_dispositivo.toLowerCase().includes(q)) ||
+        (eq.mac_address && eq.mac_address.toLowerCase().includes(q)) ||
+        (eq.modelo && eq.modelo.toLowerCase().includes(q)) ||
+        (eq.estacao_codigo && eq.estacao_codigo.toLowerCase().includes(q))
+      );
+      renderizarTabelaEquipamentos(filtrados);
+    });
 
     window.copiarApiKey = function(key) {
       navigator.clipboard.writeText(key).then(() => {
@@ -931,7 +1268,7 @@
     };
 
     document.getElementById('btnOpenModalNovoEquipamento').addEventListener('click', () => {
-      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-[#3FA87A]"></i> <span>Cadastrar Equipamento ESP32</span>`;
+      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> <span>Cadastrar Equipamento ESP32</span>`;
       document.getElementById('formEquipamento').reset();
       document.getElementById('inputEquipamentoId').value = '';
       document.getElementById('inputEquipamentoMac').readOnly = false;
@@ -943,7 +1280,7 @@
       const eq = cacheEquipamentos.find(item => item.id === id);
       if (!eq) return;
 
-      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-[#3FA87A]"></i> <span>Editar Equipamento ${eq.nome_dispositivo}</span>`;
+      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i> <span>Editar Equipamento ${eq.nome_dispositivo}</span>`;
       document.getElementById('inputEquipamentoId').value = eq.id;
       document.getElementById('inputEquipamentoMac').value = eq.mac_address;
       document.getElementById('inputEquipamentoMac').readOnly = true;
@@ -1031,6 +1368,7 @@
           cacheUsuarios = data.data;
           document.getElementById('badgeCountUsuarios').textContent = cacheUsuarios.length;
           renderizarTabelaUsuarios(cacheUsuarios);
+          atualizarMetricasKPI();
         }
       } catch (err) {
         console.error('Erro ao carregar usuários:', err);
@@ -1040,35 +1378,53 @@
     function renderizarTabelaUsuarios(lista) {
       const tbody = document.getElementById('tbodyUsuarios');
       if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-[#64748B]">Nenhum usuário cadastrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-[#64748B] font-mono">Nenhum usuário cadastrado.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = lista.map(u => `
-        <tr class="hover:bg-[#020617]/50 transition-colors">
-          <td class="py-3 px-4 font-bold text-white">${u.nome}</td>
-          <td class="py-3 px-4 font-semibold text-[#06B6D4]">@${u.usuario || 'admin'}</td>
-          <td class="py-3 px-4 text-[#94A3B8]">${u.email}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
-              u.ativo ? 'bg-[#3FA87A]/10 text-[#3FA87A] border border-[#3FA87A]/30' : 'bg-[#C55A54]/10 text-[#C55A54] border border-[#C55A54]/30'
-            }">${u.ativo ? 'Ativo' : 'Inativo'}</span>
+        <tr class="hover:bg-[#020617]/70 transition-colors border-b border-[#1E293B]/40">
+          <td class="py-3.5 px-4 font-bold text-white">${u.nome}</td>
+          <td class="py-3.5 px-4 font-semibold text-[#06B6D4]">@${u.usuario || 'admin'}</td>
+          <td class="py-3.5 px-4 text-[#94A3B8]">${u.email}</td>
+          <td class="py-3.5 px-4">
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+              u.ativo ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+            }">
+              <span class="w-1.5 h-1.5 rounded-full ${u.ativo ? 'bg-emerald-400' : 'bg-rose-400'}"></span>
+              ${u.ativo ? 'Ativo' : 'Inativo'}
+            </span>
           </td>
-          <td class="py-3 px-4 text-[11px] text-[#64748B]">
+          <td class="py-3.5 px-4 text-[11px] text-[#64748B]">
             ${new Date(u.criado_em).toLocaleDateString('pt-BR')}
           </td>
-          <td class="py-3 px-4 text-right">
+          <td class="py-3.5 px-4 text-right">
             ${u.id !== usuarioLogado.id ? `
-              <button onclick="alternarStatusUsuario(${u.id}, ${!u.ativo})" class="px-2 py-1 rounded bg-[#020617] border border-[#1E293B] hover:border-white text-[10px] font-bold ${u.ativo ? 'text-[#C55A54]' : 'text-[#3FA87A]'}">
+              <button onclick="alternarStatusUsuario(${u.id}, ${!u.ativo})" class="px-2.5 py-1 rounded-lg bg-[#020617] border border-[#1E293B] hover:border-white text-[10px] font-bold transition-colors ${u.ativo ? 'text-rose-400' : 'text-emerald-400'}">
                 ${u.ativo ? 'Desativar' : 'Ativar'}
               </button>
-            ` : `<span class="text-[10px] text-[#06B6D4] italic font-semibold">(Você)</span>`}
+            ` : `<span class="text-[10px] text-[#06B6D4] italic font-semibold px-2 py-1 rounded bg-[#06B6D4]/10 border border-[#06B6D4]/20">(Você)</span>`}
           </td>
         </tr>
       `).join('');
 
       lucide.createIcons();
     }
+
+    // Busca rápida em Usuários
+    document.getElementById('searchUsuarios').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        renderizarTabelaUsuarios(cacheUsuarios);
+        return;
+      }
+      const filtrados = cacheUsuarios.filter(u => 
+        (u.nome && u.nome.toLowerCase().includes(q)) ||
+        (u.usuario && u.usuario.toLowerCase().includes(q)) ||
+        (u.email && u.email.toLowerCase().includes(q))
+      );
+      renderizarTabelaUsuarios(filtrados);
+    });
 
     document.getElementById('btnOpenModalNovoAdmin').addEventListener('click', () => {
       document.getElementById('formAdmin').reset();

@@ -298,10 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
     mapInstance = L.map(mapContainer, {
       zoomControl: true,
       attributionControl: true,
-      scrollWheelZoom: false
+      scrollWheelZoom: true
     }).setView(coords, 13);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_3hu5_1_ebaa2039325b61a89a78caef', {
       attribution: '© OpenStreetMap · © CARTO · TILES REAIS / DADOS MOCKADOS',
       maxZoom: 19
     }).addTo(mapInstance);
@@ -702,7 +702,8 @@ document.addEventListener('DOMContentLoaded', () => {
     simIntervalId = setInterval(runSimulationStep, 3000);
     state.isLoopRunning = true;
     if (btnToggleTelemetry) {
-      btnToggleTelemetry.innerHTML = `<i data-lucide="pause" class="w-3 h-3"></i> <span>PAUSAR SIMULAÇÃO</span>`;
+      btnToggleTelemetry.className = 'preset-pill-btn active-auto';
+      btnToggleTelemetry.innerHTML = `<i data-lucide="pause" class="w-3.5 h-3.5"></i> <span>Pausar Simulação</span>`;
     }
     app.saveState(state);
     if (window.lucide) lucide.createIcons();
@@ -713,7 +714,8 @@ document.addEventListener('DOMContentLoaded', () => {
     simIntervalId = null;
     state.isLoopRunning = false;
     if (btnToggleTelemetry) {
-      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3 h-3"></i> <span>REINICIAR SIMULAÇÃO</span>`;
+      btnToggleTelemetry.className = 'preset-pill-btn';
+      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-[#06B6D4]"></i> <span>Iniciar Simulação</span>`;
     }
     app.saveState(state);
     if (window.lucide) lucide.createIcons();
@@ -742,7 +744,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnToggleTelemetry) {
-      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-[#06B6D4]"></i> <span>Simulação Automática</span>`;
+      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-[#06B6D4]"></i> <span>Iniciar Simulação</span>`;
     }
 
     const diag = engine.diagnose(state.params);
@@ -763,12 +765,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Action Buttons
   if (btnToggleTelemetry) {
     btnToggleTelemetry.onclick = () => {
-      [sc1, sc2, sc4].forEach(b => { if (b) b.className = 'preset-pill-btn'; });
       if (state.isLoopRunning && simIntervalId) {
         stopSimLoop();
-        btnToggleTelemetry.className = 'preset-pill-btn';
       } else {
-        btnToggleTelemetry.className = 'preset-pill-btn active-auto';
+        [sc1, sc2, sc4].forEach(b => { if (b) b.className = 'preset-pill-btn'; });
         runSimulationStep();
         startSimLoop();
       }
@@ -794,5 +794,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initChart();
   updateStationUI();
   renderDashboard();
-  startSimLoop();
+  stopSimLoop();
 });

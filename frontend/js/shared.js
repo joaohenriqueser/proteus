@@ -77,7 +77,7 @@ window.TieteApp = {
     return {
       params: { ...defaultStations[0].params },
       activeScenarioTag: defaultStations[0].scenarioTag,
-      isLoopRunning: true,
+      isLoopRunning: false,
       history: [],
       stations: defaultStations,
       activeStationId: 'BRB-04'
@@ -92,7 +92,7 @@ window.TieteApp = {
         return {
           params: { ...this.getDefaultState().params, ...parsed.params },
           activeScenarioTag: parsed.activeScenarioTag || '[MOCK] ÁGUA IDEAL',
-          isLoopRunning: typeof parsed.isLoopRunning === 'boolean' ? parsed.isLoopRunning : true,
+          isLoopRunning: false,
           history: Array.isArray(parsed.history) ? parsed.history : [],
           stations: Array.isArray(parsed.stations) && parsed.stations.length > 0 ? parsed.stations : this.getDefaultStations(),
           activeStationId: parsed.activeStationId || 'BRB-04'
