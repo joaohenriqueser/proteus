@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROTEUS — Monitoramento Ambiental (Rio Tietê)</title>
-  <meta name="description" content="P.R.O.T.E.U.S. - Platform for Real-time Observation & Telemetry of Eutrophication in Urban Streams.">
+  <title>PROTEUS — Monitoramento Ambiental em Tempo Real (Rio Tietê)</title>
+  <meta name="description" content="P.R.O.T.E.U.S. - Plataforma Espacial de Observação e Telemetria em Tempo Real da Qualidade da Água no Rio Tietê.">
 
-  <!-- Google Fonts: IBM Plex Sans & IBM Plex Mono -->
+  <!-- Google Fonts: Plus Jakarta Sans, Inter & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Leaflet Maps CDN -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -17,7 +18,7 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Custom CSS -->
+  <!-- Custom CSS Design System -->
   <link rel="stylesheet" href="css/style.css">
 
   <!-- Chart.js CDN -->
@@ -26,299 +27,435 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="min-h-screen bg-[#020617] text-[#F8FAFC] flex flex-col md:flex-row font-sans relative">
+<body class="h-screen w-screen overflow-hidden bg-[#F8FAFC] text-[#0F172A] flex relative select-none">
 
-  <!-- ==================== MOBILE TOP BAR (Only visible on small screens < md) ==================== -->
-  <header class="md:hidden bg-[#0F172A] border-b border-[#1E293B] px-4 py-3 flex items-center justify-between sticky top-0 z-[9900]">
+  <!-- ==================== MOBILE TOP BAR (Only visible on screens < md) ==================== -->
+  <header class="md:hidden fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 flex items-center justify-between z-[9900]">
     <a href="index.html" class="flex items-center gap-2">
-      <img src="assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-9 w-auto">
+      <img src="assets/logo-full.svg" alt="PROTEUS Logo" class="h-7 w-auto">
     </a>
-    <button id="mobileMenuBtn" type="button" class="p-2 rounded bg-[#020617] border border-[#1E293B] text-[#94A3B8] hover:text-white transition-colors" aria-label="Abrir Menu">
+    <button id="mobileMenuBtn" type="button" class="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-blue-600 transition-colors" aria-label="Abrir Menu">
       <i data-lucide="menu" class="w-5 h-5"></i>
     </button>
   </header>
 
   <!-- Mobile Backdrop Overlay -->
-  <div id="mobileMenuBackdrop" class="fixed inset-0 bg-black/70 z-[9990] hidden md:hidden transition-opacity"></div>
+  <div id="mobileMenuBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[9990] hidden md:hidden transition-opacity"></div>
 
-  <!-- ==================== LEFT VERTICAL SIDEBAR / MOBILE DRAWER ==================== -->
-  <aside id="mainSidebar" class="fixed md:sticky top-0 left-0 h-screen w-64 md:w-60 bg-[#0F172A] border-r border-[#1E293B] flex-none flex flex-col justify-between p-4 z-[9999] transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+  <!-- ==================== COLLAPSIBLE SLIM SIDEBAR (64px to 240px smoothly on hover) ==================== -->
+  <aside id="mainSidebar" class="fixed md:sticky top-0 left-0 h-screen z-[9999] flex flex-col justify-between py-4 px-2.5 transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-out shadow-sm pointer-events-auto">
     
-    <!-- Top: Logo & Mobile Close Button -->
+    <!-- Top: Dynamic Logos & Brand Mark -->
     <div class="space-y-6">
-      <div class="px-2 py-2 flex items-center justify-between">
-        <a href="index.html" class="block hover:opacity-90 transition-opacity">
-          <img src="assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-11 w-auto block">
+      <div class="sidebar-logo-container px-1">
+        <a href="index.html" class="block w-full h-full relative" title="PROTEUS — Ir para início">
+          <!-- Icon only when collapsed -->
+          <img src="assets/logo-icon.svg" alt="PROTEUS Icon" class="sidebar-logo-icon">
+          <!-- Full logo when expanded -->
+          <img src="assets/logo-full.svg" alt="PROTEUS Logo" class="sidebar-logo-full">
         </a>
-        <button id="mobileMenuCloseBtn" type="button" class="md:hidden p-1 text-[#64748B] hover:text-white rounded" aria-label="Fechar Menu">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
       </div>
 
-      <!-- Vertical Sidebar Nav Menu -->
+      <!-- Navigation Links with centered icons in collapsed state -->
       <nav class="space-y-1">
-        <a href="index.html" class="sidebar-link active">
-          <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#94A3B8]"></i>
-          <span>Monitoramento</span>
+        <a href="index.html" class="sidebar-link active" title="Monitoramento em Tempo Real">
+          <div class="link-icon">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          </div>
+          <span class="link-label">Monitoramento</span>
         </a>
-        <a href="simulador.html" class="sidebar-link">
-          <i data-lucide="sliders" class="w-4 h-4 text-[#94A3B8]"></i>
-          <span>Simulador</span>
+
+        <a href="simulador.html" class="sidebar-link" title="Simulador de Parâmetros Hídricos">
+          <div class="link-icon">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+          </div>
+          <span class="link-label">Simulador</span>
         </a>
-        <a href="metodologia.html" class="sidebar-link">
-          <i data-lucide="book-open" class="w-4 h-4 text-[#94A3B8]"></i>
-          <span>Metodologia</span>
+
+        <a href="metodologia.html" class="sidebar-link" title="Metodologia & Índice IRE">
+          <div class="link-icon">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+          </div>
+          <span class="link-label">Metodologia</span>
         </a>
-        <div class="pt-3 mt-3 border-t border-[#1E293B]">
-          <a href="admin/login.html" class="sidebar-link hover:border-[#06B6D4] group">
-            <i data-lucide="lock" class="w-4 h-4 text-[#06B6D4] group-hover:text-white"></i>
-            <span class="text-[#06B6D4] group-hover:text-white font-medium">Área Restrita</span>
-          </a>
-        </div>
       </nav>
     </div>
 
+    <!-- Bottom Sidebar Section: Restricted Admin Area & Status -->
+    <div class="pt-3 border-t border-slate-200/70 space-y-1">
+      <a href="admin/login.html" class="sidebar-link text-blue-600 hover:text-blue-700" title="Área Restrita Administrativa">
+        <div class="link-icon text-blue-600">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+        </div>
+        <span class="link-label font-semibold text-blue-600">Área Restrita</span>
+      </a>
+
+      <!-- Mobile Close Button (inside drawer) -->
+      <button id="mobileMenuCloseBtn" type="button" class="md:hidden w-full flex items-center gap-3 px-3 py-2 text-slate-500 hover:text-slate-800 rounded-lg text-xs" aria-label="Fechar Menu">
+        <i data-lucide="x" class="w-4 h-4"></i>
+        <span>Fechar Menu</span>
+      </button>
+    </div>
   </aside>
 
-  <!-- ==================== MAIN CONTENT ==================== -->
-  <div class="flex-1 flex flex-col justify-between min-w-0">
-    
-    <main class="max-w-7xl mx-auto px-3 sm:px-4 py-4 space-y-4 w-full flex-grow">
+  <!-- ==================== SPATIAL BACKDROP CANVAS (Full Viewport Map + Floating Glass HUD) ==================== -->
+  <div class="flex-1 relative w-full h-full overflow-hidden">
 
-      <!-- TOP BAR: WATER STATUS PRESET SELECTOR -->
-      <section class="bg-[#0F172A] border border-[#1E293B] rounded p-3 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-md">
-        <div class="flex items-center gap-2.5">
-          <div class="p-2 rounded bg-[#020617] border border-[#1E293B] text-[#06B6D4] flex items-center justify-center">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2.5C12 2.5 6 10 6 15a6 6 0 0 0 12 0c0-5-6-12.5-6-12.5z"/>
-              <path d="M9.5 14c0-1.5 1-3 2.5-3.5" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
+    <!-- 1. FULL VIEWPORT BACKDROP MAP CANVAS -->
+    <div id="leafletMap" class="absolute inset-0 w-full h-full z-0 outline-none"></div>
+
+    <!-- 2. FLOATING SPATIAL HUD LAYER (Glassmorphism Light Overlays) -->
+    <div class="absolute inset-0 z-10 pointer-events-none p-4 sm:p-6 overflow-hidden">
+
+      <!-- ==================== LEFT SPATIAL OVERLAY: Loose Stats, Parameters & Reference Cards ==================== -->
+      <div class="absolute top-4 sm:top-6 left-4 sm:left-6 bottom-4 sm:bottom-6 w-full max-w-[340px] sm:max-w-[380px] flex flex-col justify-between pointer-events-none z-10 overflow-y-auto pr-1">
+        
+        <!-- Top Section: Loose Hierarchy & Parameter Stream (NO CARD) -->
+        <div class="pointer-events-auto space-y-4 text-backdrop-crisp">
+          
+          <!-- Section Title & Details Link -->
           <div>
-            <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-white">CONDIÇÃO DA ÁGUA EM TEMPO REAL</h2>
-            <p class="text-[11.5px] text-[#94A3B8]">Selecione um cenário predefinido ou ative o modo de simulação automática:</p>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                Monitoramento Geral
+              </span>
+              <a href="metodologia.html" class="text-[11px] font-mono font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-0.5 tracking-wider uppercase transition-colors" title="Ver Metodologia Completa do IRE">
+                Detalhes <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </a>
+            </div>
+
+            <!-- Big Anchor IRE Metric (Reference: 7,541,390) -->
+            <div class="flex items-baseline gap-2 mt-1">
+              <span id="ireValueDisplay" class="font-sans font-extrabold text-6xl sm:text-7xl tracking-tight text-slate-900 transition-colors">
+                85.4
+              </span>
+              <span class="font-sans font-semibold text-slate-400 text-xl sm:text-2xl">/100</span>
+            </div>
+
+            <!-- Status Indicator Badge -->
+            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span id="statusDotDisplay" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-soft-pulse"></span>
+              <span id="statusLabelDisplay" class="font-sans font-bold text-xs sm:text-sm tracking-wide text-emerald-700 uppercase">
+                Ótimo / Água Boa
+              </span>
+              <span id="scenarioTagDisplay" class="font-mono text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                Água Ideal
+              </span>
+            </div>
           </div>
+
+          <!-- Current Activity / Parâmetros Físico-Químicos (Reference: Current activity) -->
+          <div class="pt-1">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-sans font-bold text-xs uppercase tracking-wider text-slate-700">
+                Atividade dos Parâmetros
+              </span>
+              <span class="text-[10px] font-mono text-slate-400">Tempo Real</span>
+            </div>
+
+            <!-- Segmented Multi-Color Progress Bar (Green, Cyan, Violet, Orange) -->
+            <div class="segmented-activity-bar mb-3">
+              <div class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="flex: 28%;"></div>
+              <div class="h-full bg-sky-500 rounded-full transition-all duration-500" style="flex: 24%;"></div>
+              <div class="h-full bg-indigo-500 rounded-full transition-all duration-500" style="flex: 26%;"></div>
+              <div class="h-full bg-amber-500 rounded-full transition-all duration-500" style="flex: 22%;"></div>
+            </div>
+
+            <!-- Loose Parameter Rows (OUTSIDE CARDS! Direct on Canvas) -->
+            <div class="space-y-1.5 font-sans">
+              
+              <!-- 1. pH da Água -->
+              <div class="param-loose-item group">
+                <div class="flex items-center gap-2.5">
+                  <span id="dotPH" class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 transition-colors"></span>
+                  <span class="font-medium text-xs text-slate-700 group-hover:text-slate-900 transition-colors">pH da Água</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <span id="valPH" class="font-mono font-bold text-sm text-slate-900">7.2</span>
+                  <span id="notePH" class="font-mono text-[11px] text-slate-500 min-w-[70px] text-right truncate">Faixa neutra</span>
+                </div>
+              </div>
+
+              <!-- 2. Turbidez -->
+              <div class="param-loose-item group">
+                <div class="flex items-center gap-2.5">
+                  <span id="dotTurb" class="w-2 h-2 rounded-full bg-sky-500 flex-shrink-0 transition-colors"></span>
+                  <span class="font-medium text-xs text-slate-700 group-hover:text-slate-900 transition-colors">Turbidez</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="flex items-baseline gap-0.5">
+                    <span id="valTurb" class="font-mono font-bold text-sm text-slate-900">8</span>
+                    <span class="text-[10px] font-mono text-slate-400">NTU</span>
+                  </div>
+                  <span id="noteTurb" class="font-mono text-[11px] text-slate-500 min-w-[70px] text-right truncate">Sólidos baixos</span>
+                </div>
+              </div>
+
+              <!-- 3. Oxigênio Dissolvido -->
+              <div class="param-loose-item group">
+                <div class="flex items-center gap-2.5">
+                  <span id="dotOD" class="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0 transition-colors"></span>
+                  <span class="font-medium text-xs text-slate-700 group-hover:text-slate-900 transition-colors">Oxigênio (OD)</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="flex items-baseline gap-0.5">
+                    <span id="valOD" class="font-mono font-bold text-sm text-slate-900">6.8</span>
+                    <span class="text-[10px] font-mono text-slate-400">mg/L</span>
+                  </div>
+                  <span id="noteOD" class="font-mono text-[11px] text-slate-500 min-w-[70px] text-right truncate">Saturação boa</span>
+                </div>
+              </div>
+
+              <!-- 4. Temperatura -->
+              <div class="param-loose-item group">
+                <div class="flex items-center gap-2.5">
+                  <span id="dotTemp" class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 transition-colors"></span>
+                  <span class="font-medium text-xs text-slate-700 group-hover:text-slate-900 transition-colors">Temperatura</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="flex items-baseline gap-0.5">
+                    <span id="valTemp" class="font-mono font-bold text-sm text-slate-900">22.4</span>
+                    <span class="text-[10px] font-mono text-slate-400">°C</span>
+                  </div>
+                  <span id="noteTemp" class="font-mono text-[11px] text-slate-500 min-w-[70px] text-right truncate">Sazonal normal</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
 
-        <!-- Interactive Pill Options -->
-        <div class="flex items-center flex-wrap gap-2 w-full md:w-auto">
-          <button id="btnQuickScenario1" type="button" class="preset-pill-btn active-ideal">
-            <span class="w-2 h-2 rounded-full bg-[#3FA87A]"></span>
-            <span>Água Ideal / Boa</span>
+        <!-- Bottom Section: Floating Reference Cards -->
+        <div class="pointer-events-auto space-y-3 pt-4">
+          
+          <!-- Reference Card 1: Diagnóstico Limnológico -->
+          <div class="ref-card p-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 uppercase font-sans tracking-wide">
+                Diagnóstico Limnológico
+              </span>
+              <span id="lastReadTimestamp" class="text-[10px] font-mono text-slate-400">12:00:00</span>
+            </div>
+
+            <p id="diagSummaryText" class="text-xs text-slate-600 mt-2 leading-relaxed font-normal">
+              Coluna d'água estável e bem oxigenada. Nenhum indício de proliferação algal crítico nas leituras recentes.
+            </p>
+
+            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
+              <div id="ireProgressBar" class="h-full rounded-full bg-emerald-500 transition-all duration-700 ease-out" style="width: 85.4%;"></div>
+            </div>
+
+            <div class="flex items-center justify-between mt-2.5 text-[11px] font-mono text-slate-500">
+              <span id="mapStationLabel">Rio Tietê · Barbosa</span>
+              <span class="text-emerald-600 font-semibold">Calibração Ativa</span>
+            </div>
+          </div>
+
+          <!-- Reference Card 2: Cobertura & Raio Ativo (with Circular Donut Gauge) -->
+          <div class="ref-card p-3 flex items-center gap-3.5">
+            <!-- Circular Progress Donut SVG (like 23% in reference) -->
+            <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+              <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
+                <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="text-blue-600" stroke-dasharray="92, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <span class="absolute font-sans font-bold text-[11px] text-slate-800">92%</span>
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400">
+                Raio & Cobertura
+              </div>
+              <div class="text-xs font-bold text-slate-900">
+                15 km em Monitoramento
+              </div>
+              <div class="text-[10.5px] text-slate-500 truncate">
+                Telemetria por satélite contínua
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==================== TOP-RIGHT FLOATING ISLAND: Station & Scenarios ==================== -->
+      <div class="absolute top-4 sm:top-6 right-4 sm:right-6 z-20 pointer-events-auto flex items-center gap-2 flex-wrap justify-end max-w-[calc(100vw-420px)]">
+        
+        <!-- Station Selector Pill -->
+        <div class="glass-pill px-3 py-1.5 flex items-center gap-2 shadow-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span id="stationNameDisplay" class="hidden">BRB-04 · BARBOSA-SP</span>
+          
+          <label for="stationSelect" class="text-[11px] font-mono font-bold text-slate-500 uppercase hidden sm:inline">Estação:</label>
+          <select id="stationSelect" class="bg-slate-50/90 border border-slate-200 text-slate-800 text-xs font-semibold rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500/30 cursor-pointer transition-colors" title="Alternar Estação">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <!-- Scenarios & Simulation Pill -->
+        <div class="glass-pill px-2 py-1 flex items-center gap-1.5 shadow-sm">
+          <button id="btnQuickScenario1" type="button" class="preset-pill-btn active-ideal text-xs py-1 px-2.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Água Boa</span>
           </button>
-          <button id="btnQuickScenario2" type="button" class="preset-pill-btn">
-            <span class="w-2 h-2 rounded-full bg-[#C9A03C]"></span>
+          <button id="btnQuickScenario2" type="button" class="preset-pill-btn text-xs py-1 px-2.5">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
             <span>Água Regular</span>
           </button>
-          <button id="btnQuickScenario4" type="button" class="preset-pill-btn">
-            <span class="w-2 h-2 rounded-full bg-[#C55A54]"></span>
-            <span>Água Ruim / Crítica</span>
+          <button id="btnQuickScenario4" type="button" class="preset-pill-btn text-xs py-1 px-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            <span>Água Crítica</span>
           </button>
-          <button id="btnToggleTelemetry" type="button" class="preset-pill-btn">
-            <i data-lucide="play" class="w-3.5 h-3.5 text-[#06B6D4]"></i>
-            <span>Iniciar Simulação</span>
+          <button id="btnToggleTelemetry" type="button" class="preset-pill-btn active-auto text-xs py-1 px-2.5">
+            <i data-lucide="play" class="w-3 h-3 text-blue-600"></i>
+            <span>Simulação</span>
           </button>
         </div>
-      </section>
 
-      <!-- TOP SECTION: HERO IRE CARD & GEOLOCATION LEAFLET MAP GRID -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+      </div>
+
+      <!-- ==================== FLOATING MAP ZOOM & CENTERING CONTROLS ==================== -->
+      <div class="absolute top-20 sm:top-24 right-4 sm:right-6 z-20 pointer-events-auto flex flex-col gap-1.5">
+        <button id="btnMapZoomIn" type="button" class="w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center justify-center text-slate-700 hover:text-blue-600 hover:bg-white hover:border-blue-300 transition-all font-bold text-base" title="Aproximar Mapa">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+        </button>
+        <button id="btnMapZoomOut" type="button" class="w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center justify-center text-slate-700 hover:text-blue-600 hover:bg-white hover:border-blue-300 transition-all font-bold text-base" title="Afastar Mapa">
+          <i data-lucide="minus" class="w-4 h-4"></i>
+        </button>
+        <button id="btnMapResetView" type="button" class="w-9 h-9 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md flex items-center justify-center text-slate-700 hover:text-blue-600 hover:bg-white hover:border-blue-300 transition-all" title="Centralizar Estação">
+          <i data-lucide="locate-fixed" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- ==================== BOTTOM-RIGHT FLOATING ANALYTICS PANEL ==================== -->
+      <div class="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 z-20 pointer-events-none flex flex-col items-end">
         
-        <!-- HERO IRE CARD (7 cols) -->
-        <div class="lg:col-span-6 bg-[#0F172A] border border-[#1E293B] rounded p-4 sm:p-5 flex flex-col justify-between space-y-4">
-          <div>
-            <!-- Title & Mock Badge -->
-            <div class="flex items-center justify-between mb-3">
-              <span class="font-mono font-semibold text-[10px] text-[#64748B] tracking-[0.14em]">ÍNDICE DE RISCO DE EUTROFIZAÇÃO · IRE</span>
-              <span class="font-mono font-semibold text-[9.5px] text-[#FCD34D] bg-[#451A03] border border-[#78350F] rounded px-2 py-0.5 tracking-[0.09em]">DADO SIMULADO</span>
-            </div>
-
-            <!-- Score & Status Indicators -->
-            <div class="flex items-baseline gap-4 my-2">
-              <div class="flex items-baseline gap-1 flex-none">
-                <span id="ireValueDisplay" class="font-mono font-bold text-6xl sm:text-7xl tracking-tighter text-[#3FA87A]">85.4</span>
-                <span class="font-mono text-sm text-[#475569]">/100</span>
-              </div>
-
-              <div class="flex-1 min-w-0 flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                  <span id="statusDotDisplay" class="w-2 h-2 rounded-full flex-none bg-[#3FA87A]"></span>
-                  <span id="statusLabelDisplay" class="font-sans font-semibold text-sm tracking-wider text-[#3FA87A]">ÓTIMO / ÁGUA BOA</span>
-                </div>
-
-                <div class="h-1 bg-[#1E293B] rounded overflow-hidden">
-                  <div id="ireProgressBar" class="h-full rounded bg-[#3FA87A] transition-all duration-500" style="width: 85.4%;"></div>
-                </div>
-
-                <p id="diagSummaryText" class="text-xs text-[#94A3B8] leading-relaxed">
-                  Coluna d'água estável e bem oxigenada. Nenhum indício de floração algal nas leituras simuladas.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Metadata Footer Row -->
-          <div class="grid grid-cols-3 gap-3 pt-3 border-t border-[#1E293B] text-xs font-mono">
-            <div>
-              <span class="text-[9.5px] text-[#475569] tracking-[0.1em] block">ESTAÇÃO ATIVA</span>
-              <span id="stationNameDisplay" class="text-[11.5px] font-medium text-[#CBD5E1] truncate block">BRB-04 · BARBOSA-SP</span>
-            </div>
-            <div>
-              <span class="text-[9.5px] text-[#475569] tracking-[0.1em] block">CENÁRIO ATIVO</span>
-              <span id="scenarioTagDisplay" class="text-[11.5px] font-medium text-[#22D3EE] truncate block">[MOCK] ÁGUA IDEAL</span>
-            </div>
-            <div>
-              <span class="text-[9.5px] text-[#475569] tracking-[0.1em] block">ÚLTIMA LEITURA</span>
-              <span id="lastReadTimestamp" class="text-[11.5px] font-medium text-[#CBD5E1]">12:00 [MOCK]</span>
-            </div>
-          </div>
-
+        <!-- Minimized Pill State (Hidden by default) -->
+        <div id="analyticsMiniPill" class="hidden pointer-events-auto">
+          <button id="btnRestoreAnalytics" type="button" class="glass-pill px-4 py-2 text-xs font-bold text-slate-800 hover:text-blue-600 transition-all flex items-center gap-2 shadow-lg hover:shadow-xl" title="Expandir Gráfico de Tendência">
+            <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+            <span>Tendência em Tempo Real</span>
+          </button>
         </div>
 
-        <!-- GEOLOCATION INTERACTIVE LEAFLET MAP (6 cols) -->
-        <div class="lg:col-span-6 bg-[#0F172A] border border-[#1E293B] rounded overflow-hidden flex flex-col relative min-h-[340px]">
-          <!-- Map Header Bar with Station Dropdown, Edit, Delete & Add Station Buttons -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-3 py-2 border-b border-[#1E293B] relative z-10 bg-[#0F172A]">
+        <!-- Full Analytics Floating Panel (Default Visible) -->
+        <div id="analyticsPanel" class="w-80 sm:w-[420px] glass-panel-floating p-4 sm:p-5 pointer-events-auto space-y-3 transition-all duration-300 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-[#06B6D4]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              <span class="font-mono font-semibold text-[10px] text-[#64748B] tracking-[0.14em]">ESTAÇÃO DE COLETA</span>
+              <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+              <div>
+                <h3 class="text-xs font-bold text-slate-900 tracking-wide uppercase font-mono">Tendência em Tempo Real</h3>
+                <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-0.5">
+                  <span class="flex items-center gap-1 text-slate-600"><span class="w-2 h-1 rounded-full bg-blue-600"></span> IRE</span>
+                  <span class="flex items-center gap-1 text-slate-600"><span class="w-2 h-1 rounded-full bg-emerald-500"></span> OD</span>
+                </div>
+              </div>
             </div>
 
-            <div class="flex items-center flex-wrap gap-1.5 w-full sm:w-auto">
-              <select id="stationSelect" class="bg-[#020617] border border-[#1E293B] text-[#F8FAFC] text-xs font-mono rounded px-2.5 py-1 focus:outline-none focus:border-[#06B6D4] cursor-pointer">
-                <!-- Dynamically populated -->
-              </select>
-            </div>
-          </div>
-
-          <div id="leafletMap" class="flex-1 w-full h-full min-h-[280px]"></div>
-
-
-
-          <!-- Overlay Status Badge -->
-          <div class="absolute left-3 bottom-3 z-10 bg-[#0F172A]/95 border border-[#1E293B] rounded p-2 flex flex-col gap-1 shadow-lg">
-            <span id="mapStationLabel" class="font-mono text-[9.5px] text-[#475569] tracking-[0.1em]">RIO TIETÊ · BARBOSA-SP</span>
-            <span id="mapOverlayStatus" class="font-mono font-medium text-xs text-[#3FA87A]">ÓTIMO / ÁGUA BOA</span>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- SECTION: 4 PARAMETER CARDS (2x2 GRID MATCHING PROTOTYPE) -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        
-        <!-- Card 1: pH -->
-        <div class="bg-[#0F172A] border border-[#1E293B] rounded p-3.5 flex flex-col justify-between gap-2.5">
-          <div class="flex items-center justify-between">
-            <span class="font-mono font-semibold text-[10px] text-[#94A3B8] tracking-[0.11em]">pH (MOCKED)</span>
-            <span id="dotPH" class="w-1.5 h-1.5 rounded-full bg-[#3FA87A]"></span>
-          </div>
-          <div class="flex items-baseline gap-1">
-            <span id="valPH" class="font-mono font-medium text-3xl tracking-tight text-[#F8FAFC]">7.2</span>
-          </div>
-          <div class="flex items-center justify-between pt-2 border-t border-[#1E293B]">
-            <span id="notePH" class="text-[10.5px] text-[#64748B]">Faixa neutra</span>
-            <span class="font-mono font-medium text-[9px] text-[#FCD34D] bg-[#451A03] px-1.5 py-0.5 rounded tracking-[0.08em]">MOCK</span>
-          </div>
-        </div>
-
-        <!-- Card 2: Turbidez -->
-        <div class="bg-[#0F172A] border border-[#1E293B] rounded p-3.5 flex flex-col justify-between gap-2.5">
-          <div class="flex items-center justify-between">
-            <span class="font-mono font-semibold text-[10px] text-[#94A3B8] tracking-[0.11em]">TURBIDEZ (MOCKED)</span>
-            <span id="dotTurb" class="w-1.5 h-1.5 rounded-full bg-[#3FA87A]"></span>
-          </div>
-          <div class="flex items-baseline gap-1">
-            <span id="valTurb" class="font-mono font-medium text-3xl tracking-tight text-[#F8FAFC]">8</span>
-            <span class="font-mono text-xs text-[#64748B]">NTU</span>
-          </div>
-          <div class="flex items-center justify-between pt-2 border-t border-[#1E293B]">
-            <span id="noteTurb" class="text-[10.5px] text-[#64748B]">Sólidos baixos</span>
-            <span class="font-mono font-medium text-[9px] text-[#FCD34D] bg-[#451A03] px-1.5 py-0.5 rounded tracking-[0.08em]">MOCK</span>
-          </div>
-        </div>
-
-        <!-- Card 3: Oxigênio Dissolvido -->
-        <div class="bg-[#0F172A] border border-[#1E293B] rounded p-3.5 flex flex-col justify-between gap-2.5">
-          <div class="flex items-center justify-between">
-            <span class="font-mono font-semibold text-[10px] text-[#94A3B8] tracking-[0.11em]">OXIGÊNIO DISSOLVIDO (MOCKED)</span>
-            <span id="dotOD" class="w-1.5 h-1.5 rounded-full bg-[#3FA87A]"></span>
-          </div>
-          <div class="flex items-baseline gap-1">
-            <span id="valOD" class="font-mono font-medium text-3xl tracking-tight text-[#F8FAFC]">6.8</span>
-            <span class="font-mono text-xs text-[#64748B]">mg/L</span>
-          </div>
-          <div class="flex items-center justify-between pt-2 border-t border-[#1E293B]">
-            <span id="noteOD" class="text-[10.5px] text-[#64748B]">Saturação adequada</span>
-            <span class="font-mono font-medium text-[9px] text-[#FCD34D] bg-[#451A03] px-1.5 py-0.5 rounded tracking-[0.08em]">MOCK</span>
-          </div>
-        </div>
-
-        <!-- Card 4: Temperatura -->
-        <div class="bg-[#0F172A] border border-[#1E293B] rounded p-3.5 flex flex-col justify-between gap-2.5">
-          <div class="flex items-center justify-between">
-            <span class="font-mono font-semibold text-[10px] text-[#94A3B8] tracking-[0.11em]">TEMP. DA ÁGUA (MOCKED)</span>
-            <span id="dotTemp" class="w-1.5 h-1.5 rounded-full bg-[#3FA87A]"></span>
-          </div>
-          <div class="flex items-baseline gap-1">
-            <span id="valTemp" class="font-mono font-medium text-3xl tracking-tight text-[#F8FAFC]">22.4</span>
-            <span class="font-mono text-xs text-[#64748B]">°C</span>
-          </div>
-          <div class="flex items-center justify-between pt-2 border-t border-[#1E293B]">
-            <span id="noteTemp" class="text-[10.5px] text-[#64748B]">Sazonal normal</span>
-            <span class="font-mono font-medium text-[9px] text-[#FCD34D] bg-[#451A03] px-1.5 py-0.5 rounded tracking-[0.08em]">MOCK</span>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- SECTION: HISTORICAL TIME-SERIES READOUT & STREAM LOG -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-3">
-        
-        <!-- Chart Canvas (8 cols) -->
-        <div class="lg:col-span-8 bg-[#0F172A] border border-[#1E293B] rounded p-4 flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="text-xs font-semibold text-[#F8FAFC] tracking-wider">Histórico de Leituras (DADOS FALSOS)</h3>
-              <span class="font-mono text-[10px] text-[#475569] tracking-[0.09em]">SÉRIE TEMPORAL HARDCODED · BARBOSA-SP</span>
-            </div>
-
-            <div class="flex items-center gap-4 text-xs font-mono">
-              <span class="flex items-center gap-1.5 text-[#94A3B8]">
-                <span class="w-3.5 h-0.5 bg-[#06B6D4]"></span> IRE [MOCK]
-              </span>
-              <span class="flex items-center gap-1.5 text-[#94A3B8]">
-                <span class="w-3.5 h-0.5 bg-[#2563EB]"></span> OD mg/L [MOCK]
-              </span>
+            <!-- Panel Window Controls (Maximize / Minimize) -->
+            <div class="flex items-center gap-1">
+              <button id="btnOpenHistoryModal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors" title="Abrir Tabela Completa de Registros">
+                <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+              </button>
+              <button id="btnMinimizeAnalytics" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Minimizar Gráfico">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
           </div>
 
-          <div class="relative w-full h-52">
+          <!-- Canvas Chart with Light Mode Theme -->
+          <div class="relative w-full h-44">
             <canvas id="ireChart"></canvas>
           </div>
+
+          <!-- Quick Bottom Action Bar -->
+          <div class="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs font-mono">
+            <span class="flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Telemetria ativa
+            </span>
+            <button id="btnOpenHistoryModalBottom" type="button" class="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+              <span>Ver Tabela Completa</span>
+              <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- History Stream Log (4 cols) -->
-        <div class="lg:col-span-4 bg-[#0F172A] border border-[#1E293B] rounded p-4 flex flex-col justify-between">
-          <div class="flex items-center justify-between border-b border-[#1E293B] pb-2">
-            <h3 class="text-xs font-semibold text-[#F8FAFC] tracking-wider font-mono">LOG DE TELEMETRIA [MOCK]</h3>
-            <button id="btnClearHistory" class="text-[10px] font-mono text-[#64748B] hover:text-[#F8FAFC] underline">LIMPAR LOG</button>
-          </div>
+      </div>
 
-          <div class="mt-2.5 overflow-y-auto max-h-[200px] space-y-2 pr-1" id="historyLogContainer">
+    </div>
+
+    <!-- Hidden compatibility badge for map overlay text -->
+    <div id="mapOverlayStatus" class="hidden">ÓTIMO / ÁGUA BOA</div>
+
+  </div>
+
+  <!-- ==================== FULL TELEMETRY HISTORY MODAL (Expanded Table View) ==================== -->
+  <div id="historyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl p-5 sm:p-7 max-w-5xl w-full max-h-[85vh] shadow-2xl flex flex-col justify-between space-y-4">
+      
+      <!-- Modal Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i data-lucide="database" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h2 class="text-base sm:text-lg font-bold text-slate-900 font-sans">Histórico Analítico de Telemetria</h2>
+              <p class="text-xs text-slate-500 font-sans mt-0.5">Série temporal de parâmetros físico-químicos e diagnósticos calculados pelo algoritmo IRE.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnClearHistoryModal" type="button" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono font-medium text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50/50 transition-colors">
+            Limpar Histórico
+          </button>
+          <button id="btnCloseHistoryModal" type="button" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Fechar Janela">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto overflow-y-auto flex-grow max-h-[55vh] border border-slate-100 rounded-2xl">
+        <table class="w-full text-left font-sans text-xs border-collapse">
+          <thead class="bg-slate-50/90 sticky top-0 text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200/80 backdrop-blur-sm z-10">
+            <tr>
+              <th class="py-3 px-3.5">Horário / Data</th>
+              <th class="py-3 px-3.5">Estação</th>
+              <th class="py-3 px-3.5 text-center">Índice IRE</th>
+              <th class="py-3 px-3.5 text-center">pH</th>
+              <th class="py-3 px-3.5 text-center">Turbidez</th>
+              <th class="py-3 px-3.5 text-center">OD (mg/L)</th>
+              <th class="py-3 px-3.5 text-center">Temp (°C)</th>
+              <th class="py-3 px-3.5">Diagnóstico Limnológico</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody" class="divide-y divide-slate-100 font-mono text-xs text-slate-700">
             <!-- Dynamically populated -->
-          </div>
-        </div>
+          </tbody>
+        </table>
+      </div>
 
-      </section>
+      <!-- Modal Footer -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-3 border-t border-slate-100 text-[11px] font-mono text-slate-500">
+        <span id="historyRecordCount">Exibindo registros sincronizados com a telemetria do Rio Tietê.</span>
+        <span class="text-emerald-700 font-semibold flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Transmissão em tempo real ativa
+        </span>
+      </div>
 
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-[#0F172A] border-t border-[#1E293B] py-3.5 px-4 text-center text-xs text-[#64748B] font-mono mt-auto">
-      © 2026 PROTEUS. Todos os direitos reservados.
-    </footer>
-
+    </div>
   </div>
 
   <!-- Scripts -->

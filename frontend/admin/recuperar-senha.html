@@ -1,50 +1,50 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PROTEUS — Recuperação de Senha</title>
   <meta name="description" content="Recuperação de acesso à área administrativa do sistema PROTEUS.">
 
-  <!-- Google Fonts: IBM Plex Sans & Mono -->
+  <!-- Google Fonts: Plus Jakarta Sans, Inter & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- Custom CSS Design System -->
+  <link rel="stylesheet" href="../css/style.css">
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <style>
-    body { font-family: 'IBM Plex Sans', sans-serif; }
-    .font-mono { font-family: 'IBM Plex Mono', monospace; }
-  </style>
 </head>
-<body class="bg-[#020617] text-[#F8FAFC] min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<body class="bg-gradient-to-br from-slate-50 via-slate-100/60 to-blue-50/40 text-slate-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden font-sans select-none">
 
-  <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#06B6D4]/10 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#3FA87A]/10 rounded-full blur-3xl pointer-events-none"></div>
+  <!-- Ambient background glow -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
   <div class="max-w-md w-full relative z-10 space-y-6">
 
-    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl p-6 sm:p-8 shadow-2xl space-y-6 backdrop-blur-md">
+    <div class="glass-card p-7 sm:p-9 shadow-xl space-y-6">
       
       <!-- Topo -->
       <div class="text-center space-y-2">
-        <a href="../index.html" class="inline-block hover:opacity-80 transition-opacity">
-          <img src="../assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-12 w-auto mx-auto mb-2">
+        <a href="../index.html" class="inline-block hover:opacity-85 transition-opacity" title="Voltar ao início">
+          <img src="../assets/logo-full.svg" alt="PROTEUS Logo" class="h-10 w-auto mx-auto mb-2">
         </a>
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-mono text-[11px] font-semibold tracking-wider uppercase">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-600 font-mono text-[11px] font-bold tracking-wider uppercase">
           <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
           Segurança
         </div>
-        <h1 id="pageTitle" class="text-lg font-bold text-white tracking-tight">Recuperar Senha</h1>
-        <p id="pageSubtitle" class="text-xs text-[#94A3B8]">Informe seu e-mail para receber as instruções de redefinição.</p>
+        <h1 id="pageTitle" class="text-xl font-bold text-slate-900 tracking-tight font-heading">Recuperar Senha</h1>
+        <p id="pageSubtitle" class="text-xs text-slate-500">Informe seu e-mail cadastrado para receber o link de redefinição.</p>
       </div>
 
       <!-- Alerta -->
-      <div id="alertBox" class="hidden p-3 rounded text-xs font-mono border flex items-start gap-2">
+      <div id="alertBox" class="hidden p-3 rounded-xl text-xs font-mono border flex items-start gap-2">
         <i id="alertIcon" data-lucide="alert-circle" class="w-4 h-4 flex-none mt-0.5"></i>
         <span id="alertMsg"></span>
       </div>
@@ -52,11 +52,11 @@
       <!-- Formulário 1: Solicitar Link de Recuperação -->
       <form id="formSolicitar" class="space-y-4">
         <div>
-          <label for="inputEmail" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+          <label for="inputEmail" class="block font-mono text-xs font-semibold text-slate-700 mb-1.5">
             E-mail Cadastrado:
           </label>
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <i data-lucide="mail" class="w-4 h-4"></i>
             </span>
             <input 
@@ -65,7 +65,7 @@
               placeholder="seu-email@proteus.com" 
               required
               autocomplete="email"
-              class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             >
           </div>
         </div>
@@ -73,17 +73,17 @@
         <button 
           type="submit" 
           id="btnSolicitar"
-          class="w-full py-2.5 px-4 rounded-lg bg-[#06B6D4] hover:bg-[#22D3EE] text-[#020617] font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+          class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-2 cursor-pointer"
         >
           <i data-lucide="send" class="w-4 h-4"></i>
-          <span>ENVIAR INSTRUÇÕES</span>
+          <span>Enviar Instruções</span>
         </button>
       </form>
 
-      <!-- Formulário 2: Redefinir Nova Senha (Aparece se houver ?token=... na URL) -->
+      <!-- Formulário 2: Redefinir Nova Senha -->
       <form id="formRedefinir" class="space-y-4 hidden">
         <div>
-          <label for="inputNovaSenha" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+          <label for="inputNovaSenha" class="block font-mono text-xs font-semibold text-slate-700 mb-1.5">
             Nova Senha (mínimo 6 caracteres):
           </label>
           <input 
@@ -91,12 +91,12 @@
             id="inputNovaSenha" 
             placeholder="••••••••" 
             required
-            class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
           >
         </div>
 
         <div>
-          <label for="inputConfirmarSenha" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+          <label for="inputConfirmarSenha" class="block font-mono text-xs font-semibold text-slate-700 mb-1.5">
             Confirmar Nova Senha:
           </label>
           <input 
@@ -104,27 +104,27 @@
             id="inputConfirmarSenha" 
             placeholder="••••••••" 
             required
-            class="w-full bg-[#020617] border border-[#1E293B] rounded-lg px-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
           >
         </div>
 
         <button 
           type="submit" 
           id="btnRedefinir"
-          class="w-full py-2.5 px-4 rounded-lg bg-[#3FA87A] hover:bg-[#4bc791] text-[#020617] font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+          class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-2 cursor-pointer"
         >
           <i data-lucide="check" class="w-4 h-4"></i>
-          <span>SALVAR NOVA SENHA</span>
+          <span>Salvar Nova Senha</span>
         </button>
       </form>
 
       <!-- Rodapé -->
-      <div class="pt-4 border-t border-[#1E293B] flex items-center justify-between text-xs text-[#64748B] font-mono">
-        <a href="login.html" class="hover:text-white flex items-center gap-1 transition-colors">
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
+        <a href="login.html" class="hover:text-blue-600 flex items-center gap-1 transition-colors">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
           Voltar ao Login
         </a>
-        <a href="../index.html" class="hover:text-white transition-colors">
+        <a href="../index.html" class="hover:text-blue-600 transition-colors">
           Portal Público
         </a>
       </div>
@@ -148,19 +148,18 @@
     const alertIcon = document.getElementById('alertIcon');
 
     function showAlert(msg, isError = true) {
-      alertBox.classList.remove('hidden', 'bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]', 'bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+      alertBox.classList.remove('hidden', 'bg-rose-50', 'border-rose-200', 'text-rose-700', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
       if (isError) {
-        alertBox.classList.add('bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]');
+        alertBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-700');
         alertIcon.setAttribute('data-lucide', 'alert-circle');
       } else {
-        alertBox.classList.add('bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+        alertBox.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
         alertIcon.setAttribute('data-lucide', 'check-circle-2');
       }
       alertMsg.innerHTML = msg;
       lucide.createIcons();
     }
 
-    // Se a URL já tiver o token (ex: clicou no link recebido), mostra formulário de redefinição
     if (tokenUrl) {
       formSolicitar.classList.add('hidden');
       formRedefinir.classList.remove('hidden');
@@ -168,7 +167,6 @@
       pageSubtitle.textContent = 'Digite sua nova senha de acesso administrativo.';
     }
 
-    // Ação: Solicitar Link
     formSolicitar.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('inputEmail').value.trim();
@@ -188,7 +186,7 @@
 
         let extraDev = '';
         if (data.devToken) {
-          extraDev = `<br><br><span class="font-bold text-[#06B6D4]">Ambiente de Desenvolvimento:</span><br><a href="recuperar-senha.html?token=${data.devToken}" class="underline hover:text-white">Clique aqui para redefinir agora com seu token de teste</a>`;
+          extraDev = `<br><br><span class="font-bold text-blue-600">Ambiente de Desenvolvimento:</span><br><a href="recuperar-senha.html?token=${data.devToken}" class="underline hover:text-blue-700">Clique aqui para redefinir agora com seu token de teste</a>`;
         }
 
         showAlert((data.message || 'Instruções enviadas com sucesso!') + extraDev, false);
@@ -201,7 +199,6 @@
       }
     });
 
-    // Ação: Redefinir Senha com Token
     formRedefinir.addEventListener('submit', async (e) => {
       e.preventDefault();
       const novaSenha = document.getElementById('inputNovaSenha').value;

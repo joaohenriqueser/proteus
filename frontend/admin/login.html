@@ -1,56 +1,51 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PROTEUS — Acesso Administrativo</title>
-  <meta name="description" content="Acesso restrito à área administrativa do sistema PROTEUS.">
+  <meta name="description" content="Acesso restrito à área administrativa da plataforma PROTEUS.">
 
-  <!-- Google Fonts: IBM Plex Sans & Mono -->
+  <!-- Google Fonts: Plus Jakarta Sans, Inter & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- Custom CSS Design System -->
+  <link rel="stylesheet" href="../css/style.css">
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <style>
-    body {
-      font-family: 'IBM Plex Sans', sans-serif;
-    }
-    .font-mono {
-      font-family: 'IBM Plex Mono', monospace;
-    }
-  </style>
 </head>
-<body class="bg-[#020617] text-[#F8FAFC] min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<body class="bg-gradient-to-br from-slate-50 via-slate-100/60 to-blue-50/40 text-slate-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden font-sans select-none">
 
-  <!-- Subtle glow background effects -->
-  <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#06B6D4]/10 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#3FA87A]/10 rounded-full blur-3xl pointer-events-none"></div>
+  <!-- Subtle ambient decorative glow rings -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
   <div class="max-w-md w-full relative z-10 space-y-6">
 
-    <!-- Card de Login -->
-    <div class="bg-[#0F172A] border border-[#1E293B] rounded-xl p-6 sm:p-8 shadow-2xl space-y-6 backdrop-blur-md">
+    <!-- Card de Login Glassmorphic -->
+    <div class="glass-card p-7 sm:p-9 shadow-xl space-y-6">
       
       <!-- Logo e Título -->
       <div class="text-center space-y-2">
-        <a href="../index.html" class="inline-block hover:opacity-80 transition-opacity">
-          <img src="../assets/logo_proteus.svg" alt="PROTEUS Logo" class="h-12 w-auto mx-auto mb-2">
+        <a href="../index.html" class="inline-block hover:opacity-85 transition-opacity" title="Voltar ao início">
+          <img src="../assets/logo-full.svg" alt="PROTEUS Logo" class="h-10 w-auto mx-auto mb-2">
         </a>
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#06B6D4]/10 border border-[#06B6D4]/30 text-[#06B6D4] font-mono text-[11px] font-semibold tracking-wider uppercase">
-          <i data-lucide="shield-lock" class="w-3.5 h-3.5"></i>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-600 font-mono text-[11px] font-bold tracking-wider uppercase">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
           Área Restrita
         </div>
-        <h1 class="text-lg font-bold text-white tracking-tight">Acesso Administrativo</h1>
-        <p class="text-xs text-[#94A3B8]">Gestão de estações, equipamentos IoT (ESP32) e telemetria.</p>
+        <h1 class="text-xl font-bold text-slate-900 tracking-tight font-heading">Painel de Gestão &amp; Telemetria</h1>
+        <p class="text-xs text-slate-500">Credenciais administrativas para gerenciamento das estações e hardware IoT.</p>
       </div>
 
       <!-- Alerta de Feedback (Mensagens de Erro / Sucesso) -->
-      <div id="loginAlert" class="hidden p-3 rounded text-xs font-mono border flex items-start gap-2">
+      <div id="loginAlert" class="hidden p-3 rounded-xl text-xs font-mono border flex items-start gap-2">
         <i id="alertIcon" data-lucide="alert-circle" class="w-4 h-4 flex-none mt-0.5"></i>
         <span id="alertMsg"></span>
       </div>
@@ -58,52 +53,52 @@
       <!-- Formulário de Login -->
       <form id="formLogin" class="space-y-4">
         <div>
-          <label for="inputLogin" class="block font-mono text-xs font-medium text-[#94A3B8] mb-1.5">
+          <label for="inputLogin" class="block font-mono text-xs font-semibold text-slate-700 mb-1.5">
             Usuário ou E-mail:
           </label>
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <i data-lucide="user" class="w-4 h-4"></i>
             </span>
             <input 
               type="text" 
               id="inputLogin" 
-              name="login"
+              name="login" 
               placeholder="admin ou admin@proteus.com" 
               required
               autocomplete="username"
-              class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-9 pr-3 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             >
           </div>
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <label for="inputSenha" class="block font-mono text-xs font-medium text-[#94A3B8]">
-              Senha:
+            <label for="inputSenha" class="block font-mono text-xs font-semibold text-slate-700">
+              Senha de Acesso:
             </label>
-            <a href="recuperar-senha.html" class="text-xs font-mono text-[#06B6D4] hover:underline">
-              Esqueceu a senha?
+            <a href="recuperar-senha.html" class="font-mono text-[11px] text-blue-600 hover:text-blue-700 transition-colors">
+              Esqueceu?
             </a>
           </div>
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B]">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <i data-lucide="lock" class="w-4 h-4"></i>
             </span>
             <input 
               type="password" 
               id="inputSenha" 
-              name="senha"
+              name="senha" 
               placeholder="••••••••" 
               required
               autocomplete="current-password"
-              class="w-full bg-[#020617] border border-[#1E293B] rounded-lg pl-9 pr-10 py-2.5 text-sm text-white placeholder-[#475569] focus:outline-none focus:border-[#06B6D4] transition-colors"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-10 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
             >
             <button 
               type="button" 
               id="btnToggleSenha"
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-white"
-              title="Mostrar/Ocultar Senha"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 transition-colors"
+              aria-label="Mostrar ou ocultar senha"
             >
               <i id="iconToggleSenha" data-lucide="eye" class="w-4 h-4"></i>
             </button>
@@ -113,16 +108,34 @@
         <button 
           type="submit" 
           id="btnSubmitLogin"
-          class="w-full py-2.5 px-4 rounded-lg bg-[#06B6D4] hover:bg-[#22D3EE] text-[#020617] font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-[#06B6D4]/20 active:scale-[0.99]"
+          class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-mono font-bold text-xs tracking-wider uppercase transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-2 cursor-pointer"
         >
           <i data-lucide="log-in" class="w-4 h-4"></i>
-          <span>ENTRAR NO SISTEMA</span>
+          <span>Entrar no Sistema</span>
+        </button>
+
+        <!-- Divisor ou teste local -->
+        <div class="relative flex py-1.5 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink mx-2 text-[10px] font-mono text-slate-400 uppercase tracking-wider">ou teste local</span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <!-- Botão Bypass Dev Mode -->
+        <button 
+          type="button" 
+          id="btnDevBypass" 
+          class="w-full py-2.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-mono font-bold text-xs tracking-wide transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+          title="Acessar o Painel em Modo Demonstração sem necessidade de banco de dados"
+        >
+          <i data-lucide="wrench" class="w-4 h-4 text-amber-600"></i>
+          <span>Acesso Desenvolvedor (Bypass Sem Banco)</span>
         </button>
       </form>
 
       <!-- Rodapé do Card -->
-      <div class="pt-4 border-t border-[#1E293B] flex items-center justify-between text-xs text-[#64748B] font-mono">
-        <a href="../index.html" class="hover:text-white flex items-center gap-1 transition-colors">
+      <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono">
+        <a href="../index.html" class="hover:text-blue-600 flex items-center gap-1 transition-colors">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
           Voltar ao Portal
         </a>
@@ -134,10 +147,8 @@
   </div>
 
   <script>
-    // Inicializa ícones Lucide
     lucide.createIcons();
 
-    // Alternar visualização da senha
     const btnToggleSenha = document.getElementById('btnToggleSenha');
     const inputSenha = document.getElementById('inputSenha');
     const iconToggleSenha = document.getElementById('iconToggleSenha');
@@ -149,7 +160,6 @@
       lucide.createIcons();
     });
 
-    // Submissão do Formulário de Login
     const formLogin = document.getElementById('formLogin');
     const btnSubmitLogin = document.getElementById('btnSubmitLogin');
     const loginAlert = document.getElementById('loginAlert');
@@ -157,12 +167,12 @@
     const alertIcon = document.getElementById('alertIcon');
 
     function showAlert(msg, isError = true) {
-      loginAlert.classList.remove('hidden', 'bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]', 'bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+      loginAlert.classList.remove('hidden', 'bg-rose-50', 'border-rose-200', 'text-rose-700', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
       if (isError) {
-        loginAlert.classList.add('bg-[#C55A54]/10', 'border-[#C55A54]/30', 'text-[#C55A54]');
+        loginAlert.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-700');
         alertIcon.setAttribute('data-lucide', 'alert-circle');
       } else {
-        loginAlert.classList.add('bg-[#3FA87A]/10', 'border-[#3FA87A]/30', 'text-[#3FA87A]');
+        loginAlert.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
         alertIcon.setAttribute('data-lucide', 'check-circle-2');
       }
       alertMsg.textContent = msg;
@@ -196,7 +206,6 @@
         if (response.ok && data.success) {
           showAlert('Login aprovado! Redirecionando...', false);
           
-          // Guarda o token e dados do usuário logado
           localStorage.setItem('proteus_admin_token', data.token);
           localStorage.setItem('proteus_admin_user', JSON.stringify(data.usuario));
 
@@ -218,19 +227,41 @@
       }
     });
 
-    // Se já estiver com token salvo válido, redireciona direto
+    // Bypass de Desenvolvedor para testes sem banco de dados
+    const btnDevBypass = document.getElementById('btnDevBypass');
+    if (btnDevBypass) {
+      btnDevBypass.addEventListener('click', () => {
+        localStorage.setItem('proteus_admin_token', 'DEV_MOCK_TOKEN_ADMIN');
+        localStorage.setItem('proteus_admin_user', JSON.stringify({
+          id: 1,
+          nome: 'Cauã Lemes (Dev Mode)',
+          usuario: 'admin',
+          cargo: 'Idealizador & Desenvolvedor',
+          email: 'admin@proteus.com'
+        }));
+        showAlert('Bypass ativado! Entrando na Área Restrita em Modo Dev...', false);
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 500);
+      });
+    }
+
     const tokenExistente = localStorage.getItem('proteus_admin_token');
     if (tokenExistente) {
-      fetch('/api/auth/me', {
-        headers: { 'Authorization': `Bearer ${tokenExistente}` }
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.success) {
-          window.location.href = 'dashboard.html';
-        }
-      })
-      .catch(() => {});
+      if (tokenExistente === 'DEV_MOCK_TOKEN_ADMIN') {
+        window.location.href = 'dashboard.html';
+      } else {
+        fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${tokenExistente}` }
+        })
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            window.location.href = 'dashboard.html';
+          }
+        })
+        .catch(() => {});
+      }
     }
   </script>
 </body>

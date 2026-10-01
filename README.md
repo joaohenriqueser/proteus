@@ -68,11 +68,6 @@ $$\text{IRE} = \frac{(0.40 \cdot S_{turb}) + (0.35 \cdot S_{OD}) + (0.25 \cdot S
    - Fundamentação matemática completa e equações de normalização dos sub-índices.
    - Explicação das dinâmicas limnológicas da floração algal no Rio Tietê.
 
-4. **ℹ️ Sobre o Projeto (`sobre.html`)**:
-   - História socioambiental no trecho do Baixo Tietê em Barbosa-SP.
-   - Apresentação da equipe de desenvolvimento do IFSP Campus Birigui.
-   - Espaços reservados para galeria de fotos do rio, protótipo ESP32 e equipe.
-
 ---
 
 ## 📁 Estrutura do Projeto
@@ -95,8 +90,7 @@ proteus/
 │   ├── js/                   # Lógica client-side, gráficos e cálculo do IRE
 │   ├── index.html            # Painel de Monitoramento ao Vivo
 │   ├── metodologia.html      # Metodologia Técnica (Abas Resumida e Detalhada)
-│   ├── simulador.html        # Simulador Interativo de Parâmetros
-│   └── sobre.html            # Histórico do projeto e equipe
+│   └── simulador.html        # Simulador Interativo de Parâmetros
 ├── .gitignore                # Regras globais de exclusão do Git
 └── README.md                 # Documentação principal do ecossistema
 ```

@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Animated Liquid Water Tank Elements
   const simulatedWaterLiquid = document.getElementById('simulatedWaterLiquid');
+  const waterSediments = document.getElementById('waterSediments');
   const waterTankDot = document.getElementById('waterTankDot');
   const waterQualityTag = document.getElementById('waterQualityTag');
 
@@ -61,48 +62,61 @@ document.addEventListener('DOMContentLoaded', () => {
     previewIREValue.textContent = diag.ire;
     previewProgressBar.style.width = `${Math.min(100, Math.max(0, diag.ireNum))}%`;
     previewProgressBar.style.backgroundColor = diag.status.accentColor;
-    previewDiagnosticCard.className = `bg-[#0F172A] border border-[#1E293B] rounded p-5 flex flex-col justify-between flex-grow transition-all duration-300 relative overflow-hidden space-y-4 ${diag.status.colorClass}`;
+    previewDiagnosticCard.className = `glass-card p-5 sm:p-6 flex flex-col justify-between flex-grow transition-all duration-300 relative overflow-hidden space-y-4 shadow-md`;
 
     previewStatusTitle.textContent = diag.status.title;
-    previewBadge.className = `px-2.5 py-1 rounded text-xs font-mono font-bold border flex items-center gap-1.5 ${diag.status.badgeClass}`;
+    previewBadge.className = `px-2.5 py-1 rounded-full text-xs font-mono font-bold border flex items-center gap-1.5 ${diag.status.badgeClass}`;
     previewMessageText.textContent = `"${diag.status.message}"`;
 
     if (previewIcon) {
       previewIcon.setAttribute('data-lucide', diag.status.iconName);
     }
 
-    // 3. Dynamic Water Tank Liquid Reaction
+    // 3. Dynamic Water Tank Liquid Reaction (Realistic Limnology: Crystalline -> Eutrophic Green/Moss)
     if (simulatedWaterLiquid && waterQualityTag) {
       const ire = diag.ireNum;
       let liquidBg = '';
       let qualityText = '';
-      let dotColor = '#3FA87A';
+      let dotColor = '#0284C7';
 
       if (ire >= 80) {
-        liquidBg = 'linear-gradient(180deg, rgba(6, 182, 212, 0.85) 0%, rgba(14, 116, 144, 0.95) 100%)';
+        // Ótimo: Água pura, azul límpido e cristalina
+        liquidBg = 'linear-gradient(180deg, #0284C7 0%, #0369A1 100%)';
         qualityText = 'LIMPA / CRISTALINA';
-        dotColor = '#3FA87A';
+        dotColor = '#0284C7';
       } else if (ire >= 60) {
-        liquidBg = 'linear-gradient(180deg, rgba(34, 197, 94, 0.85) 0%, rgba(21, 128, 61, 0.95) 100%)';
-        qualityText = 'BOA / ACEITÁVEL';
-        dotColor = '#3FA87A';
+        // Regular: Turquesa / leve perda de transparência
+        liquidBg = 'linear-gradient(180deg, #0D9488 0%, #0F766E 100%)';
+        qualityText = 'BOA / LEVE TURVAÇÃO';
+        dotColor = '#0D9488';
       } else if (ire >= 40) {
-        liquidBg = 'linear-gradient(180deg, rgba(234, 179, 8, 0.85) 0%, rgba(161, 98, 7, 0.95) 100%)';
-        qualityText = 'ATENÇÃO / TURVA';
-        dotColor = '#C9A03C';
+        // Atenção: Verde-oliva / início de densidade algal
+        liquidBg = 'linear-gradient(180deg, #65A30D 0%, #4D7C0F 100%)';
+        qualityText = 'ATENÇÃO / PROLIFERAÇÃO';
+        dotColor = '#65A30D';
       } else if (ire >= 20) {
-        liquidBg = 'linear-gradient(180deg, rgba(202, 138, 4, 0.9) 0%, rgba(133, 77, 14, 0.95) 100%)';
-        qualityText = 'ALERTA / ÁGUA VERDE';
-        dotColor = '#C97A3C';
+        // Alerta: Verde musgo denso / floração perceptível
+        liquidBg = 'linear-gradient(180deg, #365314 0%, #1E3A1E 100%)';
+        qualityText = 'ALERTA / FLORAÇÃO ALGAL';
+        dotColor = '#365314';
       } else {
-        liquidBg = 'linear-gradient(180deg, rgba(239, 68, 68, 0.9) 0%, rgba(153, 27, 27, 0.95) 100%)';
-        qualityText = 'CRÍTICA / POLUÍDA';
-        dotColor = '#C55A54';
+        // Crítico: Verde-lodo profundo / biomassa eutrofizada (sem tom de sangue)
+        liquidBg = 'linear-gradient(180deg, #14532D 0%, #0B2516 100%)';
+        qualityText = 'CRÍTICA / EUTROFIZADA';
+        dotColor = '#14532D';
       }
 
       simulatedWaterLiquid.style.background = liquidBg;
-      const fillHeight = Math.min(85, Math.max(35, 40 + (ire * 0.45)));
+      
+      // Mantém a gota preenchida de forma realista (entre 78% e 88%), sem ficar "meio-vazia"
+      const fillHeight = Math.min(88, Math.max(76, 76 + (ire * 0.12)));
       simulatedWaterLiquid.style.height = `${fillHeight}%`;
+
+      // Aplica densidade de sedimentos suspensos proporcional à turbidez da água
+      if (waterSediments) {
+        const sedimentOpacity = Math.min(0.9, Math.max(0, (params.turb - 5) / 140));
+        waterSediments.style.opacity = sedimentOpacity.toFixed(2);
+      }
 
       waterQualityTag.textContent = qualityText;
       waterQualityTag.style.color = dotColor;

@@ -80,13 +80,13 @@ window.IREEngine = {
     let ire = iPonderado / fTemp;
     ire = Math.min(100, Math.max(0, ire));
 
-    // Real-World Status Mapping
+    // Real-World Status Mapping (Light Mode Design System)
     let status = {
       code: 'OTIMO',
       title: 'ÓTIMO / ÁGUA BOA',
       colorClass: 'status-bg-otimo',
-      badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-      textHex: '#16a34a',
+      badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm',
+      textHex: '#059669',
       accentColor: '#10b981',
       iconName: 'check-circle-2',
       message: 'Água em equilíbrio ecológico, sem proliferação de microalgas.',
@@ -98,7 +98,7 @@ window.IREEngine = {
         code: 'CRITICO',
         title: 'CRÍTICO / ÁGUA VERDE INTENSA',
         colorClass: 'status-bg-critico',
-        badgeClass: 'bg-red-500/20 text-red-400 border-red-500/30',
+        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200 shadow-sm',
         textHex: '#dc2626',
         accentColor: '#ef4444',
         iconName: 'alert-triangle',
@@ -110,7 +110,7 @@ window.IREEngine = {
         code: 'ALERTA',
         title: 'ALERTA / EUTROFIZADO',
         colorClass: 'status-bg-alerta',
-        badgeClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+        badgeClass: 'bg-orange-50 text-orange-700 border-orange-200 shadow-sm',
         textHex: '#ea580c',
         accentColor: '#f97316',
         iconName: 'alert-circle',
@@ -122,8 +122,8 @@ window.IREEngine = {
         code: 'ATENCAO',
         title: 'ATENÇÃO / PRÉ-FLORAÇÃO',
         colorClass: 'status-bg-atencao',
-        badgeClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-        textHex: '#ca8a04',
+        badgeClass: 'bg-amber-50 text-amber-700 border-amber-200 shadow-sm',
+        textHex: '#d97706',
         accentColor: '#f59e0b',
         iconName: 'info',
         message: 'Elevação leve de turbidez/pH. Início de proliferação algal.',
@@ -138,28 +138,28 @@ window.IREEngine = {
         subIndex: spH.toFixed(1),
         percentage: Math.min(100, (ph / 14) * 100),
         statusText: ph >= 6.5 && ph <= 8.0 ? 'Faixa Ideal' : (ph > 8.5 ? 'Alcalino Elevado' : 'Ácido'),
-        statusColor: ph >= 6.5 && ph <= 8.0 ? 'text-emerald-400' : 'text-amber-400'
+        statusColor: ph >= 6.5 && ph <= 8.0 ? 'text-emerald-600 font-semibold' : 'text-amber-600 font-semibold'
       },
       turb: {
         value: turb,
         subIndex: sTurb.toFixed(1),
         percentage: Math.min(100, (turb / 120) * 100),
         statusText: turb <= 10 ? 'Excelente (<=10)' : (turb <= 100 ? 'Moderado' : 'Elevado (>100)'),
-        statusColor: turb <= 10 ? 'text-emerald-400' : (turb <= 100 ? 'text-amber-400' : 'text-red-400')
+        statusColor: turb <= 10 ? 'text-emerald-600 font-semibold' : (turb <= 100 ? 'text-amber-600 font-semibold' : 'text-rose-600 font-semibold')
       },
       od: {
         value: od,
         subIndex: sOD.toFixed(1),
         percentage: Math.min(100, (od / 10) * 100),
         statusText: od >= 5.0 ? 'Ótimo (>=5.0 mg/L)' : (od >= 2.0 ? 'Baixo (2-5 mg/L)' : 'Crítico (<2 mg/L)'),
-        statusColor: od >= 5.0 ? 'text-emerald-400' : (od >= 2.0 ? 'text-amber-400' : 'text-red-400')
+        statusColor: od >= 5.0 ? 'text-emerald-600 font-semibold' : (od >= 2.0 ? 'text-amber-600 font-semibold' : 'text-rose-600 font-semibold')
       },
       temp: {
         value: temp,
         subIndex: fTemp === 1.2 ? 'Penalizado (x1.2)' : 'Normal (x1.0)',
         percentage: Math.min(100, (temp / 40) * 100),
         statusText: temp >= 25 ? 'Risco Térmico (>=25°C)' : 'Ameno (<25°C)',
-        statusColor: temp >= 25 ? 'text-rose-400' : 'text-emerald-400'
+        statusColor: temp >= 25 ? 'text-rose-600 font-semibold' : 'text-emerald-600 font-semibold'
       }
     };
 

@@ -48,27 +48,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnToggleTelemetry = document.getElementById('btnToggleTelemetry');
   const mapOverlayStatus = document.getElementById('mapOverlayStatus');
 
-  // Station DOM Elements & Map Picker Variables
+  // Station DOM Elements
   const stationSelect = document.getElementById('stationSelect');
   const stationNameDisplay = document.getElementById('stationNameDisplay');
   const mapStationLabel = document.getElementById('mapStationLabel');
-  const addStationModal = document.getElementById('addStationModal');
-  const btnAddStationModal = document.getElementById('btnAddStationModal');
-  const btnEditStation = document.getElementById('btnEditStation');
-  const btnDeleteStation = document.getElementById('btnDeleteStation');
-  const btnCloseStationModal = document.getElementById('btnCloseStationModal');
-  const btnCancelStationModal = document.getElementById('btnCancelStationModal');
-  const formAddStation = document.getElementById('formAddStation');
-  const inputEditingStationId = document.getElementById('inputEditingStationId');
-  const modalStationTitle = document.getElementById('modalStationTitle');
-
-  const mapPickBanner = document.getElementById('mapPickBanner');
-  const btnCancelMapPick = document.getElementById('btnCancelMapPick');
-  const btnPickPointOnMap = document.getElementById('btnPickPointOnMap');
-
   let allStationMarkers = [];
-  let isMapPickMode = false;
-  let tempPickerMarker = null;
+
+  // Analytics Floating Card & Full History Modal Elements
+  const analyticsPanel = document.getElementById('analyticsPanel');
+  const analyticsMiniPill = document.getElementById('analyticsMiniPill');
+  const btnMinimizeAnalytics = document.getElementById('btnMinimizeAnalytics');
+  const btnRestoreAnalytics = document.getElementById('btnRestoreAnalytics');
+  const btnOpenHistoryModal = document.getElementById('btnOpenHistoryModal');
+  const btnOpenHistoryModalBottom = document.getElementById('btnOpenHistoryModalBottom');
+  const historyModal = document.getElementById('historyModal');
+  const btnCloseHistoryModal = document.getElementById('btnCloseHistoryModal');
+  const btnClearHistoryModal = document.getElementById('btnClearHistoryModal');
+  const historyTableBody = document.getElementById('historyTableBody');
+  const historyRecordCount = document.getElementById('historyRecordCount');
 
   /**
    * Active Station Helper
@@ -149,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (mapMarker) {
           mapMarker.setLatLng(st.coords);
-          mapMarker.setStyle({ color: activeColor, fillColor: '#020617' });
+          mapMarker.setStyle({ color: activeColor, fillColor: '#FFFFFF' });
           mapMarker.setPopupContent(`<b>Estação Ativa: ${st.name}</b><br>${st.river}<br>IRE: ${currentDiag.ire} — ${currentDiag.status.title}`);
         }
       } else {
@@ -157,11 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
           radius: 6,
           color: stColor,
           weight: 2,
-          fillColor: '#0F172A',
-          fillOpacity: 0.85
+          fillColor: '#FFFFFF',
+          fillOpacity: 0.95
         }).addTo(mapInstance);
 
-        marker.bindPopup(`<b>Estação ${st.name}</b><br>${st.river}<br>IRE Estimado: ${stDiag.ire}<br><span style="color:#06B6D4">Clique para selecionar</span>`);
+        marker.bindPopup(`<b>Estação ${st.name}</b><br>${st.river}<br>IRE Estimado: ${stDiag.ire}<br><span style="color:#2563EB">Clique para selecionar</span>`);
 
         marker.on('click', () => {
           switchStation(st.id);
@@ -173,14 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Color Palette Helper
+   * Color Palette Helper (Refined Light Mode)
    */
   function getStatusColor(code) {
     switch (code) {
-      case 'CRITICO': return '#C55A54';
-      case 'ALERTA': return '#C97A3C';
-      case 'ATENCAO': return '#C9A03C';
-      default: return '#3FA87A';
+      case 'CRITICO': return '#EF4444'; // Red-500
+      case 'ALERTA': return '#F97316';  // Orange-500
+      case 'ATENCAO': return '#F59E0B'; // Amber-500
+      default: return '#10B981';        // Emerald-500
     }
   }
 
@@ -212,11 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
       diagSummaryText.textContent = status.message;
     }
     if (scenarioTagDisplay) {
-      scenarioTagDisplay.textContent = state.activeScenarioTag || '[MOCK] ÁGUA IDEAL';
+      scenarioTagDisplay.textContent = state.activeScenarioTag || 'Água Boa';
     }
     if (lastReadTimestamp) {
       const now = new Date();
-      lastReadTimestamp.textContent = `${now.toLocaleTimeString('pt-BR')} [MOCK]`;
+      lastReadTimestamp.textContent = now.toLocaleTimeString('pt-BR');
     }
 
     // Individual Parameters
@@ -225,13 +222,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (notePH) {
       if (state.params.ph >= 6.5 && state.params.ph <= 8.0) {
         notePH.textContent = 'Faixa neutra (CONAMA OK)';
-        if (dotPH) dotPH.style.backgroundColor = '#3FA87A';
+        if (dotPH) dotPH.style.backgroundColor = '#10B981';
       } else if (state.params.ph > 8.5) {
         notePH.textContent = 'Alcalino / Floração Algal';
-        if (dotPH) dotPH.style.backgroundColor = '#C97A3C';
+        if (dotPH) dotPH.style.backgroundColor = '#F97316';
       } else {
         notePH.textContent = 'Fora dos padrões';
-        if (dotPH) dotPH.style.backgroundColor = '#C9A03C';
+        if (dotPH) dotPH.style.backgroundColor = '#F59E0B';
       }
     }
 
@@ -240,13 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noteTurb) {
       if (state.params.turb <= 10) {
         noteTurb.textContent = 'Sólidos baixos (Excelente)';
-        if (dotTurb) dotTurb.style.backgroundColor = '#3FA87A';
+        if (dotTurb) dotTurb.style.backgroundColor = '#10B981';
       } else if (state.params.turb > 100) {
         noteTurb.textContent = 'Acima do limite (>100 NTU)';
-        if (dotTurb) dotTurb.style.backgroundColor = '#C55A54';
+        if (dotTurb) dotTurb.style.backgroundColor = '#EF4444';
       } else {
         noteTurb.textContent = 'Aporte em elevação';
-        if (dotTurb) dotTurb.style.backgroundColor = '#C9A03C';
+        if (dotTurb) dotTurb.style.backgroundColor = '#F59E0B';
       }
     }
 
@@ -255,13 +252,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noteOD) {
       if (state.params.od >= 5.0) {
         noteOD.textContent = 'Saturação adequada';
-        if (dotOD) dotOD.style.backgroundColor = '#3FA87A';
+        if (dotOD) dotOD.style.backgroundColor = '#10B981';
       } else if (state.params.od < 2.0) {
         noteOD.textContent = 'Anóxico / Hipóxia Severa';
-        if (dotOD) dotOD.style.backgroundColor = '#C55A54';
+        if (dotOD) dotOD.style.backgroundColor = '#EF4444';
       } else {
         noteOD.textContent = 'Oxigênio em queda';
-        if (dotOD) dotOD.style.backgroundColor = '#C9A03C';
+        if (dotOD) dotOD.style.backgroundColor = '#F59E0B';
       }
     }
 
@@ -270,10 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noteTemp) {
       if (state.params.temp >= 25.0) {
         noteTemp.textContent = 'Estresse térmico (Ftemp 1.2)';
-        if (dotTemp) dotTemp.style.backgroundColor = '#C97A3C';
+        if (dotTemp) dotTemp.style.backgroundColor = '#F97316';
       } else {
         noteTemp.textContent = 'Sazonal normal';
-        if (dotTemp) dotTemp.style.backgroundColor = '#3FA87A';
+        if (dotTemp) dotTemp.style.backgroundColor = '#10B981';
       }
     }
 
@@ -296,37 +293,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const coords = currentSt.coords;
 
     mapInstance = L.map(mapContainer, {
-      zoomControl: true,
+      zoomControl: false,
       attributionControl: true,
       scrollWheelZoom: true
     }).setView(coords, 13);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_3hu5_1_ebaa2039325b61a89a78caef', {
-      attribution: '© OpenStreetMap · © CARTO · TILES REAIS / DADOS MOCKADOS',
-      maxZoom: 19
+    // Esri World Light Gray Canvas (Crisp, minimal light, zero watermarks)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri · OpenStreetMap',
+      maxZoom: 16
     }).addTo(mapInstance);
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 16,
+      opacity: 0.75
+    }).addTo(mapInstance);
+
+    // Dedicated Custom Floating Map Controls (Zoom In, Zoom Out, Center)
+    const btnZoomIn = document.getElementById('btnMapZoomIn');
+    const btnZoomOut = document.getElementById('btnMapZoomOut');
+    const btnResetView = document.getElementById('btnMapResetView');
+
+    if (btnZoomIn) {
+      btnZoomIn.onclick = () => {
+        if (mapInstance) mapInstance.zoomIn();
+      };
+    }
+    if (btnZoomOut) {
+      btnZoomOut.onclick = () => {
+        if (mapInstance) mapInstance.zoomOut();
+      };
+    }
+    if (btnResetView) {
+      btnResetView.onclick = () => {
+        const cur = getActiveStation();
+        if (mapInstance && cur && cur.coords) {
+          mapInstance.flyTo(cur.coords, 13);
+        }
+      };
+    }
 
     const initialColor = getStatusColor('OTIMO');
     mapHalo = L.circle(coords, {
       radius: 900,
       color: initialColor,
-      weight: 1,
+      weight: 1.5,
       fillColor: initialColor,
-      fillOpacity: 0.12
+      fillOpacity: 0.14
     }).addTo(mapInstance);
 
     mapMarker = L.circleMarker(coords, {
-      radius: 6,
+      radius: 7,
       color: initialColor,
-      weight: 2,
-      fillColor: '#020617',
+      weight: 3,
+      fillColor: '#FFFFFF',
       fillOpacity: 1
     }).addTo(mapInstance);
 
     mapMarker.bindPopup(`<b>Estação ${currentSt.name}</b><br>${currentSt.river}`);
-
-    // Map Click Listener for Station Picker Mode
-    mapInstance.on('click', handleMapClick);
 
     setTimeout(() => mapInstance.invalidateSize(), 200);
   }
@@ -346,165 +370,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /**
-   * Map Point Picker Mode Controller
-   */
-  function enableMapPickMode() {
-    isMapPickMode = true;
-    if (addStationModal) addStationModal.classList.add('hidden');
-    if (mapPickBanner) mapPickBanner.classList.remove('hidden');
-    const container = document.getElementById('leafletMap');
-    if (container) container.style.cursor = 'crosshair';
-  }
-
-  function disableMapPickMode() {
-    isMapPickMode = false;
-    if (mapPickBanner) mapPickBanner.classList.add('hidden');
-    const container = document.getElementById('leafletMap');
-    if (container) container.style.cursor = '';
-  }
-
-  function handleMapClick(e) {
-    if (!isMapPickMode) return;
-
-    const lat = parseFloat(e.latlng.lat.toFixed(4));
-    const lng = parseFloat(e.latlng.lng.toFixed(4));
-
-    const inputLat = document.getElementById('inputStationLat');
-    const inputLng = document.getElementById('inputStationLng');
-    if (inputLat) inputLat.value = lat;
-    if (inputLng) inputLng.value = lng;
-
-    if (tempPickerMarker && mapInstance) {
-      mapInstance.removeLayer(tempPickerMarker);
-    }
-
-    if (window.L && mapInstance) {
-      tempPickerMarker = L.circleMarker([lat, lng], {
-        radius: 8,
-        color: '#22D3EE',
-        fillColor: '#06B6D4',
-        fillOpacity: 0.9,
-        weight: 3
-      }).addTo(mapInstance);
-      tempPickerMarker.bindPopup(`<b>Ponto Selecionado</b><br>Lat: ${lat}, Lng: ${lng}`).openPopup();
-    }
-
-    disableMapPickMode();
-    openStationModal(!!(inputEditingStationId && inputEditingStationId.value));
-  }
-
-  /**
-   * Station Modal Controller
-   */
-  function openStationModal(isEdit = false) {
-    const currentSt = getActiveStation();
-    if (isEdit && currentSt) {
-      if (inputEditingStationId) inputEditingStationId.value = currentSt.id;
-      if (modalStationTitle) modalStationTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-[#06B6D4]"></i> Editar Estação de Telemetria`;
-
-      const inputName = document.getElementById('inputStationName');
-      const inputLat = document.getElementById('inputStationLat');
-      const inputLng = document.getElementById('inputStationLng');
-      const inputRiver = document.getElementById('inputStationRiver');
-
-      if (inputName) inputName.value = currentSt.name;
-      if (inputLat) inputLat.value = currentSt.coords[0];
-      if (inputLng) inputLng.value = currentSt.coords[1];
-      if (inputRiver) inputRiver.value = currentSt.river;
-    } else {
-      if (inputEditingStationId) inputEditingStationId.value = '';
-      if (modalStationTitle) modalStationTitle.innerHTML = `<i data-lucide="map-pin-plus" class="w-4 h-4 text-[#06B6D4]"></i> Cadastrar Nova Estação de Telemetria`;
-      if (formAddStation) formAddStation.reset();
-    }
-
-    if (addStationModal) addStationModal.classList.remove('hidden');
-    if (window.lucide) lucide.createIcons();
-  }
-
-  function closeStationModal() {
-    if (addStationModal) addStationModal.classList.add('hidden');
-    if (formAddStation) formAddStation.reset();
-    if (tempPickerMarker && mapInstance) {
-      mapInstance.removeLayer(tempPickerMarker);
-      tempPickerMarker = null;
-    }
-  }
-
-  function deleteActiveStation() {
-    if (!Array.isArray(state.stations) || state.stations.length <= 1) {
-      alert('Você deve manter pelo menos uma estação cadastrada.');
-      return;
-    }
-    const currentSt = getActiveStation();
-    if (!currentSt) return;
-
-    if (confirm(`Tem certeza que deseja remover a estação "${currentSt.name}"?`)) {
-      state.stations = state.stations.filter(s => s.id !== currentSt.id);
-      const nextStation = state.stations[0];
-      switchStation(nextStation.id);
-    }
-  }
-
-  if (btnAddStationModal) btnAddStationModal.onclick = () => openStationModal(false);
-  if (btnEditStation) btnEditStation.onclick = () => openStationModal(true);
-  if (btnDeleteStation) btnDeleteStation.onclick = deleteActiveStation;
-  if (btnCloseStationModal) btnCloseStationModal.onclick = closeStationModal;
-  if (btnCancelStationModal) btnCancelStationModal.onclick = closeStationModal;
-
-  if (btnPickPointOnMap) btnPickPointOnMap.onclick = enableMapPickMode;
-  if (btnCancelMapPick) {
-    btnCancelMapPick.onclick = () => {
-      disableMapPickMode();
-      openStationModal(!!(inputEditingStationId && inputEditingStationId.value));
-    };
-  }
-
+  // Station Switcher Handler
   if (stationSelect) {
     stationSelect.onchange = (e) => {
       switchStation(e.target.value);
     };
   }
 
-  if (formAddStation) {
-    formAddStation.onsubmit = (e) => {
-      e.preventDefault();
-      const editingId = inputEditingStationId ? inputEditingStationId.value : '';
-      const name = document.getElementById('inputStationName').value.trim();
-      const lat = parseFloat(document.getElementById('inputStationLat').value);
-      const lng = parseFloat(document.getElementById('inputStationLng').value);
-      const river = document.getElementById('inputStationRiver').value.trim();
+  // Analytics Floating Card Minimize & Maximize Controllers
+  if (btnMinimizeAnalytics) {
+    btnMinimizeAnalytics.onclick = () => {
+      if (analyticsPanel) analyticsPanel.classList.add('hidden');
+      if (analyticsMiniPill) analyticsMiniPill.classList.remove('hidden');
+    };
+  }
 
-      if (!name || isNaN(lat) || isNaN(lng) || !river) return;
+  if (btnRestoreAnalytics) {
+    btnRestoreAnalytics.onclick = () => {
+      if (analyticsPanel) analyticsPanel.classList.remove('hidden');
+      if (analyticsMiniPill) analyticsMiniPill.classList.add('hidden');
+      if (chartInstance) chartInstance.resize();
+    };
+  }
 
-      if (editingId) {
-        const st = state.stations.find(s => s.id === editingId);
-        if (st) {
-          st.name = name;
-          st.coords = [lat, lng];
-          st.river = river;
+  function openHistoryModal() {
+    if (historyModal) {
+      historyModal.classList.remove('hidden');
+      renderHistoryTable();
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+
+  function closeHistoryModal() {
+    if (historyModal) {
+      historyModal.classList.add('hidden');
+    }
+  }
+
+  if (btnOpenHistoryModal) btnOpenHistoryModal.onclick = openHistoryModal;
+  if (btnOpenHistoryModalBottom) btnOpenHistoryModalBottom.onclick = openHistoryModal;
+  if (btnCloseHistoryModal) btnCloseHistoryModal.onclick = closeHistoryModal;
+
+  if (historyModal) {
+    historyModal.onclick = (e) => {
+      if (e.target === historyModal) closeHistoryModal();
+    };
+  }
+
+  if (btnClearHistoryModal) {
+    btnClearHistoryModal.onclick = () => {
+      if (confirm('Deseja limpar todos os registros do histórico?')) {
+        state.history = [];
+        app.saveState(state);
+        renderHistoryTable();
+        if (chartInstance) {
+          chartInstance.data.labels = [];
+          chartInstance.data.datasets[0].data = [];
+          chartInstance.data.datasets[1].data = [];
+          chartInstance.update();
         }
-        switchStation(editingId);
-      } else {
-        const newId = 'STATION_' + Date.now();
-        const newStation = {
-          id: newId,
-          name,
-          river,
-          coords: [lat, lng],
-          params: { ph: 7.2, turb: 10, od: 7.0, temp: 23.0 },
-          scenarioTag: '[MOCK] NOVA ESTAÇÃO'
-        };
-
-        state.stations.push(newStation);
-        switchStation(newId);
       }
-
-      if (tempPickerMarker && mapInstance) {
-        mapInstance.removeLayer(tempPickerMarker);
-        tempPickerMarker = null;
-      }
-      closeStationModal();
     };
   }
 
@@ -535,27 +460,27 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: initialLabels,
         datasets: [
           {
-            label: 'IRE [MOCK]',
+            label: 'IRE',
             data: initialIRE,
-            borderColor: '#06B6D4',
-            backgroundColor: 'rgba(6, 182, 212, 0.10)',
-            borderWidth: 1.6,
-            pointRadius: 2,
-            pointBackgroundColor: '#06B6D4',
-            tension: 0.3,
+            borderColor: '#2563EB',
+            backgroundColor: 'rgba(37, 99, 235, 0.08)',
+            borderWidth: 2,
+            pointRadius: 2.5,
+            pointBackgroundColor: '#2563EB',
+            tension: 0.35,
             fill: true,
             yAxisID: 'y'
           },
           {
-            label: 'OD mg/L [MOCK]',
+            label: 'OD (mg/L)',
             data: initialOD,
-            borderColor: '#2563EB',
+            borderColor: '#10B981',
             backgroundColor: 'transparent',
-            borderWidth: 1.6,
+            borderWidth: 2,
             borderDash: [4, 4],
-            pointRadius: 2,
-            pointBackgroundColor: '#2563EB',
-            tension: 0.3,
+            pointRadius: 2.5,
+            pointBackgroundColor: '#10B981',
+            tension: 0.35,
             yAxisID: 'y1'
           }
         ]
@@ -568,32 +493,32 @@ document.addEventListener('DOMContentLoaded', () => {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#0F172A',
-            borderColor: '#1E293B',
+            backgroundColor: 'rgba(255, 255, 255, 0.96)',
+            borderColor: '#E2E8F0',
             borderWidth: 1,
             displayColors: true,
-            titleColor: '#F8FAFC',
-            bodyColor: '#94A3B8',
-            padding: 8,
-            cornerRadius: 3,
-            titleFont: { family: "'IBM Plex Mono',monospace", size: 10 },
-            bodyFont: { family: "'IBM Plex Mono',monospace", size: 10 }
+            titleColor: '#0F172A',
+            bodyColor: '#334155',
+            padding: 10,
+            cornerRadius: 8,
+            titleFont: { family: "'IBM Plex Mono',monospace", size: 11, weight: 'bold' },
+            bodyFont: { family: "'IBM Plex Mono',monospace", size: 11 }
           }
         },
         scales: {
           x: {
-            grid: { color: '#111C31', drawTicks: false },
-            border: { color: '#1E293B' },
-            ticks: { color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 }, padding: 8 }
+            grid: { color: '#F1F5F9', drawTicks: false },
+            border: { color: '#E2E8F0' },
+            ticks: { color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 }, padding: 6 }
           },
           y: {
             min: 0,
             max: 100,
             position: 'left',
-            grid: { color: '#111C31', drawTicks: false },
+            grid: { color: '#F1F5F9', drawTicks: false },
             border: { display: false },
-            title: { display: true, text: 'IRE [MOCK]', color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 } },
-            ticks: { color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 }, padding: 6, stepSize: 25 }
+            title: { display: true, text: 'IRE', color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 } },
+            ticks: { color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 }, padding: 6, stepSize: 25 }
           },
           y1: {
             min: 0,
@@ -601,8 +526,8 @@ document.addEventListener('DOMContentLoaded', () => {
             position: 'right',
             grid: { display: false },
             border: { display: false },
-            title: { display: true, text: 'OD mg/L [MOCK]', color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 } },
-            ticks: { color: '#475569', font: { family: "'IBM Plex Mono',monospace", size: 9 }, padding: 6, stepSize: 2.5 }
+            title: { display: true, text: 'OD mg/L', color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 } },
+            ticks: { color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 }, padding: 6, stepSize: 2.5 }
           }
         }
       }
@@ -627,12 +552,48 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Log Stream Manager
+   * Telemetry Historical Data Engine & Modal Table Manager
    */
+  function seedInitialHistory() {
+    if (!Array.isArray(state.history) || state.history.length < 5) {
+      const currentSt = getActiveStation();
+      const stName = currentSt ? currentSt.name : 'BRB-04 · Barbosa';
+      const now = Date.now();
+      const sampleOffsets = [
+        { min: 4, ph: 7.4, turb: 9, od: 7.1, temp: 22.8 },
+        { min: 18, ph: 7.3, turb: 12, od: 6.9, temp: 23.0 },
+        { min: 45, ph: 7.6, turb: 20, od: 6.2, temp: 23.5 },
+        { min: 90, ph: 7.8, turb: 28, od: 5.6, temp: 24.1 },
+        { min: 180, ph: 7.9, turb: 35, od: 5.1, temp: 24.6 },
+        { min: 360, ph: 7.2, turb: 10, od: 7.4, temp: 22.2 }
+      ];
+
+      state.history = sampleOffsets.map(item => {
+        const itemDate = new Date(now - item.min * 60 * 1000);
+        const diag = engine.diagnose({ ph: item.ph, turb: item.turb, od: item.od, temp: item.temp });
+        return {
+          timestamp: itemDate.toLocaleTimeString('pt-BR'),
+          date: itemDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+          stationName: stName,
+          ire: diag.ire,
+          status: diag.status,
+          params: { ph: item.ph, turb: item.turb, od: item.od, temp: item.temp }
+        };
+      });
+      app.saveState(state);
+    }
+  }
+
   function addHistoryLogEntry(params, diag) {
-    const timeStr = new Date().toLocaleTimeString('pt-BR');
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('pt-BR');
+    const dateStr = now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    const currentSt = getActiveStation();
+
     const entry = {
       timestamp: timeStr,
+      date: dateStr,
+      stationName: currentSt ? currentSt.name : 'Estação Tietê',
       ire: diag.ire,
       status: diag.status,
       params: { ...params }
@@ -643,35 +604,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     state.history.unshift(entry);
-    if (state.history.length > 25) state.history.pop();
+    if (state.history.length > 50) state.history.pop();
     app.saveState(state);
+    renderHistoryTable();
   }
 
-  function renderHistoryLog() {
-    if (!historyLogContainer) return;
+  function renderHistoryTable() {
+    if (!historyTableBody) return;
     if (!Array.isArray(state.history) || state.history.length === 0) {
-      historyLogContainer.innerHTML = `<div class="text-xs text-slate-500 py-4 text-center font-mono font-medium">NENHUMA LEITURA REGISTRADA NO MOCK.</div>`;
+      historyTableBody.innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-8 text-slate-400 font-sans">
+            Nenhum registro no histórico de telemetria. Inicie a simulação ou selecione um cenário para registrar dados.
+          </td>
+        </tr>
+      `;
+      if (historyRecordCount) historyRecordCount.textContent = '0 registros encontrados.';
       return;
     }
 
-    historyLogContainer.innerHTML = state.history.map(item => {
-      const time = item.timestamp || item.time || '--:--:--';
-      const title = item.status ? item.status.title : 'LEITURA SIMULADA';
-      const colorHex = item.status ? getStatusColor(item.status.code) : '#3FA87A';
-      const ireVal = item.ire || '--';
+    historyTableBody.innerHTML = state.history.map(item => {
+      const time = item.timestamp || '--:--:--';
+      const date = item.date || 'Hoje';
+      const station = item.stationName || 'Estação Tietê';
+      const p = item.params || {};
+      const ph = p.ph !== undefined ? Number(p.ph).toFixed(1) : '--';
+      const turb = p.turb !== undefined ? Math.round(p.turb) : '--';
+      const od = p.od !== undefined ? Number(p.od).toFixed(1) : '--';
+      const temp = p.temp !== undefined ? Number(p.temp).toFixed(1) : '--';
+      const ireVal = item.ire !== undefined ? Number(item.ire).toFixed(1) : '--';
+      const statusCode = item.status ? item.status.code : 'REGULAR';
+      const statusTitle = item.status ? item.status.title : 'Leitura';
+      const colorHex = getStatusColor(statusCode);
 
       return `
-        <div class="p-2.5 rounded bg-slate-900 border border-slate-800 flex items-center justify-between text-xs font-mono transition-all hover:border-slate-700">
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] text-slate-500 font-medium">${time}</span>
-            <span class="font-semibold text-[10px] px-1.5 py-0.5 rounded border" style="color: ${colorHex}; border-color: ${colorHex}40; background-color: ${colorHex}15">${title}</span>
-          </div>
-          <div class="font-bold text-white text-xs">
-            IRE: <span style="color: ${colorHex}">${ireVal}</span>
-          </div>
-        </div>
+        <tr class="hover:bg-slate-50/80 transition-colors">
+          <td class="py-2.5 px-3.5 whitespace-nowrap">
+            <span class="font-bold text-slate-900">${time}</span>
+            <span class="text-[10px] text-slate-400 ml-1.5">${date}</span>
+          </td>
+          <td class="py-2.5 px-3.5 whitespace-nowrap font-medium text-slate-800">
+            ${station}
+          </td>
+          <td class="py-2.5 px-3.5 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-full font-bold text-xs border" style="color: ${colorHex}; border-color: ${colorHex}40; background-color: ${colorHex}15">
+              ${ireVal}
+            </span>
+          </td>
+          <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${ph}</td>
+          <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${turb} <span class="text-[10px] text-slate-400 font-normal">NTU</span></td>
+          <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${od} <span class="text-[10px] text-slate-400 font-normal">mg/L</span></td>
+          <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${temp} <span class="text-[10px] text-slate-400 font-normal">°C</span></td>
+          <td class="py-2.5 px-3.5">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold border" style="color: ${colorHex}; border-color: ${colorHex}30; background-color: ${colorHex}10">
+              <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${colorHex}"></span>
+              ${statusTitle}
+            </span>
+          </td>
+        </tr>
       `;
     }).join('');
+
+    if (historyRecordCount) {
+      historyRecordCount.textContent = `Exibindo ${state.history.length} registro(s) sincronizados com a telemetria do Rio Tietê.`;
+    }
   }
 
   /**
@@ -715,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.isLoopRunning = false;
     if (btnToggleTelemetry) {
       btnToggleTelemetry.className = 'preset-pill-btn';
-      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-[#06B6D4]"></i> <span>Iniciar Simulação</span>`;
+      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-blue-600"></i> <span>Iniciar Simulação</span>`;
     }
     app.saveState(state);
     if (window.lucide) lucide.createIcons();
@@ -744,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnToggleTelemetry) {
-      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-[#06B6D4]"></i> <span>Iniciar Simulação</span>`;
+      btnToggleTelemetry.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-blue-600"></i> <span>Iniciar Simulação</span>`;
     }
 
     const diag = engine.diagnose(state.params);
@@ -758,9 +754,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const sc2 = document.getElementById('btnQuickScenario2');
   const sc4 = document.getElementById('btnQuickScenario4');
 
-  if (sc1) sc1.onclick = () => applyPresetScenario(7.2, 4.0, 8.6, 22.4, '[MOCK] ÁGUA IDEAL', sc1, 'active-ideal');
-  if (sc2) sc2.onclick = () => applyPresetScenario(8.4, 48.0, 3.8, 26.5, '[MOCK] ÁGUA REGULAR', sc2, 'active-regular');
-  if (sc4) sc4.onclick = () => applyPresetScenario(9.2, 120.0, 1.1, 29.5, '[MOCK] ÁGUA RUIM / CRÍTICA', sc4, 'active-ruim');
+  if (sc1) sc1.onclick = () => applyPresetScenario(7.2, 4.0, 8.6, 22.4, 'Água Boa', sc1, 'active-ideal');
+  if (sc2) sc2.onclick = () => applyPresetScenario(8.4, 48.0, 3.8, 26.5, 'Água Regular', sc2, 'active-regular');
+  if (sc4) sc4.onclick = () => applyPresetScenario(9.2, 120.0, 1.1, 29.5, 'Água Crítica', sc4, 'active-ruim');
 
   // Action Buttons
   if (btnToggleTelemetry) {
@@ -775,24 +771,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  if (btnClearHistory) {
-    btnClearHistory.onclick = () => {
-      state.history = [];
-      app.saveState(state);
-      renderHistoryLog();
-      if (chartInstance) {
-        chartInstance.data.labels = [];
-        chartInstance.data.datasets[0].data = [];
-        chartInstance.data.datasets[1].data = [];
-        chartInstance.update();
-      }
-    };
-  }
-
   // Boot & Initial Run
+  seedInitialHistory();
   initMap();
   initChart();
   updateStationUI();
   renderDashboard();
+  renderHistoryTable();
   stopSimLoop();
 });

@@ -51,7 +51,7 @@ window.TieteApp = {
         river: 'Rio Tietê · Barbosa-SP',
         coords: [-21.2662, -49.9482],
         params: { ph: 7.2, turb: 4.0, od: 8.6, temp: 22.4 },
-        scenarioTag: '[MOCK] ÁGUA IDEAL'
+        scenarioTag: 'Água Boa'
       },
       {
         id: 'PNP-02',
@@ -59,7 +59,7 @@ window.TieteApp = {
         river: 'Res. Nova Avanhandava · Penápolis-SP',
         coords: [-21.4285, -50.0775],
         params: { ph: 8.4, turb: 48.0, od: 3.8, temp: 26.5 },
-        scenarioTag: '[MOCK] ÁGUA REGULAR'
+        scenarioTag: 'Água Regular'
       },
       {
         id: 'ARÇ-01',
@@ -67,7 +67,7 @@ window.TieteApp = {
         river: 'Rio Tietê · Araçatuba (Jupiá)',
         coords: [-21.2089, -50.4402],
         params: { ph: 9.2, turb: 120.0, od: 1.1, temp: 29.5 },
-        scenarioTag: '[MOCK] ÁGUA RUIM / CRÍTICA'
+        scenarioTag: 'Água Crítica'
       }
     ];
   },
@@ -91,7 +91,7 @@ window.TieteApp = {
         const parsed = JSON.parse(stored);
         return {
           params: { ...this.getDefaultState().params, ...parsed.params },
-          activeScenarioTag: parsed.activeScenarioTag || '[MOCK] ÁGUA IDEAL',
+          activeScenarioTag: parsed.activeScenarioTag || 'Água Boa',
           isLoopRunning: false,
           history: Array.isArray(parsed.history) ? parsed.history : [],
           stations: Array.isArray(parsed.stations) && parsed.stations.length > 0 ? parsed.stations : this.getDefaultStations(),
@@ -120,7 +120,7 @@ window.TieteApp = {
   },
 
   initCommonUI() {
-    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('dark');
 
     // Live Clock & Date Badge
     const liveClock = document.getElementById('liveClock');
