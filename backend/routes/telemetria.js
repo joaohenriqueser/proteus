@@ -15,12 +15,26 @@ function calculateIRE(ph, turb, od, temp) {
   else if (ph > 8.5) spH = Math.max(0, 100 - 30 * (ph - 8.5));
   else if (ph < 6.0) spH = Math.max(0, 100 - 40 * (6.0 - ph));
 
-  let sOD = 0;
-  if (od >= 5.0) sOD = 100;
-  else if (od >= 2.0) sOD = 20 * od;
-
   const fTemp = temp >= 25 ? 1.2 : 1.0;
-  const iPonderado = (0.40 * sTurb) + (0.35 * sOD) + (0.25 * spH);
+
+  const hasOD = (od !== undefined && od !== null && od !== '' && !isNaN(parseFloat(od)));
+  let iPonderado;
+
+  if (hasOD) {
+    const numOD = parseFloat(od);
+    let sOD = 0;
+    if (numOD >= 5.0) sOD = 100;
+    else if (numOD >= 2.0) sOD = 20 * numOD;
+
+    // Fórmula clássica quad-paramétrica (40% Turb, 35% OD, 25% pH)
+    iPonderado = (0.40 * sTurb) + (0.35 * sOD) + (0.25 * spH);
+  } else {
+    // FÓRMULA ATUALIZADA DO PROTEUS SEM OXIGÊNIO (Tri-paramétrica: 60% Turb, 40% pH)
+    // A turbidez óptica afere a biomassa fitoplanctônica e o pH reflete
+    // o consumo fotossintético de CO2 alcalinizando a água, ambos amplificados pelo fator térmico.
+    iPonderado = (0.60 * sTurb) + (0.40 * spH);
+  }
+
   let ire = iPonderado / fTemp;
   ire = Math.min(100, Math.max(0, ire));
 
@@ -31,7 +45,9 @@ function calculateIRE(ph, turb, od, temp) {
 
   return {
     ire: parseFloat(ire.toFixed(2)),
-    nivelRisco
+    nivelRisco,
+    hasOD,
+    formula: hasOD ? 'Classica (Com OD)' : 'Atualizada PROTEUS (Sem OD - Tri-paramétrica)'
   };
 }
 
@@ -109,10 +125,10 @@ router.post('/', async (req, res) => {
   try {
     const { estacao_codigo, ph, turb, od, temp, cenario_tag, bateria_nivel, sinal_rssi } = req.body;
 
-    if (!estacao_codigo || ph === undefined || turb === undefined || od === undefined || temp === undefined) {
+    if (!estacao_codigo || ph === undefined || turb === undefined || temp === undefined) {
       return res.status(400).json({
         success: false,
-        error: 'Campos obrigatórios ausentes: estacao_codigo, ph, turb, od, temp são requeridos.'
+        error: 'Campos obrigatórios ausentes: estacao_codigo, ph, turb e temp são requeridos.'
       });
     }
 
@@ -129,10 +145,11 @@ router.post('/', async (req, res) => {
     }
     const estacaoId = estRes.rows[0].id;
 
-    const calc = calculateIRE(ph, turb, od, temp);
+    const odVal = (od !== undefined && od !== null && od !== '' && !isNaN(parseFloat(od))) ? parseFloat(od) : null;
+    const calc = calculateIRE(parseFloat(ph), parseFloat(turb), odVal, parseFloat(temp));
     const ireValor = req.body.ire !== undefined ? parseFloat(req.body.ire) : calc.ire;
     const nivelRisco = req.body.nivel_risco || calc.nivelRisco;
-    const scenarioTag = cenario_tag || '[TELEMETRIA AO VIVO]';
+    const scenarioTag = cenario_tag || (odVal !== null ? '[TELEMETRIA ESP32 + OD]' : '[TELEMETRIA ESP32 TRI-PARAM]');
 
     const sql = `
       INSERT INTO leituras_telemetria 
@@ -143,10 +160,10 @@ router.post('/', async (req, res) => {
 
     const values = [
       estacaoId,
-      ph,
-      turb,
-      od,
-      temp,
+      parseFloat(ph),
+      parseFloat(turb),
+      odVal,
+      parseFloat(temp),
       ireValor,
       nivelRisco,
       scenarioTag,
@@ -163,9 +180,10 @@ router.post('/', async (req, res) => {
         id: rows[0].id,
         estacao_codigo,
         data_hora: rows[0].data_hora,
-        params: { ph, turb, od, temp },
+        params: { ph: parseFloat(ph), turb: parseFloat(turb), od: odVal, temp: parseFloat(temp) },
         ire: ireValor,
         nivel_risco: nivelRisco,
+        formula_utilizada: calc.formula,
         scenarioTag
       }
     });

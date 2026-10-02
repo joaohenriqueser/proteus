@@ -244,7 +244,7 @@
             <p class="text-xs text-slate-500 mt-0.5">Indicadores essenciais que explicam a dinâmica ecológica do corpo hídrico</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
             
             <!-- Parameter: pH -->
             <div class="glass-card p-5 space-y-3 border-slate-200">
@@ -303,26 +303,6 @@
               <div class="flex items-center justify-between text-[11px] font-mono bg-slate-50 p-2 rounded-lg border border-slate-100">
                 <span class="text-slate-500">Faixa Sazonal Recomendada:</span>
                 <span class="font-bold text-rose-700">&lt; 25.0 °C</span>
-              </div>
-            </div>
-
-            <!-- Parameter: OD ou TDS -->
-            <div class="glass-card p-5 space-y-3 border-slate-200">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                  <i data-lucide="wind" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-slate-900 text-sm">Oxigênio Dissolvido (OD) ou TDS</h3>
-                  <span class="text-[10px] font-mono text-slate-400">OD: mg/L &nbsp;|&nbsp; TDS: ppm ou mg/L</span>
-                </div>
-              </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                O <strong>Oxigênio Dissolvido</strong> mede o oxigênio molecular disponível para respiração de peixes e fauna aquática. Em protótipos que adotam o sensor de <strong>TDS (Sólidos Totais Dissolvidos)</strong>, avalia-se a carga de sais e íons dissolvidos na água através de condutividade elétrica.
-              </p>
-              <div class="flex items-center justify-between text-[11px] font-mono bg-slate-50 p-2 rounded-lg border border-slate-100">
-                <span class="text-slate-500">Meta Mínima de OD:</span>
-                <span class="font-bold text-blue-700">&ge; 5.0 mg/L (Vida Aquática)</span>
               </div>
             </div>
 
@@ -483,11 +463,6 @@
                     <td class="py-2.5 px-3.5">Valor de 100 NTU é utilizado como teto de penalização máxima do subíndice.</td>
                   </tr>
                   <tr>
-                    <td class="py-2.5 px-3.5 font-mono font-bold text-slate-900">Oxigênio Dissolvido (OD)</td>
-                    <td class="py-2.5 px-3.5 font-mono text-blue-700 font-semibold">Não inferior a 5,0 mg/L O₂</td>
-                    <td class="py-2.5 px-3.5">Leituras &ge; 5.0 mg/L pontuam integralmente; quedas &lt; 2.0 mg/L geram estresse crítico.</td>
-                  </tr>
-                  <tr>
                     <td class="py-2.5 px-3.5 font-mono font-bold text-slate-900">Temperatura</td>
                     <td class="py-2.5 px-3.5 font-mono text-rose-700 font-semibold">Elevação &lt; 3°C | Máxima 30°C</td>
                     <td class="py-2.5 px-3.5">Atua como multiplicador penalizador (F_temp = 1.2 para T &ge; 25°C).</td>
@@ -551,25 +526,8 @@
                   <td class="py-3 px-3 font-mono text-slate-800">Sonda Blindada Dallas DS18B20 (Inox, 1-Wire)</td>
                   <td class="py-3 px-3 text-[11px]">Inércia de troca térmica (~15 a 25 segundos para estabilizar) e oxidação lenta da haste em ambientes muito corrosivos.</td>
                 </tr>
-                <tr>
-                  <td class="py-3 px-3 font-mono font-bold text-slate-900">OD / TDS</td>
-                  <td class="py-3 px-3">Oxigênio livre ou sólidos inorgânicos dissociados</td>
-                  <td class="py-3 px-3 text-center font-mono font-semibold">mg/L ou ppm</td>
-                  <td class="py-3 px-3 font-mono text-slate-800">Sonda Galvânica de OD ou Sensor Analógico TDS</td>
-                  <td class="py-3 px-3 text-[11px]">Sondas de OD têm custo elevado e desgaste químico de membrana; TDS afere condutividade elétrica, não medindo oxigênio.</td>
-                </tr>
               </tbody>
             </table>
-          </div>
-
-          <!-- Diferenciação TDS vs OD -->
-          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1.5 font-sans">
-            <div class="font-bold text-slate-900 flex items-center gap-1.5">
-              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600"></i> Distinção Importante: Oxigênio Dissolvido (OD) versus TDS
-            </div>
-            <p class="text-[11px] leading-relaxed text-slate-600">
-              O sensor de TDS afere condutividade elétrica induzida por sais e minerais dissolvidos. <strong>O TDS não é um substituto direto do Oxigênio Dissolvido</strong>, pois possuem significados ecológicos distintos. Caso o protótipo utilize TDS em sua configuração final de bancada, a fórmula matemática do IRE deve reavaliar os pesos e as funções de normalização para refletir mineralização, e não saturação gasosa.
-            </p>
           </div>
 
           <!-- Arquitetura Simplificada -->
@@ -607,40 +565,40 @@
           </div>
 
           <!-- Formula Box in Highlight -->
-          <div class="bg-slate-50/90 border border-slate-200 rounded-2xl p-4 font-mono text-center space-y-2 shadow-inner">
+          <div class="bg-slate-50/90 border border-slate-200 rounded-2xl p-4 sm:p-5 font-mono text-center space-y-3 shadow-inner">
             <div class="text-[11px] uppercase font-bold tracking-wider text-slate-500">Equação Principal do Índice IRE</div>
-            <div class="text-blue-700 font-bold text-base sm:text-lg tracking-wide py-2.5 bg-white rounded-xl border border-slate-200 shadow-sm">
+            
+            <div class="text-blue-700 font-bold text-base sm:text-lg tracking-wide py-2.5 bg-white rounded-xl border border-slate-200 shadow-sm max-w-xl mx-auto">
               IRE = min( 100 , max( 0 , I_ponderado / F_temp ) )
             </div>
-            <div class="text-slate-600 text-xs text-left max-w-xl mx-auto space-y-1 pt-1 font-mono">
-              <p>• <strong class="text-slate-900 font-semibold">I_ponderado</strong> = (0.40 &times; S_turb) + (0.35 &times; S_OD) + (0.25 &times; S_pH)</p>
-              <p>• <strong class="text-slate-900 font-semibold">F_temp</strong> = 1.0 (se Temp &lt; 25°C) &nbsp;|&nbsp; 1.2 (se Temp &ge; 25°C — Penalidade por estresse térmico)</p>
+
+            <div class="text-slate-700 text-xs sm:text-sm max-w-xl mx-auto space-y-1.5 pt-1 font-mono text-left bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+              <p>• <strong class="text-slate-900 font-bold">I_ponderado</strong> = (0.60 &times; S_turb) + (0.40 &times; S_pH)</p>
+              <p>• <strong class="text-slate-900 font-bold">F_temp</strong> = 1.0 (se Temp &lt; 25°C) &nbsp;|&nbsp; 1.2 (se Temp &ge; 25°C — Penalidade por estresse térmico)</p>
             </div>
           </div>
 
           <!-- Subíndices e Pesos -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-              <div class="text-amber-600 font-bold">Turbidez (S_turb)</div>
-              <div class="text-lg font-extrabold text-slate-900">Peso: 40% <span class="text-xs text-slate-400 font-normal">(w = 0.40)</span></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="text-amber-600 font-bold flex items-center justify-between">
+                <span>Turbidez (S_turb)</span>
+                <span class="text-[10px] text-amber-700 font-bold bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-300">Peso: 60%</span>
+              </div>
+              <div class="text-xl font-extrabold text-slate-900">w = 0.60 <span class="text-xs text-slate-400 font-normal">(60% do índice)</span></div>
               <p class="text-[11px] text-slate-500 font-sans leading-relaxed">
-                Normalização decrescente calibrada no teto de 100 NTU do CONAMA Classe 2.
+                Normalização decrescente calibrada no teto de 100 NTU do CONAMA Classe 2. Representa diretamente a densidade óptica de biomassa algal suspensa.
               </p>
             </div>
 
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-              <div class="text-blue-600 font-bold">Oxigênio Dissolvido (S_OD)</div>
-              <div class="text-lg font-extrabold text-slate-900">Peso: 35% <span class="text-xs text-slate-400 font-normal">(w = 0.35)</span></div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+              <div class="text-indigo-600 font-bold flex items-center justify-between">
+                <span>pH (S_pH)</span>
+                <span class="text-[10px] text-indigo-700 font-bold bg-indigo-100/80 px-2 py-0.5 rounded-full border border-indigo-300">Peso: 40%</span>
+              </div>
+              <div class="text-xl font-extrabold text-slate-900">w = 0.40 <span class="text-xs text-slate-400 font-normal">(40% do índice)</span></div>
               <p class="text-[11px] text-slate-500 font-sans leading-relaxed">
-                Normalização calibrada no patamar mínimo de 5.0 mg/L; anóxia severa abaixo de 2.0 mg/L.
-              </p>
-            </div>
-
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-              <div class="text-indigo-600 font-bold">pH (S_pH)</div>
-              <div class="text-lg font-extrabold text-slate-900">Peso: 25% <span class="text-xs text-slate-400 font-normal">(w = 0.25)</span></div>
-              <p class="text-[11px] text-slate-500 font-sans leading-relaxed">
-                Curva centrada na neutralidade (6.5 a 8.0 = 100 pontos), penalizando alcalinidade induzida por algas.
+                Curva centrada na neutralidade (6.5 a 8.0 = 100 pts). Detecta o desequilíbrio carbônico e a intensa atividade metabólica das microalgas.
               </p>
             </div>
           </div>

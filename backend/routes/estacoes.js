@@ -120,6 +120,13 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', authMiddleware, async (req, res) => {
   try {
+    if (req.usuario.papel === 'operador') {
+      return res.status(403).json({
+        success: false,
+        error: 'Acesso negado. Operadores não possuem permissão para cadastrar novas estações.'
+      });
+    }
+
     const { codigo, nome, rio_local, cidade, estado, latitude, longitude, raio_cobertura_metros, bacia_hidrografica, status_operacional } = req.body;
 
     if (!codigo || !nome || !latitude || !longitude) {
@@ -166,14 +173,29 @@ router.post('/', authMiddleware, async (req, res) => {
 
 /**
  * PUT /api/estacoes/:id
- * (Restrito - apenas administradores autenticados)
+ * (Restrito - apenas administradores autenticados ou operador da respectiva estação)
  */
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+    const isNum = !isNaN(id);
+
+    // Se o usuário logado for operador, ele só pode atualizar a estação dele
+    if (req.usuario.papel === 'operador') {
+      const stCheck = await db.query(
+        isNum ? 'SELECT id FROM estacoes WHERE (id = $1 OR codigo = $2)' : 'SELECT id FROM estacoes WHERE codigo = $1',
+        isNum ? [parseInt(id, 10), id] : [id]
+      );
+      if (stCheck.rows.length === 0 || stCheck.rows[0].id !== req.usuario.estacao_id) {
+        return res.status(403).json({
+          success: false,
+          error: 'Acesso negado. Você só pode gerenciar a sua estação designada.'
+        });
+      }
+    }
+
     const { nome, rio_local, cidade, estado, latitude, longitude, raio_cobertura_metros, bacia_hidrografica, status_operacional } = req.body;
 
-    const isNum = !isNaN(id);
     const sql = `
       UPDATE estacoes 
       SET 
@@ -224,10 +246,17 @@ router.put('/:id', authMiddleware, async (req, res) => {
 
 /**
  * DELETE /api/estacoes/:id
- * (Restrito - apenas administradores autenticados)
+ * (Restrito - apenas Administradores Gerais)
  */
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
+    if (req.usuario.papel === 'operador') {
+      return res.status(403).json({
+        success: false,
+        error: 'Acesso negado. Operadores não possuem permissão para excluir estações.'
+      });
+    }
+
     const { id } = req.params;
     const isNum = !isNaN(id);
     const sql = isNum 

@@ -1,5 +1,6 @@
 /**
  * P.R.O.T.E.U.S. - Standalone Simulator Sandbox Controller (simulador.html)
+ * Tri-Parametric Autonomous Node (pH, Turbidez, Temperatura)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,19 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = {
     ph: 7.2,
     turb: 8,
-    od: 6.8,
     temp: 22.4
   };
 
   // DOM Elements
   const inputPH = document.getElementById('inputPH');
   const inputTurb = document.getElementById('inputTurb');
-  const inputOD = document.getElementById('inputOD');
   const inputTemp = document.getElementById('inputTemp');
 
   const valPHDisplay = document.getElementById('valPHDisplay');
   const valTurbDisplay = document.getElementById('valTurbDisplay');
-  const valODDisplay = document.getElementById('valODDisplay');
   const valTempDisplay = document.getElementById('valTempDisplay');
 
   // Preview Diagnostic Card Elements
@@ -45,17 +43,23 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   function updateSimulatorUI() {
     if (!window.IREEngine) return;
-    const diag = window.IREEngine.diagnose(params);
+
+    // Constrói payload de parâmetros do nó autônomo (sem OD)
+    const activeParams = {
+      ph: params.ph,
+      turb: params.turb,
+      temp: params.temp
+    };
+
+    const diag = window.IREEngine.diagnose(activeParams);
 
     // 1. Sliders & Text Displays
     inputPH.value = params.ph;
     inputTurb.value = params.turb;
-    inputOD.value = params.od;
     inputTemp.value = params.temp;
 
     valPHDisplay.textContent = params.ph.toFixed(1);
     valTurbDisplay.textContent = `${Math.round(params.turb)} NTU`;
-    valODDisplay.textContent = `${params.od.toFixed(1)} mg/L`;
     valTempDisplay.textContent = `${params.temp.toFixed(1)} °C`;
 
     // 2. Preview Diagnostic Card
@@ -142,11 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
       updateSimulatorUI();
     });
 
-    inputOD.addEventListener('input', (e) => {
-      params.od = parseFloat(e.target.value);
-      updateSimulatorUI();
-    });
-
     inputTemp.addEventListener('input', (e) => {
       params.temp = parseFloat(e.target.value);
       updateSimulatorUI();
@@ -157,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
       btnReset.addEventListener('click', () => {
         params.ph = 7.2;
         params.turb = 8;
-        params.od = 6.8;
         params.temp = 22.4;
         updateSimulatorUI();
       });

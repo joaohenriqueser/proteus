@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 async function criarPrimeiroAdmin() {
     const nome = 'Administrador PROTEUS';
     const usuario = 'admin';
+    const email = 'admin@proteus.com';
     const senhaPura = 'Proteus@2026';
 
     try {

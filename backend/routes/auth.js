@@ -25,11 +25,13 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Busca o usuário ativo no banco por e-mail OU pelo nome de usuário
+    // Busca o usuário ativo no banco por e-mail OU pelo nome de usuário com dados da estação
     const sql = `
-      SELECT * FROM usuarios_admin 
-      WHERE (LOWER(email) = $1 OR LOWER(usuario) = $1) 
-        AND ativo = TRUE 
+      SELECT u.*, e.nome AS estacao_nome, e.codigo AS estacao_codigo 
+      FROM usuarios_admin u
+      LEFT JOIN estacoes e ON e.id = u.estacao_id
+      WHERE (LOWER(u.email) = $1 OR LOWER(u.usuario) = $1) 
+        AND u.ativo = TRUE 
       LIMIT 1
     `;
     const { rows } = await db.query(sql, [identificador]);
@@ -52,13 +54,17 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Gera o Token JWT com validade de 8 horas
+    // Gera o Token JWT com validade de 8 horas incluindo papel e estacao_id
     const token = jwt.sign(
       { 
         id: usuarioEncontrado.id, 
         nome: usuarioEncontrado.nome, 
         usuario: usuarioEncontrado.usuario,
-        email: usuarioEncontrado.email 
+        email: usuarioEncontrado.email,
+        papel: usuarioEncontrado.papel || 'admin',
+        estacao_id: usuarioEncontrado.estacao_id || null,
+        estacao_nome: usuarioEncontrado.estacao_nome || null,
+        estacao_codigo: usuarioEncontrado.estacao_codigo || null
       },
       JWT_SECRET,
       { expiresIn: '8h' }
@@ -72,7 +78,11 @@ router.post('/login', async (req, res) => {
         id: usuarioEncontrado.id,
         nome: usuarioEncontrado.nome,
         usuario: usuarioEncontrado.usuario,
-        email: usuarioEncontrado.email
+        email: usuarioEncontrado.email,
+        papel: usuarioEncontrado.papel || 'admin',
+        estacao_id: usuarioEncontrado.estacao_id || null,
+        estacao_nome: usuarioEncontrado.estacao_nome || null,
+        estacao_codigo: usuarioEncontrado.estacao_codigo || null
       }
     });
 
@@ -87,14 +97,17 @@ router.post('/login', async (req, res) => {
 
 /**
  * GET /api/auth/me
- * Retorna os dados do administrador atualmente autenticado
+ * Retorna os dados do usuário atualmente autenticado
  */
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const { rows } = await db.query(
-      'SELECT id, nome, usuario, email, ativo, criado_em FROM usuarios_admin WHERE id = $1',
-      [req.usuario.id]
-    );
+    const { rows } = await db.query(`
+      SELECT u.id, u.nome, u.usuario, u.email, u.papel, u.estacao_id, u.ativo, u.criado_em,
+             e.nome AS estacao_nome, e.codigo AS estacao_codigo
+      FROM usuarios_admin u
+      LEFT JOIN estacoes e ON e.id = u.estacao_id
+      WHERE u.id = $1
+    `, [req.usuario.id]);
 
     if (rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Usuário não encontrado.' });
@@ -108,31 +121,50 @@ router.get('/me', authMiddleware, async (req, res) => {
 
 /**
  * GET /api/auth/usuarios
- * Lista os administradores cadastrados (acesso restrito por token)
+ * Lista os usuários cadastrados (Administradores Gerais e Operadores por Estação)
  */
 router.get('/usuarios', authMiddleware, async (req, res) => {
   try {
-    const { rows } = await db.query(
-      'SELECT id, nome, usuario, email, ativo, criado_em FROM usuarios_admin ORDER BY id ASC'
-    );
+    const { rows } = await db.query(`
+      SELECT u.id, u.nome, u.usuario, u.email, u.papel, u.estacao_id, u.ativo, u.criado_em,
+             e.nome AS estacao_nome, e.codigo AS estacao_codigo
+      FROM usuarios_admin u
+      LEFT JOIN estacoes e ON e.id = u.estacao_id
+      ORDER BY u.id ASC
+    `);
     res.json({ success: true, count: rows.length, data: rows });
   } catch (err) {
-    res.status(500).json({ success: false, error: 'Erro ao listar administradores.' });
+    res.status(500).json({ success: false, error: 'Erro ao listar usuários.' });
   }
 });
 
 /**
  * POST /api/auth/usuarios
- * Cadastra um novo administrador (apenas um administrador logado pode cadastrar outro)
+ * Cadastra um novo membro (Apenas Administrador Geral pode cadastrar administradores ou operadores)
  */
 router.post('/usuarios', authMiddleware, async (req, res) => {
   try {
-    const { nome, usuario, email, senha } = req.body;
+    // Validação de papel do solicitante: apenas 'admin' geral pode criar membros
+    if (req.usuario.papel && req.usuario.papel !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: 'Acesso negado. Apenas Administradores Gerais podem cadastrar novos membros.'
+      });
+    }
+
+    const { nome, usuario, email, senha, papel = 'admin', estacao_id = null } = req.body;
 
     if (!nome || !usuario || !email || !senha) {
       return res.status(400).json({
         success: false,
         error: 'Todos os campos são obrigatórios: nome, usuário, e-mail e senha.'
+      });
+    }
+
+    if (papel === 'operador' && !estacao_id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Para cadastrar um Operador por Estação, é obrigatório selecionar a estação designada.'
       });
     }
 
@@ -143,46 +175,67 @@ router.post('/usuarios', authMiddleware, async (req, res) => {
       });
     }
 
+    // Se estacao_id for informado, verificar se a estação existe
+    let estacaoValidaId = null;
+    if (estacao_id) {
+      const chk = await db.query('SELECT id FROM estacoes WHERE id = $1', [estacao_id]);
+      if (chk.rows.length === 0) {
+        return res.status(400).json({ success: false, error: 'A estação informada não existe.' });
+      }
+      estacaoValidaId = estacao_id;
+    }
+
     // Hash com bcrypt
     const salt = await bcrypt.genSalt(10);
     const senhaHash = await bcrypt.hash(senha, salt);
 
     const sql = `
-      INSERT INTO usuarios_admin (nome, usuario, email, senha_hash)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, nome, usuario, email, ativo, criado_em;
+      INSERT INTO usuarios_admin (nome, usuario, email, senha_hash, papel, estacao_id)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, nome, usuario, email, papel, estacao_id, ativo, criado_em;
     `;
 
     const { rows } = await db.query(sql, [
       nome.trim(),
       usuario.toLowerCase().trim(),
       email.toLowerCase().trim(),
-      senhaHash
+      senhaHash,
+      papel === 'operador' ? 'operador' : 'admin',
+      papel === 'operador' ? estacaoValidaId : null
     ]);
 
     res.status(201).json({
       success: true,
-      message: 'Novo administrador cadastrado com sucesso!',
+      message: papel === 'operador' 
+        ? 'Operador por estação cadastrado com sucesso!' 
+        : 'Administrador geral cadastrado com sucesso!',
       data: rows[0]
     });
   } catch (err) {
     if (err.code === '23505') { // Violação de unicidade (e-mail ou usuário já existem)
       return res.status(400).json({
         success: false,
-        error: 'Já existe um administrador cadastrado com este e-mail ou nome de usuário.'
+        error: 'Já existe um usuário cadastrado com este e-mail ou nome de usuário.'
       });
     }
-    console.error('Erro ao cadastrar administrador:', err);
-    res.status(500).json({ success: false, error: 'Erro ao cadastrar administrador.' });
+    console.error('Erro ao cadastrar usuário:', err);
+    res.status(500).json({ success: false, error: 'Erro ao cadastrar usuário.' });
   }
 });
 
 /**
  * PUT /api/auth/usuarios/:id/status
- * Ativa ou desativa um administrador
+ * Ativa ou desativa um usuário (Apenas Administrador Geral)
  */
 router.put('/usuarios/:id/status', authMiddleware, async (req, res) => {
   try {
+    if (req.usuario.papel && req.usuario.papel !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: 'Acesso negado. Apenas Administradores Gerais podem alterar o status de usuários.'
+      });
+    }
+
     const { id } = req.params;
     const { ativo } = req.body;
 
@@ -194,7 +247,7 @@ router.put('/usuarios/:id/status', authMiddleware, async (req, res) => {
     }
 
     const { rows } = await db.query(
-      'UPDATE usuarios_admin SET ativo = $1 WHERE id = $2 RETURNING id, nome, ativo',
+      'UPDATE usuarios_admin SET ativo = $1 WHERE id = $2 RETURNING id, nome, ativo, papel',
       [!!ativo, id]
     );
 
@@ -209,6 +262,41 @@ router.put('/usuarios/:id/status', authMiddleware, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Erro ao alterar status do usuário.' });
+  }
+});
+
+/**
+ * DELETE /api/auth/usuarios/:id
+ * Remove um usuário do sistema (Apenas Administrador Geral)
+ */
+router.delete('/usuarios/:id', authMiddleware, async (req, res) => {
+  try {
+    if (req.usuario.papel && req.usuario.papel !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: 'Acesso negado. Apenas Administradores Gerais podem excluir usuários.'
+      });
+    }
+
+    const { id } = req.params;
+
+    if (parseInt(id, 10) === req.usuario.id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Você não pode excluir sua própria conta enquanto estiver logado.'
+      });
+    }
+
+    const { rowCount } = await db.query('DELETE FROM usuarios_admin WHERE id = $1', [id]);
+
+    if (rowCount === 0) {
+      return res.status(404).json({ success: false, error: 'Usuário não encontrado.' });
+    }
+
+    res.json({ success: true, message: 'Usuário excluído com sucesso!' });
+  } catch (err) {
+    console.error('Erro ao excluir usuário:', err);
+    res.status(500).json({ success: false, error: 'Erro ao excluir usuário.' });
   }
 });
 

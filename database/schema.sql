@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS leituras_telemetria (
     -- Parâmetros Físico-Químicos Monitorados (CONAMA Nº 357/2005)
     ph DECIMAL(4, 2) NOT NULL,                   -- Potencial Hidrogeniônico (ex: 7.20)
     turbidez DECIMAL(6, 2) NOT NULL,             -- Turbidez em NTU (ex: 4.00)
-    oxigenio_dissolvido DECIMAL(5, 2) NOT NULL,  -- OD em mg/L (ex: 8.60)
+    oxigenio_dissolvido DECIMAL(5, 2) NULL,      -- OD em mg/L (Opcional - Sonda IoT opera no modo tri-paramétrico)
     temperatura DECIMAL(4, 2) NOT NULL,           -- Temperatura da água em °C (ex: 22.40)
     
     -- Métricas Calculadas pelo Algoritmo IRE
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS leituras_telemetria (
 );
 
 -- ============================================================
--- 3. TABELA DE USUÁRIOS ADMINISTRATIVOS
+-- 3. TABELA DE USUÁRIOS ADMINISTRATIVOS E OPERADORES
 -- ============================================================
 CREATE TABLE IF NOT EXISTS usuarios_admin (
     id SERIAL PRIMARY KEY,
@@ -54,8 +54,11 @@ CREATE TABLE IF NOT EXISTS usuarios_admin (
     usuario VARCHAR(50) UNIQUE,
     email VARCHAR(150) UNIQUE NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
+    papel VARCHAR(20) DEFAULT 'admin',            -- 'admin' (Administrador Geral) ou 'operador' (Operador por Estação)
+    estacao_id INT NULL,                          -- Estação vinculada (obrigatório se papel = 'operador')
     ativo BOOLEAN DEFAULT TRUE,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (estacao_id) REFERENCES estacoes(id) ON DELETE SET NULL
 );
 
 -- ============================================================

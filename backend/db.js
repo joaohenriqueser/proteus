@@ -2,13 +2,24 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Pool de Conexões PostgreSQL NATIVO
+// Suporte a SSL para bancos em nuvem (como Neon Tech, Supabase, Render, AWS)
+const isCloudOrSsl = 
+  process.env.DB_SSL === 'true' ||
+  (process.env.DB_SSL !== 'false' && process.env.DB_HOST && (
+    process.env.DB_HOST.includes('neon.tech') ||
+    (process.env.DB_HOST !== 'localhost' && process.env.DB_HOST !== '127.0.0.1')
+  ));
+
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432', 10),
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || '123456',
   database: process.env.DB_NAME || 'postgres',
-  max: 10
+  max: 10,
+  ssl: isCloudOrSsl ? {
+    rejectUnauthorized: false,
+  } : false,
 });
 
 async function initPostgreSQL() {
@@ -28,10 +39,16 @@ async function initPostgreSQL() {
         estado VARCHAR(2) DEFAULT 'SP',
         latitude DECIMAL(10, 8) NOT NULL,
         longitude DECIMAL(11, 8) NOT NULL,
+        raio_cobertura_metros INT DEFAULT 1000,
         bacia_hidrografica VARCHAR(100) DEFAULT 'Baixo Tietê',
         status_operacional VARCHAR(20) DEFAULT 'Ativo',
         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    // Garantir coluna raio_cobertura_metros se a tabela já existia sem ela
+    await client.query(`
+      ALTER TABLE estacoes ADD COLUMN IF NOT EXISTS raio_cobertura_metros INT DEFAULT 1000;
     `);
 
     // Criar tabela leituras_telemetria se não existir
@@ -49,6 +66,56 @@ async function initPostgreSQL() {
         cenario_tag VARCHAR(50),
         bateria_nivel INT,
         sinal_rssi INT
+      );
+    `);
+
+    // Criar tabela usuarios_admin se não existir
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS usuarios_admin (
+        id SERIAL PRIMARY KEY,
+        nome VARCHAR(100) NOT NULL,
+        usuario VARCHAR(50) UNIQUE,
+        email VARCHAR(150) UNIQUE NOT NULL,
+        senha_hash VARCHAR(255) NOT NULL,
+        papel VARCHAR(20) DEFAULT 'admin',
+        estacao_id INT REFERENCES estacoes(id) ON DELETE SET NULL,
+        ativo BOOLEAN DEFAULT TRUE,
+        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Migrações e atualizações estruturais idempotentes
+    await client.query(`
+      ALTER TABLE usuarios_admin ADD COLUMN IF NOT EXISTS papel VARCHAR(20) DEFAULT 'admin';
+      ALTER TABLE usuarios_admin ADD COLUMN IF NOT EXISTS estacao_id INT REFERENCES estacoes(id) ON DELETE SET NULL;
+      ALTER TABLE leituras_telemetria ALTER COLUMN oxigenio_dissolvido DROP NOT NULL;
+    `);
+
+    // Criar tabela tokens_recuperacao_senha se não existir
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tokens_recuperacao_senha (
+        id SERIAL PRIMARY KEY,
+        usuario_id INT NOT NULL REFERENCES usuarios_admin(id) ON DELETE CASCADE,
+        token VARCHAR(255) NOT NULL,
+        expira_em TIMESTAMP NOT NULL,
+        usado BOOLEAN DEFAULT FALSE,
+        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Criar tabela equipamentos se não existir
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS equipamentos (
+        id SERIAL PRIMARY KEY,
+        mac_address VARCHAR(17) UNIQUE NOT NULL,
+        nome_dispositivo VARCHAR(100) NOT NULL,
+        modelo VARCHAR(50) DEFAULT 'ESP32 DevKit V1',
+        estacao_id INT REFERENCES estacoes(id) ON DELETE SET NULL,
+        api_key VARCHAR(64) UNIQUE NOT NULL,
+        firmware_versao VARCHAR(20) DEFAULT '1.0.0',
+        status VARCHAR(20) DEFAULT 'Ativo',
+        ultima_comunicacao TIMESTAMP NULL,
+        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 

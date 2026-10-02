@@ -108,14 +108,7 @@
 </head>
 <body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col selection:bg-blue-500/20 selection:text-blue-900">
 
-  <!-- ==================== BANNER MODO DESENVOLVEDOR (BYPASS) ==================== -->
-  <div id="devModeBanner" class="hidden bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs font-mono text-amber-900 flex items-center justify-between z-50">
-    <div class="flex items-center gap-2">
-      <i data-lucide="wrench" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
-      <span><strong>Modo Desenvolvedor (Bypass Ativo):</strong> Acesso liberado sem necessidade de conexão com o banco PostgreSQL local.</span>
-    </div>
-    <button id="btnExitDevMode" type="button" class="text-[11px] underline hover:text-amber-700 font-bold ml-4 cursor-pointer">Sair do Modo Dev</button>
-  </div>
+
 
   <!-- ==================== HEADER ADMIN MODERNO ==================== -->
   <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between">
@@ -123,40 +116,21 @@
       <a href="../index.html" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Ir ao Portal Público">
         <img src="../assets/logo-full.svg" alt="PROTEUS Logo" class="h-8 w-auto">
       </a>
-      <div class="h-5 w-[1px] bg-slate-200 hidden sm:block"></div>
-      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-600 font-mono text-[11px] font-bold uppercase tracking-wider">
-        <i data-lucide="shield" class="w-3.5 h-3.5"></i>
-        <span>Painel de Gestão</span>
-      </div>
-      <!-- Badge de Sistema Online -->
-      <div class="hidden lg:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-[10px]">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 -ml-3"></span>
-        <span>SISTEMA OPERACIONAL</span>
-      </div>
     </div>
 
     <!-- Info Usuário & Ações -->
-    <div class="flex items-center gap-2.5 sm:gap-3">
-      <a href="../index.html" target="_blank" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-all">
-        <i data-lucide="external-link" class="w-3.5 h-3.5 text-blue-600"></i>
-        <span>Ver Portal Público</span>
-      </a>
-
-      <!-- Card do Usuário Logado -->
-      <div class="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-        <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center font-mono font-bold text-xs text-white" id="userAvatarLetter">
+    <div class="flex items-center gap-3">
+      <!-- Usuário Logado (Texto na esquerda, Foto/Avatar na direita, sem container em volta) -->
+      <div class="flex items-center gap-2.5">
+        <span id="userNomeDisplay" class="text-xs font-mono font-bold text-slate-900 max-w-[180px] truncate">Administrador PROTEUS</span>
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center font-mono font-bold text-xs text-white flex-shrink-0" id="userAvatarLetter">
           A
-        </div>
-        <div class="text-left font-mono leading-tight">
-          <div id="userNomeDisplay" class="text-xs font-bold text-slate-900 max-w-[130px] truncate">Carregando...</div>
-          <div id="userLoginDisplay" class="text-[10px] text-blue-600 font-semibold">@admin</div>
         </div>
       </div>
 
       <!-- Botão Sair -->
-      <button id="btnLogout" type="button" title="Sair do Sistema" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-rose-400 text-slate-500 hover:text-rose-600 transition-all active:scale-95 cursor-pointer">
-        <i data-lucide="log-out" class="w-4 h-4"></i>
+      <button id="btnLogout" type="button" onclick="fazerLogout()" title="Sair do Sistema" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-rose-400 text-slate-500 hover:text-rose-600 transition-all active:scale-95 cursor-pointer flex items-center justify-center">
+        <i data-lucide="log-out" class="w-4 h-4 pointer-events-none"></i>
       </button>
     </div>
   </header>
@@ -173,62 +147,47 @@
     <!-- ==================== CARDS ANALÍTICOS (KPIS) MODERNOS EM LIGHT MODE ==================== -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Card 1: Estações -->
-      <div class="metric-card p-5 flex items-center justify-between">
+      <div class="metric-card p-5">
         <div>
           <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Estações de Coleta</span>
-          <div class="flex items-baseline gap-2 mt-1.5">
-            <span id="kpiEstacoesTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
-            <span id="kpiEstacoesAtivas" class="text-[11px] font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/70">0 ativas</span>
-          </div>
-          <span class="text-xs text-slate-500 block mt-1">Pontos físicos no Rio Tietê</span>
+          <span class="text-xs text-slate-500 block mt-0.5">Pontos físicos no Rio Tietê</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200/60 flex items-center justify-center text-blue-600 shadow-sm flex-shrink-0">
-          <i data-lucide="radio" class="w-5 h-5"></i>
+        <div class="mt-3">
+          <span id="kpiEstacoesTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
         </div>
       </div>
 
       <!-- Card 2: Sensores IoT ESP32 -->
-      <div class="metric-card p-5 flex items-center justify-between">
+      <div class="metric-card p-5">
         <div>
           <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Dispositivos IoT ESP32</span>
-          <div class="flex items-baseline gap-2 mt-1.5">
-            <span id="kpiEquipamentosTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
-            <span id="kpiEquipamentosAtivos" class="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">0 operando</span>
-          </div>
-          <span class="text-xs text-slate-500 block mt-1">Sondas e microcontroladores</span>
+          <span class="text-xs text-slate-500 block mt-0.5">Sondas e microcontroladores</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-emerald-600 shadow-sm flex-shrink-0">
-          <i data-lucide="cpu" class="w-5 h-5"></i>
+        <div class="mt-3">
+          <span id="kpiEquipamentosTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
         </div>
       </div>
 
       <!-- Card 3: Cobertura Hídrica -->
-      <div class="metric-card p-5 flex items-center justify-between">
+      <div class="metric-card p-5">
         <div>
           <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Raio Coberto Estimado</span>
-          <div class="flex items-baseline gap-1.5 mt-1.5">
-            <span id="kpiCoberturaTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0.0</span>
-            <span class="text-xs font-mono font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-200/70">km</span>
-          </div>
-          <span class="text-xs text-slate-500 block mt-1">Abrangência física somada</span>
+          <span class="text-xs text-slate-500 block mt-0.5">Abrangência física somada</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-200/60 flex items-center justify-center text-cyan-600 shadow-sm flex-shrink-0">
-          <i data-lucide="activity" class="w-5 h-5"></i>
+        <div class="flex items-baseline gap-1 mt-3">
+          <span id="kpiCoberturaTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0.0</span>
+          <span class="text-sm font-mono font-semibold text-slate-500">km</span>
         </div>
       </div>
 
       <!-- Card 4: Administradores -->
-      <div class="metric-card p-5 flex items-center justify-between">
+      <div class="metric-card p-5">
         <div>
           <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Membros da Equipe</span>
-          <div class="flex items-baseline gap-2 mt-1.5">
-            <span id="kpiUsuariosTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
-            <span class="text-[11px] font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200/70">Acesso Restrito</span>
-          </div>
-          <span class="text-xs text-slate-500 block mt-1">Contas com acesso autorizado</span>
+          <span class="text-xs text-slate-500 block mt-0.5">Contas com acesso autorizado</span>
         </div>
-        <div class="w-12 h-12 rounded-xl bg-purple-50 border border-purple-200/60 flex items-center justify-center text-purple-600 shadow-sm flex-shrink-0">
-          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        <div class="mt-3">
+          <span id="kpiUsuariosTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
         </div>
       </div>
     </section>
@@ -387,6 +346,7 @@
               <tr>
                 <th class="py-3.5 px-4">Nome</th>
                 <th class="py-3.5 px-4">Usuário (@)</th>
+                <th class="py-3.5 px-4">Perfil / Papel</th>
                 <th class="py-3.5 px-4">E-mail</th>
                 <th class="py-3.5 px-4">Status</th>
                 <th class="py-3.5 px-4">Cadastrado em</th>
@@ -395,7 +355,7 @@
             </thead>
             <tbody id="tbodyUsuarios" class="divide-y divide-slate-100 text-slate-800">
               <tr>
-                <td colspan="6" class="py-10 text-center text-slate-400 font-mono">Carregando administradores...</td>
+                <td colspan="7" class="py-10 text-center text-slate-400 font-mono">Carregando membros...</td>
               </tr>
             </tbody>
           </table>
@@ -635,6 +595,22 @@
         </div>
 
         <div>
+          <label class="block text-slate-700 font-semibold mb-1">Perfil de Acesso / Papel *</label>
+          <select id="selectAdminPapel" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
+            <option value="admin">Administrador Geral (Acesso Total)</option>
+            <option value="operador">Operador de Estação (Acesso Local)</option>
+          </select>
+        </div>
+
+        <div id="containerAdminEstacao" class="hidden">
+          <label class="block text-slate-700 font-semibold mb-1">Estação Atribuída ao Operador *</label>
+          <select id="selectAdminEstacao" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
+            <option value="">-- Selecione a Estação --</option>
+          </select>
+          <p class="text-[10px] text-slate-500 mt-1">O operador terá foco operacional e monitoramento na estação indicada.</p>
+        </div>
+
+        <div>
           <label class="block text-slate-700 font-semibold mb-1">Senha Provisória (Mínimo 6 dígitos) *</label>
           <input type="password" id="inputAdminSenha" placeholder="••••••••" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
         </div>
@@ -654,66 +630,75 @@
 
   <!-- ==================== SCRIPTS JS ==================== -->
   <script>
-    // 1. Verificação de Autenticação Inicial & Suporte a Bypass via URL (?dev=true)
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('dev') === 'true' || urlParams.get('bypass') === 'true') {
-      localStorage.setItem('proteus_admin_token', 'DEV_MOCK_TOKEN_ADMIN');
-      localStorage.setItem('proteus_admin_user', JSON.stringify({
-        id: 1,
-        nome: 'Cauã Lemes (Dev Mode)',
-        usuario: 'admin',
-        cargo: 'Idealizador & Desenvolvedor',
-        email: 'admin@proteus.com'
-      }));
+    // Função Global de Logout Imediato
+    function fazerLogout() {
+      try {
+        localStorage.removeItem('proteus_admin_token');
+        localStorage.removeItem('proteus_admin_user');
+        sessionStorage.clear();
+      } catch (e) {}
+      window.location.replace('login.html');
     }
+    window.fazerLogout = fazerLogout;
 
+    // 1. Verificação Estrita de Autenticação com o Servidor (Neon Tech PostgreSQL)
     const token = localStorage.getItem('proteus_admin_token');
     const userJson = localStorage.getItem('proteus_admin_user');
-    const isDevMode = token === 'DEV_MOCK_TOKEN_ADMIN';
 
-    if (!token) {
+    if (!token || token === 'DEV_MOCK_TOKEN_ADMIN') {
+      localStorage.removeItem('proteus_admin_token');
+      localStorage.removeItem('proteus_admin_user');
       window.location.href = 'login.html';
     }
 
-    if (isDevMode) {
-      const devBanner = document.getElementById('devModeBanner');
-      if (devBanner) devBanner.classList.remove('hidden');
-      const btnExitDev = document.getElementById('btnExitDevMode');
-      if (btnExitDev) {
-        btnExitDev.onclick = () => {
-          localStorage.removeItem('proteus_admin_token');
-          localStorage.removeItem('proteus_admin_user');
-          window.location.href = 'login.html';
-        };
+    let usuarioLogado = {};
+    function aplicarPerfilUsuario(u) {
+      if (!u) return;
+      const nomeEl = document.getElementById('userNomeDisplay');
+      if (nomeEl) nomeEl.textContent = u.nome || 'Administrador';
+      
+      const loginEl = document.getElementById('userLoginDisplay');
+      if (loginEl) loginEl.textContent = '@' + (u.usuario || 'admin');
+      
+      const firstLetter = (u.nome || 'A').charAt(0).toUpperCase();
+      const avatarEl = document.getElementById('userAvatarLetter');
+      if (avatarEl) avatarEl.textContent = firstLetter;
+
+      const papelBadge = document.getElementById('userPapelBadge');
+      if (papelBadge) {
+        papelBadge.classList.remove('hidden');
+        if (u.papel === 'operador') {
+          papelBadge.className = 'px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-blue-100 text-blue-700 border border-blue-200';
+          papelBadge.textContent = `OPERADOR · ${u.estacao_codigo || ('ESTAÇÃO ' + (u.estacao_id || ''))}`;
+        } else {
+          papelBadge.className = 'px-2 py-0.2 rounded-full text-[9px] font-mono font-bold bg-purple-100 text-purple-700 border border-purple-200';
+          papelBadge.textContent = 'ADMIN GERAL';
+        }
       }
     }
 
-    let usuarioLogado = {};
     try {
       usuarioLogado = JSON.parse(userJson || '{}');
-      document.getElementById('userNomeDisplay').textContent = usuarioLogado.nome || 'Administrador (Dev)';
-      document.getElementById('userLoginDisplay').textContent = '@' + (usuarioLogado.usuario || 'admin');
-      
-      const firstLetter = (usuarioLogado.nome || 'A').charAt(0).toUpperCase();
-      const avatarEl = document.getElementById('userAvatarLetter');
-      if (avatarEl) avatarEl.textContent = firstLetter;
+      aplicarPerfilUsuario(usuarioLogado);
     } catch(e) {}
 
-    // Valida o token no servidor apenas se não estiver em Dev Bypass
-    if (!isDevMode) {
-      fetch('/api/auth/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      .then(r => r.json())
-      .then(r => {
-        if (!r.success) {
-          localStorage.removeItem('proteus_admin_token');
-          localStorage.removeItem('proteus_admin_user');
-          window.location.href = 'login.html';
-        }
-      })
-      .catch(() => {});
-    }
+    // Validação contínua do token JWT com a base Neon Tech
+    fetch('/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(r => r.json())
+    .then(r => {
+      if (!r || !r.success) {
+        localStorage.removeItem('proteus_admin_token');
+        localStorage.removeItem('proteus_admin_user');
+        window.location.href = 'login.html';
+      } else {
+        usuarioLogado = r.usuario;
+        localStorage.setItem('proteus_admin_user', JSON.stringify(usuarioLogado));
+        aplicarPerfilUsuario(usuarioLogado);
+      }
+    })
+    .catch(() => {});
 
     // Geradores de Dados Simulados (Fallback quando o banco PostgreSQL não está local)
     function getMockEstacoes() {
@@ -801,6 +786,7 @@
           id: 1,
           nome: 'Cauã Lemes',
           usuario: 'caua.lemes',
+          papel: 'admin',
           email: 'caua.lemes@aluno.ifsp.edu.br',
           ativo: true,
           criado_em: '2026-03-01T10:00:00Z'
@@ -809,6 +795,7 @@
           id: 2,
           nome: 'João Henrique Lemos',
           usuario: 'joao.lemos',
+          papel: 'admin',
           email: 'joao.lemos@aluno.ifsp.edu.br',
           ativo: true,
           criado_em: '2026-03-01T10:00:00Z'
@@ -817,6 +804,10 @@
           id: 3,
           nome: 'Dr. Rogério Alexandre (Orientador)',
           usuario: 'rogerio.alexandre',
+          papel: 'operador',
+          estacao_id: 1,
+          estacao_codigo: 'BRB-04',
+          estacao_nome: 'Estação Central Barbosa',
           email: 'rogerio.alexandre@ifsp.edu.br',
           ativo: true,
           criado_em: '2026-02-15T14:30:00Z'
@@ -825,13 +816,13 @@
     }
 
     // Logout
-    document.getElementById('btnLogout').addEventListener('click', () => {
-      if (confirm('Deseja realmente encerrar a sessão administrativa?')) {
-        localStorage.removeItem('proteus_admin_token');
-        localStorage.removeItem('proteus_admin_user');
-        window.location.href = 'login.html';
-      }
-    });
+    const btnLogoutEl = document.getElementById('btnLogout');
+    if (btnLogoutEl) {
+      btnLogoutEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        fazerLogout();
+      });
+    }
 
     // Toasts Modernos em Light Mode
     function showToast(msg, isError = false) {
@@ -894,24 +885,24 @@
     function atualizarMetricasKPI() {
       // Estações
       const totalEst = cacheEstacoes.length;
-      const ativasEst = cacheEstacoes.filter(s => (s.status || 'Ativo') === 'Ativo').length;
-      document.getElementById('kpiEstacoesTotal').textContent = totalEst;
-      document.getElementById('kpiEstacoesAtivas').textContent = `${ativasEst} ativas`;
+      const elEstacoes = document.getElementById('kpiEstacoesTotal');
+      if (elEstacoes) elEstacoes.textContent = totalEst;
 
       // Raio Coberto
       const raioTotalMetros = cacheEstacoes.reduce((acc, s) => acc + (s.raio_metros || 1000), 0);
       const raioKm = (raioTotalMetros / 1000).toFixed(1);
-      document.getElementById('kpiCoberturaTotal').textContent = raioKm;
+      const elCobertura = document.getElementById('kpiCoberturaTotal');
+      if (elCobertura) elCobertura.textContent = raioKm;
 
       // Equipamentos
       const totalEq = cacheEquipamentos.length;
-      const ativosEq = cacheEquipamentos.filter(e => (e.status || 'Ativo') === 'Ativo').length;
-      document.getElementById('kpiEquipamentosTotal').textContent = totalEq;
-      document.getElementById('kpiEquipamentosAtivos').textContent = `${ativosEq} operando`;
+      const elEq = document.getElementById('kpiEquipamentosTotal');
+      if (elEq) elEq.textContent = totalEq;
 
       // Usuários
       const totalUsr = cacheUsuarios.length;
-      document.getElementById('kpiUsuariosTotal').textContent = totalUsr;
+      const elUsr = document.getElementById('kpiUsuariosTotal');
+      if (elUsr) elUsr.textContent = totalUsr;
     }
 
     // ==========================================
@@ -1612,7 +1603,7 @@
     function renderizarTabelaUsuarios(lista) {
       const tbody = document.getElementById('tbodyUsuarios');
       if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-400 font-mono">Nenhum usuário cadastrado.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-400 font-mono">Nenhum membro cadastrado.</td></tr>`;
         return;
       }
 
@@ -1620,6 +1611,19 @@
         <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
           <td class="py-3.5 px-4 font-bold text-slate-900 font-heading text-xs sm:text-sm">${u.nome}</td>
           <td class="py-3.5 px-4 font-semibold text-blue-600 font-mono">@${u.usuario || 'admin'}</td>
+          <td class="py-3.5 px-4">
+            ${u.papel === 'operador' ? `
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
+                <i data-lucide="radio" class="w-3 h-3 text-blue-600"></i>
+                <span>Operador (${u.estacao_codigo || u.estacao_nome || ('Estação ' + (u.estacao_id || ''))})</span>
+              </span>
+            ` : `
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200/80">
+                <i data-lucide="shield-check" class="w-3 h-3 text-purple-600"></i>
+                <span>Admin Geral</span>
+              </span>
+            `}
+          </td>
           <td class="py-3.5 px-4 text-slate-600 font-mono">${u.email}</td>
           <td class="py-3.5 px-4">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
@@ -1634,12 +1638,17 @@
           </td>
           <td class="py-3.5 px-4 text-right">
             ${u.id !== usuarioLogado.id ? `
-              <button onclick="alternarStatusUsuario(${u.id}, ${!u.ativo})" class="px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono transition-colors cursor-pointer ${
-                u.ativo ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
-              }">
-                ${u.ativo ? 'Desativar' : 'Ativar'}
-              </button>
-            ` : `<span class="text-[11px] text-blue-700 italic font-semibold px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 font-mono">(Você)</span>`}
+              <div class="flex items-center justify-end gap-1.5">
+                <button onclick="alternarStatusUsuario(${u.id}, ${!u.ativo})" class="px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono transition-colors cursor-pointer ${
+                  u.ativo ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+                }">
+                  ${u.ativo ? 'Desativar' : 'Ativar'}
+                </button>
+                <button onclick="excluirUsuario(${u.id}, '${u.nome}')" class="p-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer" title="Excluir Usuário">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            ` : `<span class="text-[11px] text-blue-700 italic font-semibold px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 font-mono">(Sua Conta)</span>`}
           </td>
         </tr>
       `).join('');
@@ -1657,15 +1666,39 @@
       const filtrados = cacheUsuarios.filter(u => 
         (u.nome && u.nome.toLowerCase().includes(q)) ||
         (u.usuario && u.usuario.toLowerCase().includes(q)) ||
-        (u.email && u.email.toLowerCase().includes(q))
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.papel && u.papel.toLowerCase().includes(q)) ||
+        (u.estacao_codigo && u.estacao_codigo.toLowerCase().includes(q)) ||
+        (u.estacao_nome && u.estacao_nome.toLowerCase().includes(q))
       );
       renderizarTabelaUsuarios(filtrados);
     });
 
     document.getElementById('btnOpenModalNovoAdmin').addEventListener('click', () => {
       document.getElementById('formAdmin').reset();
+
+      // Popula select de estações para operadores
+      const selectEst = document.getElementById('selectAdminEstacao');
+      selectEst.innerHTML = '<option value="">-- Selecione a Estação --</option>' + 
+        cacheEstacoes.map(e => `<option value="${e.db_id}">${e.id} · ${e.name}</option>`).join('');
+
+      document.getElementById('containerAdminEstacao').classList.add('hidden');
+      document.getElementById('selectAdminPapel').value = 'admin';
       document.getElementById('modalAdmin').classList.remove('hidden');
       lucide.createIcons();
+    });
+
+    document.getElementById('selectAdminPapel').addEventListener('change', (e) => {
+      const container = document.getElementById('containerAdminEstacao');
+      const selectEst = document.getElementById('selectAdminEstacao');
+      if (e.target.value === 'operador') {
+        container.classList.remove('hidden');
+        selectEst.required = true;
+      } else {
+        container.classList.add('hidden');
+        selectEst.required = false;
+        selectEst.value = '';
+      }
     });
 
     document.getElementById('formAdmin').addEventListener('submit', async (e) => {
@@ -1674,6 +1707,13 @@
       const usuario = document.getElementById('inputAdminUsuario').value.trim();
       const email = document.getElementById('inputAdminEmail').value.trim();
       const senha = document.getElementById('inputAdminSenha').value;
+      const papel = document.getElementById('selectAdminPapel').value;
+      const estacao_id = papel === 'operador' ? document.getElementById('selectAdminEstacao').value : null;
+
+      if (papel === 'operador' && !estacao_id) {
+        showToast('Selecione a estação para o perfil de operador.', true);
+        return;
+      }
 
       try {
         const res = await fetch('/api/auth/usuarios', {
@@ -1682,24 +1722,29 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ nome, usuario, email, senha })
+          body: JSON.stringify({ nome, usuario, email, senha, papel, estacao_id })
         });
 
         const data = await res.json();
         if (res.ok && data.success) {
-          showToast('Novo administrador cadastrado com sucesso!');
+          showToast(data.message || 'Membro cadastrado com sucesso!');
           document.getElementById('modalAdmin').classList.add('hidden');
           carregarUsuarios();
         } else {
-          throw new Error(data.error || 'Erro ao cadastrar administrador.');
+          throw new Error(data.error || 'Erro ao cadastrar membro.');
         }
       } catch (err) {
         if (isDevMode) {
+          const estacaoObj = cacheEstacoes.find(e => e.db_id == estacao_id || e.id == estacao_id);
           cacheUsuarios.push({
             id: Date.now(),
             nome,
             usuario,
             email,
+            papel,
+            estacao_id: estacao_id ? parseInt(estacao_id, 10) : null,
+            estacao_codigo: estacaoObj ? estacaoObj.id : null,
+            estacao_nome: estacaoObj ? estacaoObj.name : null,
             ativo: true,
             criado_em: new Date().toISOString()
           });
@@ -1741,6 +1786,36 @@
           return;
         }
         showToast('Erro ao atualizar status do usuário.', true);
+      }
+    };
+
+    window.excluirUsuario = async function(id, nome) {
+      if (!confirm(`Deseja realmente remover o usuário "${nome}"? Esta ação é irreversível.`)) return;
+
+      try {
+        const res = await fetch(`/api/auth/usuarios/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(data.message || 'Usuário excluído com sucesso!');
+          carregarUsuarios();
+        } else {
+          throw new Error(data.error || 'Erro ao excluir usuário.');
+        }
+      } catch (err) {
+        if (isDevMode) {
+          cacheUsuarios = cacheUsuarios.filter(u => u.id != id);
+          showToast('Usuário excluído com sucesso (Simulação Local)!');
+          renderizarTabelaUsuarios(cacheUsuarios);
+          atualizarMetricasKPI();
+          return;
+        }
+        showToast('Erro ao excluir usuário.', true);
       }
     };
 

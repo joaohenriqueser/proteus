@@ -65,16 +65,35 @@ window.IREEngine = {
   diagnose(params) {
     const ph = parseFloat(params.ph);
     const turb = parseFloat(params.turb);
-    const od = parseFloat(params.od);
     const temp = parseFloat(params.temp);
+
+    // Verificação de presença do sensor de OD
+    const hasOD = (params.od !== undefined && params.od !== null && params.od !== '' && !isNaN(parseFloat(params.od)));
+    const od = hasOD ? parseFloat(params.od) : null;
 
     const sTurb = this.calculateSubTurbidity(turb);
     const spH = this.calculateSubpH(ph);
-    const sOD = this.calculateSubOD(od);
+    const sOD = hasOD ? this.calculateSubOD(od) : null;
     const fTemp = this.calculateTempFactor(temp);
 
     // Weighted sum
-    const iPonderado = (0.40 * sTurb) + (0.35 * sOD) + (0.25 * spH);
+    let iPonderado;
+    let formulaMode;
+    let weights;
+
+    if (hasOD) {
+      // Fórmula clássica com sensor de OD (40% Turb, 35% OD, 25% pH)
+      iPonderado = (0.40 * sTurb) + (0.35 * sOD) + (0.25 * spH);
+      formulaMode = 'Clássica (Com OD - Lab)';
+      weights = { turb: 0.40, od: 0.35, ph: 0.25 };
+    } else {
+      // FÓRMULA ATUALIZADA DO PROTEUS SEM OXIGÊNIO (Tri-paramétrica: 60% Turb, 40% pH)
+      // Fundamentação limnológica: A turbidez afere a biomassa algal suspensa e o pH afere
+      // a alcalinização metabólica fotossintética, corrigidos pela temperatura (F_temp).
+      iPonderado = (0.60 * sTurb) + (0.40 * spH);
+      formulaMode = 'Atualizada PROTEUS (Sem OD - 3 Sensores IoT)';
+      weights = { turb: 0.60, od: 0.00, ph: 0.40 };
+    }
 
     // Final IRE (clamped between 0 and 100)
     let ire = iPonderado / fTemp;
@@ -102,8 +121,10 @@ window.IREEngine = {
         textHex: '#dc2626',
         accentColor: '#ef4444',
         iconName: 'alert-triangle',
-        message: 'Hipóxia severa, risco de mortandade de peixes e presença de toxinas.',
-        conamaNote: 'Alerta Ambiental: Colapso do Oxigênio Dissolvido (<2.0 mg/L) e hiper-eutrofização.'
+        message: 'Proliferação algal massiva confirmada, risco de toxinas e mortandade.',
+        conamaNote: hasOD && od < 2.0 
+          ? 'Alerta Ambiental: Hipóxia severa (OD < 2.0 mg/L) e hiper-eutrofização.'
+          : 'Alerta Ambiental: Floração algal crítica com alta biomassa óptica e desequilíbrio metabólico.'
       };
     } else if (ire < 55) {
       status = {
@@ -115,7 +136,7 @@ window.IREEngine = {
         accentColor: '#f97316',
         iconName: 'alert-circle',
         message: 'Presença confirmada de água verde. Riscos para recreação e balneabilidade.',
-        conamaNote: 'Alerta: Floração ativa de cianobactérias com pH alcalino elevado.'
+        conamaNote: 'Alerta: Floração ativa com pH alcalino e turbidez óptica elevada.'
       };
     } else if (ire < 80) {
       status = {
@@ -131,7 +152,7 @@ window.IREEngine = {
       };
     }
 
-    // Individual parameter status relative to CONAMA standards
+    // Individual parameter status relative to standards
     const paramEvaluations = {
       ph: {
         value: ph,
@@ -147,12 +168,18 @@ window.IREEngine = {
         statusText: turb <= 10 ? 'Excelente (<=10)' : (turb <= 100 ? 'Moderado' : 'Elevado (>100)'),
         statusColor: turb <= 10 ? 'text-emerald-600 font-semibold' : (turb <= 100 ? 'text-amber-600 font-semibold' : 'text-rose-600 font-semibold')
       },
-      od: {
+      od: hasOD ? {
         value: od,
         subIndex: sOD.toFixed(1),
         percentage: Math.min(100, (od / 10) * 100),
         statusText: od >= 5.0 ? 'Ótimo (>=5.0 mg/L)' : (od >= 2.0 ? 'Baixo (2-5 mg/L)' : 'Crítico (<2 mg/L)'),
         statusColor: od >= 5.0 ? 'text-emerald-600 font-semibold' : (od >= 2.0 ? 'text-amber-600 font-semibold' : 'text-rose-600 font-semibold')
+      } : {
+        value: null,
+        subIndex: 'Dispensado',
+        percentage: 0,
+        statusText: 'Dispensado no Nó IoT (Sem OD)',
+        statusColor: 'text-slate-400 font-medium'
       },
       temp: {
         value: temp,
@@ -165,6 +192,9 @@ window.IREEngine = {
 
     return {
       params: { ph, turb, od, temp },
+      hasOD,
+      formulaMode,
+      weights,
       subIndices: {
         sTurb,
         spH,

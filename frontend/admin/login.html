@@ -31,17 +31,11 @@
     <!-- Card de Login Glassmorphic -->
     <div class="glass-card p-7 sm:p-9 shadow-xl space-y-6">
       
-      <!-- Logo e Título -->
-      <div class="text-center space-y-2">
+      <!-- Logo Centralizada -->
+      <div class="text-center pb-1">
         <a href="../index.html" class="inline-block hover:opacity-85 transition-opacity" title="Voltar ao início">
-          <img src="../assets/logo-full.svg" alt="PROTEUS Logo" class="h-10 w-auto mx-auto mb-2">
+          <img src="../assets/logo-full.svg" alt="PROTEUS Logo" class="h-11 w-auto mx-auto">
         </a>
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-600 font-mono text-[11px] font-bold tracking-wider uppercase">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-          Área Restrita
-        </div>
-        <h1 class="text-xl font-bold text-slate-900 tracking-tight font-heading">Painel de Gestão &amp; Telemetria</h1>
-        <p class="text-xs text-slate-500">Credenciais administrativas para gerenciamento das estações e hardware IoT.</p>
       </div>
 
       <!-- Alerta de Feedback (Mensagens de Erro / Sucesso) -->
@@ -64,7 +58,7 @@
               type="text" 
               id="inputLogin" 
               name="login" 
-              placeholder="admin ou admin@proteus.com" 
+              placeholder="usuario ou seuemail@gmail.com" 
               required
               autocomplete="username"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
@@ -112,24 +106,6 @@
         >
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>Entrar no Sistema</span>
-        </button>
-
-        <!-- Divisor ou teste local -->
-        <div class="relative flex py-1.5 items-center">
-          <div class="flex-grow border-t border-slate-200"></div>
-          <span class="flex-shrink mx-2 text-[10px] font-mono text-slate-400 uppercase tracking-wider">ou teste local</span>
-          <div class="flex-grow border-t border-slate-200"></div>
-        </div>
-
-        <!-- Botão Bypass Dev Mode -->
-        <button 
-          type="button" 
-          id="btnDevBypass" 
-          class="w-full py-2.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-mono font-bold text-xs tracking-wide transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-          title="Acessar o Painel em Modo Demonstração sem necessidade de banco de dados"
-        >
-          <i data-lucide="wrench" class="w-4 h-4 text-amber-600"></i>
-          <span>Acesso Desenvolvedor (Bypass Sem Banco)</span>
         </button>
       </form>
 
@@ -227,41 +203,18 @@
       }
     });
 
-    // Bypass de Desenvolvedor para testes sem banco de dados
-    const btnDevBypass = document.getElementById('btnDevBypass');
-    if (btnDevBypass) {
-      btnDevBypass.addEventListener('click', () => {
-        localStorage.setItem('proteus_admin_token', 'DEV_MOCK_TOKEN_ADMIN');
-        localStorage.setItem('proteus_admin_user', JSON.stringify({
-          id: 1,
-          nome: 'Cauã Lemes (Dev Mode)',
-          usuario: 'admin',
-          cargo: 'Idealizador & Desenvolvedor',
-          email: 'admin@proteus.com'
-        }));
-        showAlert('Bypass ativado! Entrando na Área Restrita em Modo Dev...', false);
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 500);
-      });
-    }
-
     const tokenExistente = localStorage.getItem('proteus_admin_token');
-    if (tokenExistente) {
-      if (tokenExistente === 'DEV_MOCK_TOKEN_ADMIN') {
-        window.location.href = 'dashboard.html';
-      } else {
-        fetch('/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${tokenExistente}` }
-        })
-        .then(res => res.json())
-        .then(res => {
-          if (res.success) {
-            window.location.href = 'dashboard.html';
-          }
-        })
-        .catch(() => {});
-      }
+    if (tokenExistente && tokenExistente !== 'DEV_MOCK_TOKEN_ADMIN') {
+      fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${tokenExistente}` }
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res && res.success) {
+          window.location.href = 'dashboard.html';
+        }
+      })
+      .catch(() => {});
     }
   </script>
 </body>

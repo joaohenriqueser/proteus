@@ -134,6 +134,7 @@
                 <span class="font-bold text-slate-800 flex items-center gap-2">
                   <i data-lucide="test-tube" class="w-4 h-4 text-indigo-500"></i>
                   Potencial Hidrogeniônico (pH)
+                  <span id="pesoPHBadge" class="text-[10px] text-indigo-700 font-mono px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200">Peso: 40%</span>
                 </span>
                 <span id="valPHDisplay" class="text-xs px-2.5 py-0.5 rounded-lg bg-white text-indigo-600 font-mono font-bold border border-slate-200 shadow-sm">
                   7.2
@@ -157,6 +158,7 @@
                 <span class="font-bold text-slate-800 flex items-center gap-2">
                   <i data-lucide="droplets" class="w-4 h-4 text-amber-500"></i>
                   Turbidez da Água (NTU)
+                  <span id="pesoTurbBadge" class="text-[10px] text-amber-700 font-mono px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200">Peso: 60%</span>
                 </span>
                 <span id="valTurbDisplay" class="text-xs px-2.5 py-0.5 rounded-lg bg-white text-amber-600 font-mono font-bold border border-slate-200 shadow-sm">
                   8 NTU
@@ -174,30 +176,7 @@
               </div>
             </div>
 
-            <!-- Slider 3: Oxigênio Dissolvido -->
-            <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/70 space-y-2.5">
-              <div class="flex justify-between items-center text-xs">
-                <span class="font-bold text-slate-800 flex items-center gap-2">
-                  <i data-lucide="wind" class="w-4 h-4 text-blue-500"></i>
-                  Oxigênio Dissolvido — OD (mg/L)
-                </span>
-                <span id="valODDisplay" class="text-xs px-2.5 py-0.5 rounded-lg bg-white text-blue-600 font-mono font-bold border border-slate-200 shadow-sm">
-                  6.8 mg/L
-                </span>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="text-[10.5px] font-mono text-slate-400">0</span>
-                <input type="range" id="inputOD" min="0" max="12" step="0.1" value="6.8" class="w-full">
-                <span class="text-[10.5px] font-mono text-slate-400">12 mg/L</span>
-              </div>
-              <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                <span class="text-rose-600 font-semibold">&lt; 2.0 (Anóxico)</span>
-                <span>Sub-ótimo (2 - 5)</span>
-                <span class="text-emerald-600 font-semibold">&ge; 5.0 (Adequado)</span>
-              </div>
-            </div>
-
-            <!-- Slider 4: Temperatura -->
+            <!-- Slider 3: Temperatura -->
             <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/70 space-y-2.5">
               <div class="flex justify-between items-center text-xs">
                 <span class="font-bold text-slate-800 flex items-center gap-2">
