@@ -47,12 +47,14 @@
     
     <!-- Top: Dynamic Logos & Brand Mark -->
     <div class="space-y-6">
-      <div class="sidebar-logo-container px-1">
-        <a href="index.html" class="block w-full h-full relative" title="PROTEUS — Ir para início">
-          <!-- Icon only when collapsed -->
-          <img src="assets/logo-icon.svg" alt="PROTEUS Icon" class="sidebar-logo-icon">
-          <!-- Full logo when expanded -->
-          <img src="assets/logo-full.svg" alt="PROTEUS Logo" class="sidebar-logo-full">
+      <div class="sidebar-brand-container">
+        <a href="index.html" class="sidebar-brand-wrapper" title="PROTEUS — Ir para início">
+          <div class="sidebar-brand-icon-box">
+            <img src="assets/logo-icon.svg" alt="PROTEUS" class="sidebar-brand-icon">
+          </div>
+          <div class="sidebar-brand-text-box">
+            <img src="assets/logo-text.svg" alt="PROTEUS" class="sidebar-brand-text">
+          </div>
         </a>
       </div>
 
@@ -108,43 +110,36 @@
     <div class="absolute inset-0 z-10 pointer-events-none p-4 sm:p-6 overflow-hidden">
 
       <!-- ==================== LEFT SPATIAL OVERLAY: Loose Stats, Parameters & Reference Cards ==================== -->
-      <div class="absolute top-4 sm:top-6 left-4 sm:left-6 bottom-4 sm:bottom-6 w-full max-w-[340px] sm:max-w-[380px] flex flex-col justify-between pointer-events-none z-10 overflow-y-auto pr-1">
+      <div class="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 w-full max-w-[340px] sm:max-w-[380px] flex flex-col justify-end pointer-events-none z-10">
         
-        <!-- Top Section: Loose Hierarchy & Parameter Stream (NO CARD) -->
-        <div class="pointer-events-auto space-y-4 text-backdrop-crisp">
+        <!-- Top Section: Telemetry Overview Glass Card -->
+        <div class="pointer-events-auto glass-panel-floating p-5 sm:p-6 space-y-4 shadow-xl transition-all">
           
-          <!-- Section Title & Details Link -->
+          <!-- Section Title -->
           <div>
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between mb-1">
               <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">
                 Monitoramento Geral
               </span>
-              <a href="metodologia.html" class="text-[11px] font-mono font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-0.5 tracking-wider uppercase transition-colors" title="Ver Metodologia Completa do IRE">
-                Detalhes <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-              </a>
             </div>
 
-            <!-- Big Anchor IRE Metric (Reference: 7,541,390) -->
+            <!-- Big Anchor IRE Metric with font-weight: 500 -->
             <div class="flex items-baseline gap-2 mt-1">
-              <span id="ireValueDisplay" class="font-sans font-extrabold text-6xl sm:text-7xl tracking-tight text-slate-900 transition-colors">
+              <span id="ireValueDisplay" class="font-sans font-medium text-6xl sm:text-7xl tracking-tight text-slate-900 transition-colors" style="font-weight: 500;">
                 85.4
               </span>
-              <span class="font-sans font-semibold text-slate-400 text-xl sm:text-2xl">/100</span>
+              <span class="font-sans font-normal text-slate-400 text-xl sm:text-2xl" style="font-weight: 400;">/100</span>
             </div>
 
-            <!-- Status Indicator Badge -->
-            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
-              <span id="statusDotDisplay" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-soft-pulse"></span>
+            <!-- Status Indicator Badge (Clean, without scenarioTag pill) -->
+            <div class="flex items-center gap-2 mt-2">
+              <span id="statusDotDisplay" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-soft-pulse flex-shrink-0"></span>
               <span id="statusLabelDisplay" class="font-sans font-bold text-xs sm:text-sm tracking-wide text-emerald-700 uppercase">
                 Ótimo / Água Boa
-              </span>
-              <span id="scenarioTagDisplay" class="font-mono text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                Água Ideal
               </span>
             </div>
           </div>
 
-          <!-- Current Activity / Parâmetros Físico-Químicos (Reference: Current activity) -->
           <div class="pt-1">
             <div class="flex items-center justify-between mb-2">
               <span class="font-sans font-bold text-xs uppercase tracking-wider text-slate-700">
@@ -155,10 +150,9 @@
 
             <!-- Segmented Multi-Color Progress Bar (Green, Cyan, Violet, Orange) -->
             <div class="segmented-activity-bar mb-3">
-              <div class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="flex: 28%;"></div>
-              <div class="h-full bg-sky-500 rounded-full transition-all duration-500" style="flex: 24%;"></div>
-              <div class="h-full bg-indigo-500 rounded-full transition-all duration-500" style="flex: 26%;"></div>
-              <div class="h-full bg-amber-500 rounded-full transition-all duration-500" style="flex: 22%;"></div>
+              <div class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="flex: 34%;"></div>
+              <div class="h-full bg-sky-500 rounded-full transition-all duration-500" style="flex: 33%;"></div>
+              <div class="h-full bg-amber-500 rounded-full transition-all duration-500" style="flex: 33%;"></div>
             </div>
 
             <!-- Loose Parameter Rows (OUTSIDE CARDS! Direct on Canvas) -->
@@ -191,22 +185,7 @@
                 </div>
               </div>
 
-              <!-- 3. Oxigênio Dissolvido -->
-              <div class="param-loose-item group">
-                <div class="flex items-center gap-2.5">
-                  <span id="dotOD" class="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0 transition-colors"></span>
-                  <span class="font-medium text-xs text-slate-700 group-hover:text-slate-900 transition-colors">Oxigênio (OD)</span>
-                </div>
-                <div class="flex items-center gap-2.5">
-                  <div class="flex items-baseline gap-0.5">
-                    <span id="valOD" class="font-mono font-bold text-sm text-slate-900">6.8</span>
-                    <span class="text-[10px] font-mono text-slate-400">mg/L</span>
-                  </div>
-                  <span id="noteOD" class="font-mono text-[11px] text-slate-500 min-w-[70px] text-right truncate">Saturação boa</span>
-                </div>
-              </div>
-
-              <!-- 4. Temperatura -->
+              <!-- 3. Temperatura -->
               <div class="param-loose-item group">
                 <div class="flex items-center gap-2.5">
                   <span id="dotTemp" class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0 transition-colors"></span>
@@ -221,60 +200,6 @@
                 </div>
               </div>
 
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Bottom Section: Floating Reference Cards -->
-        <div class="pointer-events-auto space-y-3 pt-4">
-          
-          <!-- Reference Card 1: Diagnóstico Limnológico -->
-          <div class="ref-card p-4">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-900 uppercase font-sans tracking-wide">
-                Diagnóstico Limnológico
-              </span>
-              <span id="lastReadTimestamp" class="text-[10px] font-mono text-slate-400">12:00:00</span>
-            </div>
-
-            <p id="diagSummaryText" class="text-xs text-slate-600 mt-2 leading-relaxed font-normal">
-              Coluna d'água estável e bem oxigenada. Nenhum indício de proliferação algal crítico nas leituras recentes.
-            </p>
-
-            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
-              <div id="ireProgressBar" class="h-full rounded-full bg-emerald-500 transition-all duration-700 ease-out" style="width: 85.4%;"></div>
-            </div>
-
-            <div class="flex items-center justify-between mt-2.5 text-[11px] font-mono text-slate-500">
-              <span id="mapStationLabel">Rio Tietê · Barbosa</span>
-              <span class="text-emerald-600 font-semibold">Calibração Ativa</span>
-            </div>
-          </div>
-
-          <!-- Reference Card 2: Cobertura & Raio Ativo (with Circular Donut Gauge) -->
-          <div class="ref-card p-3 flex items-center gap-3.5">
-            <!-- Circular Progress Donut SVG (like 23% in reference) -->
-            <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
-              <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
-                <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path class="text-blue-600" stroke-dasharray="92, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none"
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              </svg>
-              <span class="absolute font-sans font-bold text-[11px] text-slate-800">92%</span>
-            </div>
-
-            <div class="min-w-0 flex-1">
-              <div class="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400">
-                Raio & Cobertura
-              </div>
-              <div class="text-xs font-bold text-slate-900">
-                15 km em Monitoramento
-              </div>
-              <div class="text-[10.5px] text-slate-500 truncate">
-                Telemetria por satélite contínua
-              </div>
             </div>
           </div>
 
@@ -346,42 +271,52 @@
         </div>
 
         <!-- Full Analytics Floating Panel (Default Visible) -->
-        <div id="analyticsPanel" class="w-80 sm:w-[420px] glass-panel-floating p-4 sm:p-5 pointer-events-auto space-y-3 transition-all duration-300 shadow-xl">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-            <div class="flex items-center gap-2">
-              <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
-              <div>
-                <h3 class="text-xs font-bold text-slate-900 tracking-wide uppercase font-mono">Tendência em Tempo Real</h3>
-                <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-0.5">
-                  <span class="flex items-center gap-1 text-slate-600"><span class="w-2 h-1 rounded-full bg-blue-600"></span> IRE</span>
-                  <span class="flex items-center gap-1 text-slate-600"><span class="w-2 h-1 rounded-full bg-emerald-500"></span> OD</span>
-                </div>
+        <div id="analyticsPanel" class="w-80 sm:w-[410px] glass-panel-floating p-4 pointer-events-auto space-y-2.5 transition-all duration-300 shadow-xl">
+          
+          <!-- Header with live score stat and status badge -->
+          <div class="flex items-start justify-between border-b border-slate-100/90 pb-2.5">
+            <div>
+              <div class="flex items-center gap-1.5 text-[10.5px] font-bold text-slate-500 uppercase tracking-wider font-mono">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5 text-blue-600"></i>
+                <span>Tendência em Tempo Real</span>
+              </div>
+              <div class="flex items-center gap-2 mt-1">
+                <span id="chartCurrentIRE" class="text-2xl font-bold text-slate-900 font-sans tracking-tight">--</span>
+                <span id="chartCurrentBadge" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
+                  ÓTIMO
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">pontuação IRE</span>
               </div>
             </div>
 
             <!-- Panel Window Controls (Maximize / Minimize) -->
-            <div class="flex items-center gap-1">
-              <button id="btnOpenHistoryModal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors" title="Abrir Tabela Completa de Registros">
+            <div class="flex items-center gap-0.5">
+              <button id="btnOpenHistoryModal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100/80 transition-colors" title="Abrir Tabela Completa de Registros">
                 <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
               </button>
-              <button id="btnMinimizeAnalytics" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Minimizar Gráfico">
+              <button id="btnMinimizeAnalytics" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100/80 transition-colors" title="Minimizar Gráfico">
                 <i data-lucide="minus" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
 
-          <!-- Canvas Chart with Light Mode Theme -->
-          <div class="relative w-full h-44">
+          <!-- Canvas Chart -->
+          <div class="relative w-full h-40">
             <canvas id="ireChart"></canvas>
           </div>
 
           <!-- Quick Bottom Action Bar -->
-          <div class="border-t border-slate-100 pt-2.5 flex items-center justify-between text-xs font-mono">
-            <span class="flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Telemetria ativa
-            </span>
-            <button id="btnOpenHistoryModalBottom" type="button" class="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+          <div class="border-t border-slate-100/90 pt-2 flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-1.5 text-[11px] text-slate-600 font-medium">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span class="text-emerald-700 font-bold">Ao vivo</span>
+              <span class="text-slate-300">•</span>
+              <span id="chartReadingsCount" class="text-slate-400 text-[10px]">15 leituras</span>
+            </div>
+            <button id="btnOpenHistoryModalBottom" type="button" class="text-[11px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 hover:underline transition-all">
               <span>Ver Tabela Completa</span>
               <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
             </button>
@@ -435,7 +370,6 @@
               <th class="py-3 px-3.5 text-center">Índice IRE</th>
               <th class="py-3 px-3.5 text-center">pH</th>
               <th class="py-3 px-3.5 text-center">Turbidez</th>
-              <th class="py-3 px-3.5 text-center">OD (mg/L)</th>
               <th class="py-3 px-3.5 text-center">Temp (°C)</th>
               <th class="py-3 px-3.5">Diagnóstico Limnológico</th>
             </tr>

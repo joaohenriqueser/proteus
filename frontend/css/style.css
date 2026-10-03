@@ -129,13 +129,12 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 #mainSidebar {
   width: 64px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-right: 1px solid rgba(226, 232, 240, 0.7);
+  border-right: 1px solid rgba(226, 232, 240, 0.8);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  white-space: nowrap;
+  overflow-x: hidden;
   will-change: width;
 }
 
@@ -145,85 +144,101 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08), 0 0 25px rgba(0, 0, 0, 0.03);
 }
 
-/* Logo container in sidebar */
-.sidebar-logo-container {
-  position: relative;
-  height: 44px;
+/* Brand Logo in sidebar - Fixed 44px Icon Slot + Sliding Wordmark */
+.sidebar-brand-container {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-brand-wrapper {
   display: flex;
   align-items: center;
+  height: 44px;
+  width: 100%;
+  text-decoration: none;
+  border-radius: 0.75rem;
   overflow: hidden;
 }
 
-.sidebar-logo-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  opacity: 1;
+.sidebar-brand-icon-box {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.sidebar-logo-full {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 34px;
+.sidebar-brand-icon {
+  width: 26px;
+  height: 32px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-brand-wrapper:hover .sidebar-brand-icon {
+  transform: scale(1.05);
+}
+
+.sidebar-brand-text-box {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 0.5rem;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.25s ease 0.05s, transform 0.25s ease 0.05s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.sidebar-brand-text {
+  height: 22px;
   width: auto;
-  max-width: 190px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
+  object-fit: contain;
 }
 
-#mainSidebar:hover .sidebar-logo-icon,
-#mainSidebar.expanded .sidebar-logo-icon {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#mainSidebar:hover .sidebar-logo-full,
-#mainSidebar.expanded .sidebar-logo-full {
+#mainSidebar:hover .sidebar-brand-text-box,
+#mainSidebar.expanded .sidebar-brand-text-box {
   opacity: 1;
+  transform: translateX(0);
   pointer-events: auto;
 }
 
-/* Navigation links */
+/* Navigation links - Centered in 44px Slot */
 .sidebar-link {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  padding: 0.65rem 0.85rem;
-  margin: 0.2rem 0;
+  height: 44px;
+  width: 100%;
+  margin: 0.25rem 0;
   border-radius: 0.75rem; /* 12px */
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 0.875rem;
   text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  overflow: hidden;
 }
 
 .sidebar-link .link-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .sidebar-link .link-label {
   opacity: 0;
-  transform: translateX(-6px);
+  transform: translateX(-8px);
   transition: opacity 0.25s ease 0.05s, transform 0.25s ease 0.05s;
   pointer-events: none;
   font-weight: 600;
+  font-size: 0.8125rem; /* 13px */
   color: var(--text-secondary);
+  white-space: nowrap;
+  padding-left: 0.25rem;
 }
 
 #mainSidebar:hover .sidebar-link .link-label,
@@ -240,7 +255,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .sidebar-link:hover .link-icon {
   color: var(--color-primary);
-  background-color: transparent;
+  transform: scale(1.08);
 }
 
 .sidebar-link:hover .link-label {
@@ -255,7 +270,6 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .sidebar-link.active .link-icon {
   color: var(--color-primary);
-  background-color: transparent;
 }
 
 .sidebar-link.active .link-label {
@@ -270,8 +284,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   transform: translateY(-50%);
   width: 3.5px;
   height: 20px;
-  border-radius: 0 4px 4px 0;
   background-color: var(--color-primary);
+  border-radius: 0 4px 4px 0;
 }
 
 /* ==========================================================================

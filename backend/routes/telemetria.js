@@ -17,23 +17,8 @@ function calculateIRE(ph, turb, od, temp) {
 
   const fTemp = temp >= 25 ? 1.2 : 1.0;
 
-  const hasOD = (od !== undefined && od !== null && od !== '' && !isNaN(parseFloat(od)));
-  let iPonderado;
-
-  if (hasOD) {
-    const numOD = parseFloat(od);
-    let sOD = 0;
-    if (numOD >= 5.0) sOD = 100;
-    else if (numOD >= 2.0) sOD = 20 * numOD;
-
-    // Fórmula clássica quad-paramétrica (40% Turb, 35% OD, 25% pH)
-    iPonderado = (0.40 * sTurb) + (0.35 * sOD) + (0.25 * spH);
-  } else {
-    // FÓRMULA ATUALIZADA DO PROTEUS SEM OXIGÊNIO (Tri-paramétrica: 60% Turb, 40% pH)
-    // A turbidez óptica afere a biomassa fitoplanctônica e o pH reflete
-    // o consumo fotossintético de CO2 alcalinizando a água, ambos amplificados pelo fator térmico.
-    iPonderado = (0.60 * sTurb) + (0.40 * spH);
-  }
+  // FÓRMULA ATUALIZADA DO PROTEUS SEM OXIGÊNIO (Tri-paramétrica: 60% Turb, 40% pH)
+  const iPonderado = (0.60 * sTurb) + (0.40 * spH);
 
   let ire = iPonderado / fTemp;
   ire = Math.min(100, Math.max(0, ire));
@@ -46,8 +31,8 @@ function calculateIRE(ph, turb, od, temp) {
   return {
     ire: parseFloat(ire.toFixed(2)),
     nivelRisco,
-    hasOD,
-    formula: hasOD ? 'Classica (Com OD)' : 'Atualizada PROTEUS (Sem OD - Tri-paramétrica)'
+    hasOD: false,
+    formula: 'Atualizada PROTEUS (Sem OD - Tri-paramétrica)'
   };
 }
 

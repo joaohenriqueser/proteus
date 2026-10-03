@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PROTEUS — Metodologia &amp; Modelagem IRE</title>
-  <meta name="description" content="Entenda a fundamentação matemática, subíndices e critérios ambientais do algoritmo de monitoramento PROTEUS.">
+  <meta name="description" content="Fundamentação técnica, critérios da Resolução CONAMA nº 357/2005 e funcionamento matemático do algoritmo de telemetria PROTEUS.">
 
   <!-- Google Fonts: Plus Jakarta Sans, Inter & IBM Plex Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
 </head>
 <body class="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col md:flex-row font-sans relative">
 
-  <!-- ==================== MOBILE TOP BAR (Only visible on screens < md) ==================== -->
+  <!-- ==================== MOBILE TOP BAR ==================== -->
   <header class="md:hidden bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center justify-between sticky top-0 z-[9900]">
     <a href="index.html" class="flex items-center gap-2">
       <img src="assets/logo-full.svg" alt="PROTEUS Logo" class="h-7 w-auto">
@@ -38,12 +38,16 @@
   <!-- ==================== COLLAPSIBLE SLIM SIDEBAR ==================== -->
   <aside id="mainSidebar" class="fixed md:sticky top-0 left-0 h-screen z-[9999] flex flex-col justify-between py-4 px-2.5 transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-out shadow-sm pointer-events-auto">
     
-    <!-- Top: Dynamic Logos & Brand Mark -->
+    <!-- Top: Brand Mark & Logos -->
     <div class="space-y-6">
-      <div class="sidebar-logo-container px-1">
-        <a href="index.html" class="block w-full h-full relative" title="PROTEUS — Ir para início">
-          <img src="assets/logo-icon.svg" alt="PROTEUS Icon" class="sidebar-logo-icon">
-          <img src="assets/logo-full.svg" alt="PROTEUS Logo" class="sidebar-logo-full">
+      <div class="sidebar-brand-container">
+        <a href="index.html" class="sidebar-brand-wrapper" title="PROTEUS — Ir para início">
+          <div class="sidebar-brand-icon-box">
+            <img src="assets/logo-icon.svg" alt="PROTEUS" class="sidebar-brand-icon">
+          </div>
+          <div class="sidebar-brand-text-box">
+            <img src="assets/logo-text.svg" alt="PROTEUS" class="sidebar-brand-text">
+          </div>
         </a>
       </div>
 
@@ -88,565 +92,313 @@
     </div>
   </aside>
 
-  <!-- ==================== MAIN CONTENT ==================== -->
+  <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
   <div class="flex-1 flex flex-col justify-between min-w-0">
 
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6 w-full flex-grow">
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 w-full flex-grow">
 
-      <!-- Hero Header -->
-      <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <!-- Header & Tab Navigation -->
+      <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-heading">
             Metodologia &amp; Modelagem do Índice IRE
           </h1>
           <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            Compreenda a fundamentação ambiental, a arquitetura de sensores IoT e o funcionamento do algoritmo experimental de cálculo do Índice de Risco de Eutrofização (IRE).
+            Fundamentação ambiental, critérios da Resolução CONAMA nº 357/2005 e funcionamento matemático do modelo de telemetria.
           </p>
         </div>
 
-        <!-- TABS NAVIGATION -->
-        <div class="glass-pill p-1 flex items-center gap-1 flex-none shadow-sm">
-          <button id="tabResumida" type="button" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-blue-600 text-white shadow-sm">
+        <!-- Tab Toggle Buttons -->
+        <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 flex-none border border-slate-200/80">
+          <button id="tabResumida" type="button" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-xs">
             Visão Geral
           </button>
-          <button id="tabDetalhada" type="button" class="px-4 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">
+          <button id="tabDetalhada" type="button" class="px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all">
             Modelo Detalhado
           </button>
         </div>
       </div>
 
-      <!-- ==================== TAB 1: VISÃO GERAL (SIMPLES & DIDÁTICA) ==================== -->
+      <!-- ==================== TAB 1: VISÃO GERAL (LIMPA & DIRETA) ==================== -->
       <div id="contentResumida" class="space-y-6 block">
 
-        <!-- 1. O que é o PROTEUS & Importância do Monitoramento -->
-        <section class="glass-card p-5 sm:p-6 space-y-4">
-          <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <i data-lucide="info" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">O que é o PROTEUS</h2>
-              <p class="text-xs text-slate-500 font-sans">Monitoramento inteligente e em tempo real dos recursos hídricos</p>
-            </div>
+        <!-- 1. O que é o PROTEUS & o Índice IRE -->
+        <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
+            <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
+              O Projeto PROTEUS e o Índice IRE
+            </h2>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs text-slate-600 leading-relaxed font-sans">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 leading-relaxed font-sans">
             <div class="space-y-2">
-              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                <i data-lucide="waves" class="w-4 h-4 text-blue-600"></i> Monitoramento Contínuo da Água
-              </h3>
+              <h3 class="font-bold text-slate-900 text-sm">Monitoramento Hídrico Contínuo</h3>
               <p>
-                O <strong class="text-slate-800">PROTEUS</strong> é uma plataforma experimental de telemetria hídrica projetada para acompanhar a dinâmica físico-química da água em corpos hídricos como o Rio Tietê. Sensores acoplados a uma unidade inteligente coletam dados diretamente da água, enviando as leituras automaticamente para a nuvem.
+                O <strong class="text-slate-800">PROTEUS</strong> é uma plataforma de telemetria hídrica projetada para acompanhar em tempo real as variações físico-químicas em rios urbanos como o Tietê. Sondas acopladas a uma unidade microcontrolada (ESP32) realizam leituras automatizadas e transmitem os dados diretamente ao servidor.
               </p>
               <p>
-                O monitoramento contínuo é fundamental porque a qualidade das águas fluviais pode se degradar rapidamente em resposta ao calor, despejo de efluentes ou chuvas intensas, permitindo antecipar anomalias ambientais antes que se tornem críticas.
+                O acompanhamento contínuo permite identificar desequilíbrios precocemente, reduzindo o tempo de resposta a anomalias causadas por calor intenso, despejo de efluentes ou escoamento urbano.
               </p>
             </div>
 
             <div class="space-y-2.5">
-              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                <i data-lucide="activity" class="w-4 h-4 text-emerald-600"></i> O que Representa o Índice IRE
-              </h3>
+              <h3 class="font-bold text-slate-900 text-sm">Índice de Risco de Eutrofização (IRE)</h3>
               <p>
-                O <strong class="text-slate-800">Índice de Risco de Eutrofização (IRE)</strong> sintetiza os múltiplos parâmetros medidos pelos sensores em uma nota única e intuitiva de <strong>0 a 100</strong>. Valores próximos de 100 indicam água estável e oxigenada, enquanto notas em declínio apontam perturbação e condições propícias à proliferação desordenada de microalgas.
+                O <strong class="text-slate-800">Índice IRE</strong> converte os parâmetros medidos pelos sensores em uma escala única de <strong>0 a 100</strong>. Notas próximas de 100 indicam água estável e em equilíbrio ecológico, enquanto notas mais baixas apontam condições propícias à proliferação desordenada de microalgas.
               </p>
-              <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 text-[11px] text-blue-900 flex items-start gap-2">
-                <i data-lucide="alert-circle" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5"></i>
-                <div>
-                  <span class="font-bold">Proposta de Classificação Própria do Projeto:</span>
-                  O IRE é um indicador experimental desenvolvido pela equipe técnica do PROTEUS para este protótipo, não constituindo índice regulatório oficial de órgãos fiscalizadores como o CONAMA ou a CETESB.
-                </div>
+              <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-200/70 text-[11px] text-blue-900 leading-relaxed">
+                <strong>Referência do Modelo:</strong> O IRE é um indicador experimental desenvolvido no âmbito do projeto, fundamentado nos parâmetros de <strong>Águas Doces de Classe 2 da Resolução CONAMA nº 357/2005</strong>. Não constitui índice fiscalizatório oficial.
               </div>
             </div>
           </div>
         </section>
 
-        <!-- 2. Fluxo Visual de Funcionamento (5 Passos) -->
-        <section class="space-y-3">
-          <div class="border-b border-slate-200 pb-2">
-            <h2 class="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider">
-              Fluxo Visual de Funcionamento
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Da coleta na água ao painel de alertas: como a informação trafega no sistema</p>
+        <!-- 2. Parâmetros e Referência CONAMA Classe 2 -->
+        <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="scale" class="w-4 h-4 text-blue-600"></i>
+              <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
+                Parâmetros e Padrão CONAMA Classe 2
+              </h2>
+            </div>
+            <span class="text-[11px] font-mono bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200 font-semibold">
+              Resolução CONAMA nº 357/2005 — Águas Doces Classe 2
+            </span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 font-sans">
-            
-            <!-- Etapa 1 -->
-            <div class="glass-card p-4 space-y-2 border-slate-200 text-center flex flex-col items-center justify-between">
-              <div class="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shadow-sm">
-                <i data-lucide="droplet" class="w-5 h-5"></i>
-              </div>
-              <div class="space-y-1">
-                <div class="font-mono text-[10px] font-bold text-sky-600 uppercase">Etapa 1</div>
-                <div class="font-bold text-xs text-slate-900">Água do Rio</div>
-                <p class="text-[11px] text-slate-500 leading-snug">Corpo hídrico monitorado onde as sondas estão submersas.</p>
-              </div>
-            </div>
+          <p class="text-xs text-slate-500 leading-relaxed font-sans">
+            A Resolução CONAMA 357/2005 define a Classe 2 para corpos hídricos destinados à preservação da vida aquática, recreação de contato primário e abastecimento após tratamento convencional. O PROTEUS utiliza estes critérios como limites de referência:
+          </p>
 
-            <!-- Etapa 2 -->
-            <div class="glass-card p-4 space-y-2 border-slate-200 text-center flex flex-col items-center justify-between">
-              <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-sm">
-                <i data-lucide="sliders" class="w-5 h-5"></i>
-              </div>
-              <div class="space-y-1">
-                <div class="font-mono text-[10px] font-bold text-indigo-600 uppercase">Etapa 2</div>
-                <div class="font-bold text-xs text-slate-900">Sensores</div>
-                <p class="text-[11px] text-slate-500 leading-snug">Sondas físico-químicas capturam grandezas como pH e turbidez.</p>
-              </div>
-            </div>
-
-            <!-- Etapa 3 -->
-            <div class="glass-card p-4 space-y-2 border-slate-200 text-center flex flex-col items-center justify-between">
-              <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm">
-                <i data-lucide="cpu" class="w-5 h-5"></i>
-              </div>
-              <div class="space-y-1">
-                <div class="font-mono text-[10px] font-bold text-blue-600 uppercase">Etapa 3</div>
-                <div class="font-bold text-xs text-slate-900">ESP32</div>
-                <p class="text-[11px] text-slate-500 leading-snug">Microcontrolador que processa os sinais e os transmite via Wi-Fi.</p>
-              </div>
-            </div>
-
-            <!-- Etapa 4 -->
-            <div class="glass-card p-4 space-y-2 border-slate-200 text-center flex flex-col items-center justify-between">
-              <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-sm">
-                <i data-lucide="server" class="w-5 h-5"></i>
-              </div>
-              <div class="space-y-1">
-                <div class="font-mono text-[10px] font-bold text-purple-600 uppercase">Etapa 4</div>
-                <div class="font-bold text-xs text-slate-900">Plataforma Web</div>
-                <p class="text-[11px] text-slate-500 leading-snug">Servidor backend recebe, armazena e organiza os dados históricos.</p>
-              </div>
-            </div>
-
-            <!-- Etapa 5 -->
-            <div class="glass-card p-4 space-y-2 border-slate-200 text-center flex flex-col items-center justify-between">
-              <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm">
-                <i data-lucide="bell-ring" class="w-5 h-5"></i>
-              </div>
-              <div class="space-y-1">
-                <div class="font-mono text-[10px] font-bold text-emerald-600 uppercase">Etapa 5</div>
-                <div class="font-bold text-xs text-slate-900">Análise e Alertas</div>
-                <p class="text-[11px] text-slate-500 leading-snug">Cálculo do IRE e apresentação imediata no dashboard espacial.</p>
-              </div>
-            </div>
-
+          <div class="overflow-x-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-left font-sans text-xs border-collapse">
+              <thead class="bg-slate-50 text-slate-700 font-mono text-[11px] border-b border-slate-200">
+                <tr>
+                  <th class="py-2.5 px-4 font-bold">Parâmetro</th>
+                  <th class="py-2.5 px-4 font-bold">Padrão CONAMA Classe 2</th>
+                  <th class="py-2.5 px-4 font-bold">Importância para o Controle da Água</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-600">
+                <tr>
+                  <td class="py-3 px-4 font-semibold text-slate-900 font-mono">pH</td>
+                  <td class="py-3 px-4 font-mono font-bold text-indigo-700">6,0 a 9,0</td>
+                  <td class="py-3 px-4 leading-relaxed">
+                    Mede o equilíbrio ácido-básico. Em florações intensas de algas, o consumo de carbono dissolvido eleva o pH para faixas alcalinas excessivas (> 8,5).
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-semibold text-slate-900 font-mono">Turbidez</td>
+                  <td class="py-3 px-4 font-mono font-bold text-amber-700">Até 100 NTU</td>
+                  <td class="py-3 px-4 leading-relaxed">
+                    Mede a perda de transparência. Água turva indica excesso de partículas ou biomassa de algas em suspensão, bloqueando a luz solar essencial ao ecossistema.
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-3 px-4 font-semibold text-slate-900 font-mono">Temperatura</td>
+                  <td class="py-3 px-4 font-mono font-bold text-rose-700">Máx. 30 °C (Elevação &lt; 3 °C)</td>
+                  <td class="py-3 px-4 leading-relaxed">
+                    Temperaturas elevadas (&ge; 25 °C) aceleram as reações químicas, estimulam a rápida multiplicação biológica e reduzem a retenção natural de oxigênio na água.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
-        <!-- 3. Cards dos Parâmetros Monitorados -->
-        <section class="space-y-3.5">
-          <div class="border-b border-slate-200 pb-2">
-            <h2 class="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider">
-              Parâmetros Físico-Químicos Monitorados
+        <!-- 3. Faixas de Classificação do IRE -->
+        <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <i data-lucide="bar-chart-3" class="w-4 h-4 text-blue-600"></i>
+            <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
+              Faixas de Diagnóstico do Índice IRE
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Indicadores essenciais que explicam a dinâmica ecológica do corpo hídrico</p>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans">
-            
-            <!-- Parameter: pH -->
-            <div class="glass-card p-5 space-y-3 border-slate-200">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                  <i data-lucide="test-tube" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-slate-900 text-sm">pH (Potencial Hidrogeniônico)</h3>
-                  <span class="text-[10px] font-mono text-slate-400">Escala Adimensional: 0 a 14</span>
-                </div>
-              </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                Mede a acidez, neutralidade ou alcalinidade da água. Em florações intensas de algas e cianobactérias, a fotossíntese consome grandes quantidades de carbono dissolvido, elevando o pH rapidamente para faixas excessivamente alcalinas (&gt; 8.5).
-              </p>
-              <div class="flex items-center justify-between text-[11px] font-mono bg-slate-50 p-2 rounded-lg border border-slate-100">
-                <span class="text-slate-500">Faixa de Equilíbrio:</span>
-                <span class="font-bold text-indigo-700">6.5 a 8.0 (Neutro)</span>
-              </div>
-            </div>
-
-            <!-- Parameter: Turbidez -->
-            <div class="glass-card p-5 space-y-3 border-slate-200">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-                  <i data-lucide="droplets" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-slate-900 text-sm">Turbidez (Clareza Óptica)</h3>
-                  <span class="text-[10px] font-mono text-slate-400">Unidade: NTU (Nephelometric Turbidity Units)</span>
-                </div>
-              </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                Avalia a perda de transparência da água decorrente de sólidos em suspensão, argilas e acúmulo de biomassa algal microscópica. Água turva bloqueia a luz solar nas camadas mais profundas, perturbando os ciclos ecológicos bentônicos.
-              </p>
-              <div class="flex items-center justify-between text-[11px] font-mono bg-slate-50 p-2 rounded-lg border border-slate-100">
-                <span class="text-slate-500">Água Límpida:</span>
-                <span class="font-bold text-amber-700">&le; 10 a 20 NTU</span>
-              </div>
-            </div>
-
-            <!-- Parameter: Temperatura -->
-            <div class="glass-card p-5 space-y-3 border-slate-200">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
-                  <i data-lucide="thermometer" class="w-5 h-5"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-slate-900 text-sm">Temperatura da Água</h3>
-                  <span class="text-[10px] font-mono text-slate-400">Unidade: Graus Celsius (°C)</span>
-                </div>
-              </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                Regula a velocidade das reações químicas e o metabolismo biológico. Temperaturas elevadas aceleram significativamente a taxa de divisão celular de microrganismos e diminuem a solubilidade natural do gás oxigênio na água.
-              </p>
-              <div class="flex items-center justify-between text-[11px] font-mono bg-slate-50 p-2 rounded-lg border border-slate-100">
-                <span class="text-slate-500">Faixa Sazonal Recomendada:</span>
-                <span class="font-bold text-rose-700">&lt; 25.0 °C</span>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        <!-- 4. Classificação das Faixas do IRE -->
-        <section class="space-y-3.5">
-          <div class="border-b border-slate-200 pb-2">
-            <h2 class="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider">
-              Faixas de Classificação do Índice IRE
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Categorias de diagnóstico aplicadas às estações de telemetria</p>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-sans">
-            
-            <div class="glass-card p-4 space-y-2 border-emerald-200/80 bg-emerald-50/40">
+            <div class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
-                  <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i> Ótimo / Bom
-                </span>
-                <span class="font-mono text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">80 a 100</span>
+                <span class="text-xs font-bold text-emerald-800">Ótimo / Bom</span>
+                <span class="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">80 – 100</span>
               </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                Água transparente, bem oxigenada e parâmetros em equilíbrio térmico e químico. Condição favorável.
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                Parâmetros dentro da normalidade e plenamente alinhados aos limites normativos da Classe 2.
               </p>
             </div>
 
-            <div class="glass-card p-4 space-y-2 border-amber-200/80 bg-amber-50/40">
+            <div class="p-3.5 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-amber-700 flex items-center gap-1.5">
-                  <i data-lucide="info" class="w-4 h-4 text-amber-600"></i> Atenção
-                </span>
-                <span class="font-mono text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">60 a 79</span>
+                <span class="text-xs font-bold text-amber-800">Atenção</span>
+                <span class="font-mono text-[11px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-md">60 – 79</span>
               </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                Variações leves em turbidez ou temperatura. Nível preventivo para inspeção de campo e monitoramento de rotina.
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                Pequenas oscilações em turbidez ou temperatura. Nível preventivo para acompanhamento de rotina.
               </p>
             </div>
 
-            <div class="glass-card p-4 space-y-2 border-orange-200/80 bg-orange-50/40">
+            <div class="p-3.5 rounded-xl border border-orange-200 bg-orange-50/50 space-y-1">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-orange-700 flex items-center gap-1.5">
-                  <i data-lucide="alert-circle" class="w-4 h-4 text-orange-600"></i> Alerta
-                </span>
-                <span class="font-mono text-[10px] bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full font-bold">40 a 59</span>
+                <span class="text-xs font-bold text-orange-800">Alerta</span>
+                <span class="font-mono text-[11px] font-bold text-orange-700 bg-orange-100/80 px-2 py-0.5 rounded-md">40 – 59</span>
               </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                Indícios de floração de biomassa algal ou alteração severa de pH/oxigênio. Exige vigilância reforçada.
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                Desvios expressivos que favorecem a floração de microalgas. Requer vigilância reforçada.
               </p>
             </div>
 
-            <div class="glass-card p-4 space-y-2 border-slate-200 bg-slate-50/80">
+            <div class="p-3.5 rounded-xl border border-rose-200 bg-rose-50/50 space-y-1">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600"></i> Crítico
-                </span>
-                <span class="font-mono text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-bold">0 a 39</span>
+                <span class="text-xs font-bold text-rose-800">Crítico</span>
+                <span class="font-mono text-[11px] font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-md">0 – 39</span>
               </div>
-              <p class="text-xs text-slate-600 leading-relaxed">
-                Severa degradação físico-química, hipóxia ou anóxia e risco iminente de prejuízo à ictiofauna.
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                Forte degradação físico-química e alto risco ecológico à vida aquática e às espécies locais.
               </p>
             </div>
-
           </div>
         </section>
 
       </div>
 
-      <!-- ==================== TAB 2: MODELO DETALHADO (TÉCNICO & OBJETIVO) ==================== -->
+      <!-- ==================== TAB 2: MODELO DETALHADO (TÉCNICO & LIMPO) ==================== -->
       <div id="contentDetalhada" class="space-y-6 hidden">
 
-        <!-- 1. Fundamento Ambiental -->
-        <section class="glass-card p-5 sm:p-6 space-y-3.5">
-          <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <i data-lucide="leaf" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">1. Fundamento Ambiental</h2>
-              <p class="text-xs text-slate-500 font-sans">Relação entre parâmetros físico-químicos e dinâmica de eutrofização</p>
-            </div>
+        <!-- 1. Resolução CONAMA 357/2005 - Classe 2 -->
+        <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <i data-lucide="file-check" class="w-4 h-4 text-blue-600"></i>
+            <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
+              1. Referência Normativa — Resolução CONAMA nº 357/2005
+            </h2>
           </div>
 
           <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-sans">
             <p>
-              A <strong>eutrofização</strong> é o processo de enriquecimento de corpos hídricos por nutrientes — notadamente compostos de nitrogênio e fósforo provenientes de esgotos domésticos e drenagem agrícola —, ocasionando proliferação excessiva de microalgas e cianobactérias.
+              O projeto adota formalmente os padrões estabelecidos na <strong class="text-slate-800">Resolução CONAMA nº 357/2005</strong> para <strong>Águas Doces de Classe 2</strong> (Art. 4º e Art. 15) como referência comparativa para a calibração do algoritmo.
             </p>
             <p>
-              Embora o sistema monitore variáveis estritamente físico-químicas, esses parâmetros refletem diretamente o comportamento metabólico desses microrganismos:
+              A Classe 2 foi selecionada por representar o enquadramento mais frequente nos reservatórios e trechos metropolitanos da bacia do Rio Tietê, compreendendo águas voltadas à proteção das comunidades aquáticas e ao abastecimento após tratamento convencional.
             </p>
-            <ul class="list-disc pl-5 space-y-1 text-slate-700">
-              <li><strong>Consumo de Carbono e Elevação de pH:</strong> Durante a fotossíntese intensa diurna, as algas consomem bicarbonatos dissolvidos na água, deslocando o equilíbrio químico e fazendo o pH atingir valores alcalinos elevados (&gt; 8.5).</li>
-              <li><strong>Bloqueio de Luz e Turbidez:</strong> A elevada densidade celular em suspensão forma manchas densas na superfície, aumentando a turbidez e impedindo a fotossíntese de plantas aquáticas submersas.</li>
-              <li><strong>Hipóxia e Decomposição:</strong> No período noturno ou após o colapso da biomassa algal, a respiração e a decomposição bacteriana consomem o oxigênio dissolvido, levando a episódios severos de anóxia e mortandade de peixes.</li>
-            </ul>
-            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2">
-              <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
-              <div>
-                <strong>Aviso de Escopo:</strong> As referências a algas e cianobactérias constituem a fundamentação ecológica do modelo. O sistema PROTEUS realiza telemetria físico-química automatizada e <strong>não realiza análise biológica laboratorial</strong>, contagem celular ou identificação taxonômica de espécies.
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <!-- 2. Referência Normativa (CONAMA 357/2005 - Classe 2) -->
-        <section class="glass-card p-5 sm:p-6 space-y-4">
-          <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <i data-lucide="scale" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">2. Referência Normativa — Resolução CONAMA nº 357/2005</h2>
-              <p class="text-xs text-slate-500 font-sans">Critérios de qualidade para Águas Doces de Classe 2</p>
-            </div>
-          </div>
-
-          <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-sans">
-            <p>
-              O projeto adota como referência técnica comparativa os padrões estabelecidos pela <strong class="text-slate-800">Resolução CONAMA nº 357, de 17 de março de 2005</strong>, especificamente para <strong>Águas Doces de Classe 2</strong> (Art. 4º e Art. 15).
-            </p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-                <span class="font-bold text-slate-900 font-mono text-[11px] uppercase">Caracterização da Classe 2</span>
-                <p class="text-slate-600 leading-relaxed text-[11px]">
-                  Águas destinadas ao abastecimento para consumo humano após tratamento convencional; à proteção das comunidades aquáticas; à recreação de contato primário; à irrigação de hortaliças e à aquicultura.
-                </p>
-              </div>
-              <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
-                <span class="font-bold text-slate-900 font-mono text-[11px] uppercase">Por que é Utilizada no Projeto</span>
-                <p class="text-slate-600 leading-relaxed text-[11px]">
-                  É o enquadramento padrão e mais representativo para os reservatórios paulistas e trechos de uso múltiplo na bacia hidrográfica do Rio Tietê sob influência urbana.
-                </p>
-              </div>
-            </div>
-
-            <!-- Tabela Literal dos Critérios CONAMA 357 Classe 2 -->
-            <div class="overflow-x-auto border border-slate-200 rounded-xl mt-2">
-              <table class="w-full text-left font-mono text-xs border-collapse">
-                <thead class="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200 text-[11px]">
+            <div class="overflow-x-auto border border-slate-200 rounded-xl mt-3">
+              <table class="w-full text-left font-sans text-xs border-collapse">
+                <thead class="bg-slate-50 text-slate-700 font-mono text-[11px] border-b border-slate-200">
                   <tr>
-                    <th class="py-2.5 px-3.5">Parâmetro</th>
-                    <th class="py-2.5 px-3.5">Critério Legal Literal (CONAMA 357/2005 Classe 2)</th>
-                    <th class="py-2.5 px-3.5">Relação no Algoritmo PROTEUS</th>
+                    <th class="py-2.5 px-4 font-bold">Parâmetro</th>
+                    <th class="py-2.5 px-4 font-bold">Critério Legal Literal (CONAMA 357)</th>
+                    <th class="py-2.5 px-4 font-bold">Aplicação no Algoritmo PROTEUS</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-slate-600 font-sans text-xs">
+                <tbody class="divide-y divide-slate-100 text-slate-600">
                   <tr>
-                    <td class="py-2.5 px-3.5 font-mono font-bold text-slate-900">pH</td>
-                    <td class="py-2.5 px-3.5 font-mono text-indigo-700 font-semibold">6,0 a 9,0</td>
-                    <td class="py-2.5 px-3.5">Penalização proporcional para valores abaixo de 6.0 ou acima de 9.0.</td>
+                    <td class="py-3 px-4 font-mono font-bold text-slate-900">pH</td>
+                    <td class="py-3 px-4 font-mono text-indigo-700 font-semibold">6,0 a 9,0</td>
+                    <td class="py-3 px-4">Penalização proporcional progressiva para valores fora do intervalo 6,0 a 9,0.</td>
                   </tr>
                   <tr>
-                    <td class="py-2.5 px-3.5 font-mono font-bold text-slate-900">Turbidez</td>
-                    <td class="py-2.5 px-3.5 font-mono text-amber-700 font-semibold">Até 100 NTU</td>
-                    <td class="py-2.5 px-3.5">Valor de 100 NTU é utilizado como teto de penalização máxima do subíndice.</td>
+                    <td class="py-3 px-4 font-mono font-bold text-slate-900">Turbidez</td>
+                    <td class="py-3 px-4 font-mono text-amber-700 font-semibold">Até 100 NTU</td>
+                    <td class="py-3 px-4">O teto legal de 100 NTU corresponde à pontuação nula no subíndice (S_turb = 0).</td>
                   </tr>
                   <tr>
-                    <td class="py-2.5 px-3.5 font-mono font-bold text-slate-900">Temperatura</td>
-                    <td class="py-2.5 px-3.5 font-mono text-rose-700 font-semibold">Elevação &lt; 3°C | Máxima 30°C</td>
-                    <td class="py-2.5 px-3.5">Atua como multiplicador penalizador (F_temp = 1.2 para T &ge; 25°C).</td>
+                    <td class="py-3 px-4 font-mono font-bold text-slate-900">Temperatura</td>
+                    <td class="py-3 px-4 font-mono text-rose-700 font-semibold">Elevação &lt; 3 °C | Máx. 30 °C</td>
+                    <td class="py-3 px-4">Fator multiplicador de penalidade térmica (F_temp = 1,2 para Temp &ge; 25 °C).</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
-              <i data-lucide="alert-octagon" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
-              <div>
-                <strong>Ressalva Institucional:</strong> Os valores da legislação servem estritamente como parâmetros matemáticos de calibração do modelo. O sistema PROTEUS <strong>não certifica a qualidade nem o enquadramento oficial</strong> do corpo hídrico perante os órgãos reguladores.
-              </div>
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500">
+              <strong>Ressalva Institucional:</strong> Os valores normativos atuam estritamente como parâmetros matemáticos de calibração do modelo experimental. O PROTEUS não substitui laudos emitidos por órgãos reguladores como CETESB ou ANA.
             </div>
           </div>
         </section>
 
-        <!-- 3. Parâmetros, Equipamentos & Arquitetura IoT -->
-        <section class="glass-card p-5 sm:p-6 space-y-4">
-          <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <i data-lucide="cpu" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">3. Parâmetros e Equipamentos do Protótipo</h2>
-              <p class="text-xs text-slate-500 font-sans">Sensores físicos utilizados, unidades, importância ambiental e limitações</p>
-            </div>
+        <!-- 2. Equação Matemática do IRE -->
+        <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <i data-lucide="sigma" class="w-4 h-4 text-blue-600"></i>
+            <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
+              2. Formulação Matemática do Índice IRE
+            </h2>
           </div>
 
-          <!-- Tabela de Sensores e Limitações -->
-          <div class="overflow-x-auto border border-slate-200 rounded-xl">
-            <table class="w-full text-left font-sans text-xs border-collapse">
-              <thead class="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200 text-[11px] font-mono">
-                <tr>
-                  <th class="py-2.5 px-3">Parâmetro</th>
-                  <th class="py-2.5 px-3">O que afere</th>
-                  <th class="py-2.5 px-3 text-center">Unidade</th>
-                  <th class="py-2.5 px-3">Sensor Utilizado</th>
-                  <th class="py-2.5 px-3">Principais Limitações</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-slate-600">
-                <tr>
-                  <td class="py-3 px-3 font-mono font-bold text-slate-900">pH</td>
-                  <td class="py-3 px-3">Concentração de íons de hidrogênio (H⁺)</td>
-                  <td class="py-3 px-3 text-center font-mono font-semibold">Adimensional (0-14)</td>
-                  <td class="py-3 px-3 font-mono text-slate-800">Eletrodo Combinado de Vidro c/ Módulo Analógico</td>
-                  <td class="py-3 px-3 text-[11px]">Desvio por temperatura (drift), bioincrustação na membrana de vidro e necessidade de calibração quinzenal em soluções tampão.</td>
-                </tr>
-                <tr>
-                  <td class="py-3 px-3 font-mono font-bold text-slate-900">Turbidez</td>
-                  <td class="py-3 px-3">Dispersão luminosa por partículas sólidas e microalgas</td>
-                  <td class="py-3 px-3 text-center font-mono font-semibold">NTU</td>
-                  <td class="py-3 px-3 font-mono text-slate-800">Sensor Óptico Nefelométrico (IR 850nm)</td>
-                  <td class="py-3 px-3 text-[11px]">Acúmulo de biofilme na fresta óptica, interferência de luz solar direta e sensibilidade a bolhas de ar na água.</td>
-                </tr>
-                <tr>
-                  <td class="py-3 px-3 font-mono font-bold text-slate-900">Temperatura</td>
-                  <td class="py-3 px-3">Energia térmica cinética da coluna d'água</td>
-                  <td class="py-3 px-3 text-center font-mono font-semibold">°C</td>
-                  <td class="py-3 px-3 font-mono text-slate-800">Sonda Blindada Dallas DS18B20 (Inox, 1-Wire)</td>
-                  <td class="py-3 px-3 text-[11px]">Inércia de troca térmica (~15 a 25 segundos para estabilizar) e oxidação lenta da haste em ambientes muito corrosivos.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <p class="text-xs text-slate-500 font-sans leading-relaxed">
+            O algoritmo utiliza uma formulação tri-paramétrica adaptada para telemetria em tempo real, eliminando a dependência de sondas galvânicas de oxigênio dissolvido:
+          </p>
 
-          <!-- Arquitetura Simplificada -->
-          <div class="pt-2">
-            <span class="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider block mb-2">
-              Arquitetura de Transmissão e Processamento
-            </span>
-            <div class="p-3.5 bg-slate-50/90 rounded-xl border border-slate-200 font-mono text-xs flex flex-wrap items-center justify-between gap-2 text-center">
-              <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-bold text-blue-700">Sensores Físicos</span>
-              <span class="text-slate-400 font-bold">➔</span>
-              <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-bold text-indigo-700">ESP32 (ADC / Wi-Fi)</span>
-              <span class="text-slate-400 font-bold">➔</span>
-              <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-bold text-purple-700">Backend (Node.js REST)</span>
-              <span class="text-slate-400 font-bold">➔</span>
-              <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-bold text-cyan-700">Banco de Dados (Histórico)</span>
-              <span class="text-slate-400 font-bold">➔</span>
-              <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-bold text-emerald-700">Dashboard Web</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- 4. Modelo Matemático do IRE -->
-        <section class="glass-card p-5 sm:p-6 space-y-4">
-          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <i data-lucide="sigma" class="w-4 h-4"></i>
-              </div>
-              <div>
-                <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">4. Modelo Matemático do IRE</h2>
-                <p class="text-xs text-slate-500 font-sans">Normalização, pesos aplicados, fórmula final e validação experimental</p>
-              </div>
-            </div>
-            <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">Intervalo Normalizado: [0.0 , 100.0]</span>
-          </div>
-
-          <!-- Formula Box in Highlight -->
-          <div class="bg-slate-50/90 border border-slate-200 rounded-2xl p-4 sm:p-5 font-mono text-center space-y-3 shadow-inner">
-            <div class="text-[11px] uppercase font-bold tracking-wider text-slate-500">Equação Principal do Índice IRE</div>
-            
-            <div class="text-blue-700 font-bold text-base sm:text-lg tracking-wide py-2.5 bg-white rounded-xl border border-slate-200 shadow-sm max-w-xl mx-auto">
+          <!-- Formula Card -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 font-mono text-center space-y-2">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Equação Principal do Modelo</div>
+            <div class="text-base sm:text-lg font-bold text-blue-700 bg-white py-2 px-4 rounded-lg border border-slate-200 inline-block shadow-2xs">
               IRE = min( 100 , max( 0 , I_ponderado / F_temp ) )
             </div>
-
-            <div class="text-slate-700 text-xs sm:text-sm max-w-xl mx-auto space-y-1.5 pt-1 font-mono text-left bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
-              <p>• <strong class="text-slate-900 font-bold">I_ponderado</strong> = (0.60 &times; S_turb) + (0.40 &times; S_pH)</p>
-              <p>• <strong class="text-slate-900 font-bold">F_temp</strong> = 1.0 (se Temp &lt; 25°C) &nbsp;|&nbsp; 1.2 (se Temp &ge; 25°C — Penalidade por estresse térmico)</p>
+            <div class="text-xs text-slate-600 pt-1 font-mono">
+              onde: <strong class="text-slate-900">I_ponderado = (0.60 &times; S_turb) + (0.40 &times; S_pH)</strong>
             </div>
           </div>
 
-          <!-- Subíndices e Pesos -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
-              <div class="text-amber-600 font-bold flex items-center justify-between">
-                <span>Turbidez (S_turb)</span>
-                <span class="text-[10px] text-amber-700 font-bold bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-300">Peso: 60%</span>
+          <!-- Weights and Sub-indices -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans text-xs">
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900">Subíndice de Turbidez (S_turb)</span>
+                <span class="font-mono text-[11px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">Peso: 60%</span>
               </div>
-              <div class="text-xl font-extrabold text-slate-900">w = 0.60 <span class="text-xs text-slate-400 font-normal">(60% do índice)</span></div>
-              <p class="text-[11px] text-slate-500 font-sans leading-relaxed">
-                Normalização decrescente calibrada no teto de 100 NTU do CONAMA Classe 2. Representa diretamente a densidade óptica de biomassa algal suspensa.
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                Decrescimento a partir da transparência máxima (&le; 5 NTU = 100 pts) até o limite de 100 NTU do CONAMA Classe 2 (0 pts). Reflete a proliferação celular e a turbidez suspensa.
               </p>
             </div>
 
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
-              <div class="text-indigo-600 font-bold flex items-center justify-between">
-                <span>pH (S_pH)</span>
-                <span class="text-[10px] text-indigo-700 font-bold bg-indigo-100/80 px-2 py-0.5 rounded-full border border-indigo-300">Peso: 40%</span>
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900">Subíndice de pH (S_pH)</span>
+                <span class="font-mono text-[11px] font-bold text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded-full">Peso: 40%</span>
               </div>
-              <div class="text-xl font-extrabold text-slate-900">w = 0.40 <span class="text-xs text-slate-400 font-normal">(40% do índice)</span></div>
-              <p class="text-[11px] text-slate-500 font-sans leading-relaxed">
-                Curva centrada na neutralidade (6.5 a 8.0 = 100 pts). Detecta o desequilíbrio carbônico e a intensa atividade metabólica das microalgas.
+              <p class="text-slate-600 text-[11px] leading-relaxed">
+                Curva centrada no intervalo de neutralidade (6,5 a 8,0 = 100 pts), penalizando alcalinidade intensa provocada pelo consumo acelerado de carbono na fotossíntese.
               </p>
             </div>
           </div>
 
-          <!-- Validação Experimental Callout -->
-          <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-200 text-xs text-blue-900 font-sans leading-relaxed">
-            <strong>Modelo Experimental:</strong> O IRE é uma formulação algorítmica proposta especificamente para este projeto de graduação/pesquisa. Carece de validação científica em campanhas de longa duração para conferir sustentação a classificações normativas definitivas.
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 text-xs font-sans text-slate-600 space-y-1">
+            <span class="font-bold text-slate-900">Fator de Correção Térmica (F_temp):</span>
+            <p class="text-[11px] leading-relaxed">
+              Quando a temperatura da água atinge ou supera <strong>25 °C</strong>, é aplicado um fator redutor de <strong>1,2</strong> (<code class="text-rose-700 font-mono">F_temp = 1.2</code>) sobre o índice ponderado, penalizando a pontuação para refletir a aceleração metabólica dos microrganismos e o menor oxigênio dissolvido disponível. Em temperaturas normais (&lt; 25 °C), <code class="text-slate-700 font-mono">F_temp = 1.0</code>.
+            </p>
           </div>
         </section>
 
-        <!-- 5. Limitações do Sistema -->
-        <section class="glass-card p-5 sm:p-6 space-y-3.5">
-          <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-            <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-              <i data-lucide="shield-alert" class="w-4 h-4"></i>
-            </div>
-            <div>
-              <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">5. Limitações Técnicas e Operacionais</h2>
-              <p class="text-xs text-slate-500 font-sans">Restrições intrínsecas ao protótipo e cuidados de medição em campo</p>
-            </div>
+        <!-- 3. Hardware e Limitações -->
+        <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <i data-lucide="cpu" class="w-4 h-4 text-blue-600"></i>
+            <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
+              3. Instrumentação &amp; Limitações Operacionais
+            </h2>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-sans">
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5">
-              <h3 class="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-700"></i> Parâmetros Parciais
-              </h3>
-              <p class="text-[11px] text-slate-600 leading-relaxed">
-                Os sensores representam apenas parte dos parâmetros que compõem o IQA ou índices oficiais. O sistema não mede nutrientes dissolvidos (fósforo total, nitratos), DBO/DQO, metais pesados nem cianotoxinas (microcistinas).
-              </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 leading-relaxed font-sans">
+            <div class="space-y-2">
+              <h3 class="font-bold text-slate-900 text-sm">Arquitetura de Sensores e IoT</h3>
+              <ul class="space-y-1.5 list-disc pl-4 text-[11px]">
+                <li><strong class="text-slate-800">ESP32:</strong> Microcontrolador dual-core com Wi-Fi integrado e conversor ADC de 12 bits para leitura de grandezas analógicas.</li>
+                <li><strong class="text-slate-800">Sensor de pH:</strong> Eletrodo combinado de vidro com módulo transmissor de sinal analógico.</li>
+                <li><strong class="text-slate-800">Sensor de Turbidez:</strong> Sonda óptica nefelométrica baseada em feixe infravermelho de 850 nm.</li>
+                <li><strong class="text-slate-800">Sensor de Temperatura:</strong> Sonda blindada Dallas DS18B20 em cápsula de aço inoxidável (1-Wire).</li>
+              </ul>
             </div>
 
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5">
-              <h3 class="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                <i data-lucide="wrench" class="w-3.5 h-3.5 text-slate-700"></i> Calibração & Bioincrustação
-              </h3>
-              <p class="text-[11px] text-slate-600 leading-relaxed">
-                Eletrodos submersos em rios urbanos sofrem rápida degradação por biofilme (algas e lodo aderido). Exigem rotinas rigorosas de higienização mecânica e calibração periódica com padrões conhecidos.
-              </p>
-            </div>
-
-            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5">
-              <h3 class="font-bold text-slate-900 flex items-center gap-1.5 text-xs">
-                <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-700"></i> Não Substitui Laboratório
-              </h3>
-              <p class="text-[11px] text-slate-600 leading-relaxed">
-                O PROTEUS opera como uma ferramenta de telemetria contínua para triagem e alertas prévios em tempo real. De nenhuma forma substitui ensaios laboratoriais certificados ou campanhas analíticas oficiais.
-              </p>
+            <div class="space-y-2">
+              <h3 class="font-bold text-slate-900 text-sm">Limitações Técnicas do Protótipo</h3>
+              <ul class="space-y-1.5 list-disc pl-4 text-[11px]">
+                <li><strong class="text-slate-800">Escopo Físico-Químico:</strong> O modelo infere tendências ecológicas a partir de grandezas físicas e químicas, não realizando contagem direta de células algais ou identificação taxonômica.</li>
+                <li><strong class="text-slate-800">Bioincrustação e Calibração:</strong> A permanência dos sensores na água gera biofilme aderido, demandando manutenção física preventiva e calibração periódica em soluções tampão.</li>
+                <li><strong class="text-slate-800">Finalidade de Triagem:</strong> Desenvolvido como ferramenta de alerta rápido contínuo; não substitui ensaios laboratoriais completos (DBO, fósforo total, nitrogênio).</li>
+              </ul>
             </div>
           </div>
         </section>
@@ -676,24 +428,30 @@
 
       if (tabResumida && tabDetalhada) {
         tabResumida.addEventListener('click', () => {
-          tabResumida.className = 'px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-blue-600 text-white shadow-sm';
-          tabDetalhada.className = 'px-4 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all';
+          tabResumida.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-xs';
+          tabDetalhada.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all';
           
           contentResumida.classList.remove('hidden');
           contentResumida.classList.add('block');
           contentDetalhada.classList.add('hidden');
           contentDetalhada.classList.remove('block');
+          if (window.lucide) lucide.createIcons();
         });
 
         tabDetalhada.addEventListener('click', () => {
-          tabDetalhada.className = 'px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-blue-600 text-white shadow-sm';
-          tabResumida.className = 'px-4 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all';
+          tabDetalhada.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-900 shadow-xs';
+          tabResumida.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all';
 
           contentDetalhada.classList.remove('hidden');
           contentDetalhada.classList.add('block');
           contentResumida.classList.add('hidden');
           contentResumida.classList.remove('block');
+          if (window.lucide) lucide.createIcons();
         });
+      }
+
+      if (window.lucide) {
+        lucide.createIcons();
       }
     });
   </script>

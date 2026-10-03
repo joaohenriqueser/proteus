@@ -40,12 +40,14 @@
     
     <!-- Top: Dynamic Logos & Brand Mark -->
     <div class="space-y-6">
-      <div class="sidebar-logo-container px-1">
-        <a href="index.html" class="block w-full h-full relative" title="PROTEUS — Ir para início">
-          <!-- Icon only when collapsed -->
-          <img src="assets/logo-icon.svg" alt="PROTEUS Icon" class="sidebar-logo-icon">
-          <!-- Full logo when expanded -->
-          <img src="assets/logo-full.svg" alt="PROTEUS Logo" class="sidebar-logo-full">
+      <div class="sidebar-brand-container">
+        <a href="index.html" class="sidebar-brand-wrapper" title="PROTEUS — Ir para início">
+          <div class="sidebar-brand-icon-box">
+            <img src="assets/logo-icon.svg" alt="PROTEUS" class="sidebar-brand-icon">
+          </div>
+          <div class="sidebar-brand-text-box">
+            <img src="assets/logo-text.svg" alt="PROTEUS" class="sidebar-brand-text">
+          </div>
         </a>
       </div>
 
@@ -97,20 +99,13 @@
     <main class="max-w-7xl mx-auto px-3 sm:px-6 py-6 space-y-6 w-full flex-grow">
 
       <!-- Concise Page Intro Header -->
-      <div class="glass-card p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-heading">
-            Simulador de Parâmetros Físico-Químicos
-          </h1>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            Ajuste os controles deslizantes para simular cenários hídricos em tempo real e observar a resposta matemática do algoritmo IRE e o comportamento visual da coluna d'água.
-          </p>
-        </div>
-
-        <button id="btnReset" type="button" class="preset-pill-btn active-auto px-4 py-2.5 flex items-center gap-2 flex-none shadow-sm" title="Restaurar parâmetros padrão">
-          <i data-lucide="rotate-ccw" class="w-4 h-4 text-blue-600"></i>
-          <span>Resetar Parâmetros</span>
-        </button>
+      <div class="glass-card p-5 sm:p-6 space-y-1.5">
+        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-heading">
+          Simulador de Parâmetros Físico-Químicos
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed w-full">
+          Mova os controles abaixo para experimentar diferentes níveis de pH, turbidez e temperatura, e acompanhe em tempo real como a qualidade da água do rio se transforma e qual é o nível de risco ecológico.
+        </p>
       </div>
 
       <!-- MAIN SIMULATOR INTERACTIVE GRID (50/50 SPLIT) -->
@@ -199,6 +194,16 @@
               </div>
             </div>
 
+          
+
+            <!-- Reset Button underneath sliders -->
+            <div class="pt-3 flex items-center justify-between border-t border-slate-100">
+              <span class="text-[11px] font-mono text-slate-400">Arraste as barras para simular</span>
+              <button id="btnReset" type="button" class="preset-pill-btn active-auto px-3.5 py-1.5 flex items-center gap-2 text-xs font-semibold shadow-sm transition-all" title="Restaurar parâmetros padrão">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-blue-600"></i>
+                <span>Resetar Parâmetros</span>
+              </button>
+            </div>
           </div>
         </section>
 
@@ -273,23 +278,14 @@
                   Índice de Risco Calculado (IRE)
                 </div>
                 <div class="flex items-baseline justify-center gap-1">
-                  <span id="previewIREValue" class="font-sans text-5xl sm:text-6xl font-extrabold tracking-tight text-emerald-600">85.4</span>
+                  <span id="previewIREValue" class="font-sans text-5xl sm:text-6xl font-medium tracking-tight text-emerald-600" style="font-weight: 500;">85.4</span>
                   <span class="font-sans font-medium text-slate-400 text-base">/100</span>
                 </div>
                 <div class="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
                   <div id="previewProgressBar" class="h-full rounded-full bg-emerald-500 transition-all duration-500" style="width: 85.4%;"></div>
                 </div>
               </div>
-
-              <!-- Diagnostic Message Box -->
-              <div class="bg-slate-50/90 p-4 rounded-xl border border-slate-200/70 space-y-1">
-                <div class="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-wider">Avaliação do Modelo:</div>
-                <p id="previewMessageText" class="text-xs font-medium text-slate-800 leading-relaxed">
-                  "Coluna d'água estável e bem oxigenada."
-                </p>
-              </div>
             </div>
-
           </div>
         </section>
 

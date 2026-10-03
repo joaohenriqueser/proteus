@@ -2,6 +2,9 @@
  * Tietê River Water Diagnostics - IRE Math Engine
  * Eutrophication Risk Index (Índice de Risco de Eutrofização - IRE)
  * Environmental Water Quality Framework for Tietê River (Barbosa-SP)
+ * 
+ * ARQUITETURA ATUALIZADA: Módulo Tri-paramétrico (pH, Turbidez, Temperatura)
+ * Sensor de Oxigênio Dissolvido (OD) dispensado por viabilidade técnico-financeira IoT.
  */
 
 window.IREEngine = {
@@ -31,21 +34,7 @@ window.IREEngine = {
     if (ph < 6.0) {
       return Math.max(0, 100 - 40 * (6.0 - ph));
     }
-    // Smooth boundary for 6.0 <= ph < 6.5 or 8.0 < ph <= 8.5
     return 100;
-  },
-
-  /**
-   * Calculate Dissolved Oxygen Sub-index (S_OD)
-   * @param {number} od - Dissolved Oxygen in mg/L
-   * @returns {number} Sub-index 0 to 100
-   */
-  calculateSubOD(od) {
-    if (od >= 5.0) return 100;
-    if (od >= 2.0) {
-      return 20 * od;
-    }
-    return 0;
   },
 
   /**
@@ -59,7 +48,7 @@ window.IREEngine = {
 
   /**
    * Full calculation of IRE and detailed diagnostic step-by-step
-   * @param {object} params - { ph, turb, od, temp }
+   * @param {object} params - { ph, turb, temp }
    * @returns {object} Diagnosis results
    */
   diagnose(params) {
@@ -67,33 +56,16 @@ window.IREEngine = {
     const turb = parseFloat(params.turb);
     const temp = parseFloat(params.temp);
 
-    // Verificação de presença do sensor de OD
-    const hasOD = (params.od !== undefined && params.od !== null && params.od !== '' && !isNaN(parseFloat(params.od)));
-    const od = hasOD ? parseFloat(params.od) : null;
-
     const sTurb = this.calculateSubTurbidity(turb);
     const spH = this.calculateSubpH(ph);
-    const sOD = hasOD ? this.calculateSubOD(od) : null;
     const fTemp = this.calculateTempFactor(temp);
 
-    // Weighted sum
-    let iPonderado;
-    let formulaMode;
-    let weights;
-
-    if (hasOD) {
-      // Fórmula clássica com sensor de OD (40% Turb, 35% OD, 25% pH)
-      iPonderado = (0.40 * sTurb) + (0.35 * sOD) + (0.25 * spH);
-      formulaMode = 'Clássica (Com OD - Lab)';
-      weights = { turb: 0.40, od: 0.35, ph: 0.25 };
-    } else {
-      // FÓRMULA ATUALIZADA DO PROTEUS SEM OXIGÊNIO (Tri-paramétrica: 60% Turb, 40% pH)
-      // Fundamentação limnológica: A turbidez afere a biomassa algal suspensa e o pH afere
-      // a alcalinização metabólica fotossintética, corrigidos pela temperatura (F_temp).
-      iPonderado = (0.60 * sTurb) + (0.40 * spH);
-      formulaMode = 'Atualizada PROTEUS (Sem OD - 3 Sensores IoT)';
-      weights = { turb: 0.60, od: 0.00, ph: 0.40 };
-    }
+    // FÓRMULA ATUALIZADA DO PROTEUS SEM OXIGÊNIO (Tri-paramétrica: 60% Turb, 40% pH)
+    // A turbidez afere a biomassa fitoplanctônica e o pH afere a alcalinização fotossintética,
+    // com penalidade cinética por estresse térmico (F_temp).
+    const iPonderado = (0.60 * sTurb) + (0.40 * spH);
+    const formulaMode = 'Atualizada PROTEUS (Sem OD - 3 Sensores IoT)';
+    const weights = { turb: 0.60, ph: 0.40 };
 
     // Final IRE (clamped between 0 and 100)
     let ire = iPonderado / fTemp;
@@ -122,9 +94,7 @@ window.IREEngine = {
         accentColor: '#ef4444',
         iconName: 'alert-triangle',
         message: 'Proliferação algal massiva confirmada, risco de toxinas e mortandade.',
-        conamaNote: hasOD && od < 2.0 
-          ? 'Alerta Ambiental: Hipóxia severa (OD < 2.0 mg/L) e hiper-eutrofização.'
-          : 'Alerta Ambiental: Floração algal crítica com alta biomassa óptica e desequilíbrio metabólico.'
+        conamaNote: 'Alerta Ambiental: Floração algal crítica com alta biomassa óptica e desequilíbrio metabólico.'
       };
     } else if (ire < 55) {
       status = {
@@ -168,19 +138,6 @@ window.IREEngine = {
         statusText: turb <= 10 ? 'Excelente (<=10)' : (turb <= 100 ? 'Moderado' : 'Elevado (>100)'),
         statusColor: turb <= 10 ? 'text-emerald-600 font-semibold' : (turb <= 100 ? 'text-amber-600 font-semibold' : 'text-rose-600 font-semibold')
       },
-      od: hasOD ? {
-        value: od,
-        subIndex: sOD.toFixed(1),
-        percentage: Math.min(100, (od / 10) * 100),
-        statusText: od >= 5.0 ? 'Ótimo (>=5.0 mg/L)' : (od >= 2.0 ? 'Baixo (2-5 mg/L)' : 'Crítico (<2 mg/L)'),
-        statusColor: od >= 5.0 ? 'text-emerald-600 font-semibold' : (od >= 2.0 ? 'text-amber-600 font-semibold' : 'text-rose-600 font-semibold')
-      } : {
-        value: null,
-        subIndex: 'Dispensado',
-        percentage: 0,
-        statusText: 'Dispensado no Nó IoT (Sem OD)',
-        statusColor: 'text-slate-400 font-medium'
-      },
       temp: {
         value: temp,
         subIndex: fTemp === 1.2 ? 'Penalizado (x1.2)' : 'Normal (x1.0)',
@@ -191,14 +148,13 @@ window.IREEngine = {
     };
 
     return {
-      params: { ph, turb, od, temp },
-      hasOD,
+      params: { ph, turb, temp },
+      hasOD: false,
       formulaMode,
       weights,
       subIndices: {
         sTurb,
         spH,
-        sOD,
         fTemp
       },
       iPonderado,

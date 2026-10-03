@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     previewStatusTitle.textContent = diag.status.title;
     previewBadge.className = `px-2.5 py-1 rounded-full text-xs font-mono font-bold border flex items-center gap-1.5 ${diag.status.badgeClass}`;
-    previewMessageText.textContent = `"${diag.status.message}"`;
+    if (previewMessageText) previewMessageText.textContent = `"${diag.status.message}"`;
 
     if (previewIcon) {
       previewIcon.setAttribute('data-lucide', diag.status.iconName);

@@ -34,10 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const noteTurb = document.getElementById('noteTurb');
   const dotTurb = document.getElementById('dotTurb');
 
-  const valOD = document.getElementById('valOD');
-  const noteOD = document.getElementById('noteOD');
-  const dotOD = document.getElementById('dotOD');
-
   const valTemp = document.getElementById('valTemp');
   const noteTemp = document.getElementById('noteTemp');
   const dotTemp = document.getElementById('dotTemp');
@@ -135,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     state.stations.forEach(st => {
       const isActive = st.id === currentSt.id;
-      const stParams = st.params || { ph: 7.2, turb: 8, od: 6.8, temp: 22.4 };
+      const stParams = st.params || { ph: 7.2, turb: 8, temp: 22.4 };
       const stDiag = engine.diagnose(stParams);
       const stColor = getStatusColor(stDiag.status.code);
 
@@ -247,22 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. OD
-    if (valOD) valOD.textContent = state.params.od.toFixed(1);
-    if (noteOD) {
-      if (state.params.od >= 5.0) {
-        noteOD.textContent = 'Saturação adequada';
-        if (dotOD) dotOD.style.backgroundColor = '#10B981';
-      } else if (state.params.od < 2.0) {
-        noteOD.textContent = 'Anóxico / Hipóxia Severa';
-        if (dotOD) dotOD.style.backgroundColor = '#EF4444';
-      } else {
-        noteOD.textContent = 'Oxigênio em queda';
-        if (dotOD) dotOD.style.backgroundColor = '#F59E0B';
-      }
-    }
-
-    // 4. Temperatura
+// 3. Temperatura
     if (valTemp) valTemp.textContent = state.params.temp.toFixed(1);
     if (noteTemp) {
       if (state.params.temp >= 25.0) {
@@ -278,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syncMap(colorHex, status.title);
 
     // Sync Chart & Log
-    updateChart(ireNum, state.params.od);
+    updateChart(ireNum);
     renderHistoryLog();
   }
 
@@ -437,20 +418,23 @@ document.addEventListener('DOMContentLoaded', () => {
    * Chart.js Time-Series Dual Y-Axes
    */
   function initChart() {
-    const ctx = document.getElementById('ireChart');
-    if (!ctx || !window.Chart) return;
+    const canvas = document.getElementById('ireChart');
+    if (!canvas || !window.Chart) return;
+    const ctx = canvas.getContext('2d');
+
+    // Create a smooth vertical gradient fill
+    const gradient = ctx.createLinearGradient(0, 0, 0, 160);
+    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.22)');
+    gradient.addColorStop(0.8, 'rgba(37, 99, 235, 0.02)');
+    gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
 
     const initialLabels = [];
     const initialIRE = [];
-    const initialOD = [];
-
     if (Array.isArray(state.history) && state.history.length > 0) {
       const reversed = [...state.history].reverse().slice(-15);
       reversed.forEach(item => {
         initialLabels.push(item.timestamp || item.time || '');
         initialIRE.push(parseFloat(item.ire) || 85);
-        const odVal = item.params ? item.params.od : parseFloat(item.od) || 6.8;
-        initialOD.push(odVal);
       });
     }
 
@@ -463,92 +447,128 @@ document.addEventListener('DOMContentLoaded', () => {
             label: 'IRE',
             data: initialIRE,
             borderColor: '#2563EB',
-            backgroundColor: 'rgba(37, 99, 235, 0.08)',
-            borderWidth: 2,
-            pointRadius: 2.5,
+            backgroundColor: gradient,
+            borderWidth: 2.5,
+            pointRadius: (context) => {
+              const idx = context.dataIndex;
+              const count = context.dataset.data.length;
+              return idx === count - 1 ? 4 : 0;
+            },
+            pointHoverRadius: 6,
             pointBackgroundColor: '#2563EB',
-            tension: 0.35,
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            tension: 0.38,
             fill: true,
             yAxisID: 'y'
-          },
-          {
-            label: 'OD (mg/L)',
-            data: initialOD,
-            borderColor: '#10B981',
-            backgroundColor: 'transparent',
-            borderWidth: 2,
-            borderDash: [4, 4],
-            pointRadius: 2.5,
-            pointBackgroundColor: '#10B981',
-            tension: 0.35,
-            yAxisID: 'y1'
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 320 },
+        animation: { duration: 250 },
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(255, 255, 255, 0.96)',
-            borderColor: '#E2E8F0',
+            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+            borderColor: 'rgba(255, 255, 255, 0.12)',
             borderWidth: 1,
-            displayColors: true,
-            titleColor: '#0F172A',
-            bodyColor: '#334155',
-            padding: 10,
+            displayColors: false,
+            padding: { top: 8, bottom: 8, left: 10, right: 10 },
             cornerRadius: 8,
-            titleFont: { family: "'IBM Plex Mono',monospace", size: 11, weight: 'bold' },
-            bodyFont: { family: "'IBM Plex Mono',monospace", size: 11 }
+            titleFont: { family: "'IBM Plex Mono', monospace", size: 10, weight: '500' },
+            titleColor: '#94A3B8',
+            bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '700' },
+            bodyColor: '#FFFFFF',
+            callbacks: {
+              title: (items) => `Horário: ${items[0].label}`,
+              label: (item) => `Índice IRE: ${Number(item.raw).toFixed(1)} pts`
+            }
           }
         },
         scales: {
           x: {
-            grid: { color: '#F1F5F9', drawTicks: false },
-            border: { color: '#E2E8F0' },
-            ticks: { color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 }, padding: 6 }
+            grid: { display: false },
+            border: { display: false },
+            ticks: {
+              color: '#94A3B8',
+              font: { family: "'IBM Plex Mono', monospace", size: 9.5 },
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 4,
+              padding: 6
+            }
           },
           y: {
             min: 0,
             max: 100,
             position: 'left',
-            grid: { color: '#F1F5F9', drawTicks: false },
+            grid: {
+              color: '#F1F5F9',
+              drawTicks: false
+            },
             border: { display: false },
-            title: { display: true, text: 'IRE', color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 } },
-            ticks: { color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 }, padding: 6, stepSize: 25 }
-          },
-          y1: {
-            min: 0,
-            max: 10,
-            position: 'right',
-            grid: { display: false },
-            border: { display: false },
-            title: { display: true, text: 'OD mg/L', color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 } },
-            ticks: { color: '#64748B', font: { family: "'IBM Plex Mono',monospace", size: 10 }, padding: 6, stepSize: 2.5 }
+            ticks: {
+              color: '#94A3B8',
+              font: { family: "'IBM Plex Mono', monospace", size: 9.5 },
+              padding: 6,
+              stepSize: 25,
+              callback: (val) => val
+            }
           }
         }
       }
     });
+
+    updateChartHeaderStat();
   }
 
-  function updateChart(ireNum, od) {
+  function updateChart(ireNum) {
     if (!chartInstance) return;
     const nowLabel = new Date().toLocaleTimeString('pt-BR');
-    
     chartInstance.data.labels.push(nowLabel);
     chartInstance.data.datasets[0].data.push(ireNum);
-    chartInstance.data.datasets[1].data.push(od);
 
     if (chartInstance.data.labels.length > 15) {
       chartInstance.data.labels.shift();
       chartInstance.data.datasets[0].data.shift();
-      chartInstance.data.datasets[1].data.shift();
     }
-
     chartInstance.update();
+    updateChartHeaderStat();
+  }
+
+  function updateChartHeaderStat() {
+    const elScore = document.getElementById('chartCurrentIRE');
+    const elBadge = document.getElementById('chartCurrentBadge');
+    const elCount = document.getElementById('chartReadingsCount');
+
+    if (chartInstance && chartInstance.data.datasets[0].data.length > 0) {
+      const data = chartInstance.data.datasets[0].data;
+      const latest = data[data.length - 1];
+      const count = data.length;
+
+      if (elScore) elScore.textContent = Number(latest).toFixed(1);
+      if (elCount) elCount.textContent = `${count} leituras`;
+
+      if (elBadge) {
+        if (latest >= 80) {
+          elBadge.textContent = 'ÓTIMO';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200';
+        } else if (latest >= 60) {
+          elBadge.textContent = 'ATENÇÃO';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200';
+        } else if (latest >= 40) {
+          elBadge.textContent = 'ALERTA';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-orange-50 text-orange-700 border-orange-200';
+        } else {
+          elBadge.textContent = 'CRÍTICO';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200';
+        }
+      }
+    }
   }
 
   /**
@@ -560,12 +580,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const stName = currentSt ? currentSt.name : 'BRB-04 · Barbosa';
       const now = Date.now();
       const sampleOffsets = [
-        { min: 4, ph: 7.4, turb: 9, od: 7.1, temp: 22.8 },
-        { min: 18, ph: 7.3, turb: 12, od: 6.9, temp: 23.0 },
-        { min: 45, ph: 7.6, turb: 20, od: 6.2, temp: 23.5 },
-        { min: 90, ph: 7.8, turb: 28, od: 5.6, temp: 24.1 },
-        { min: 180, ph: 7.9, turb: 35, od: 5.1, temp: 24.6 },
-        { min: 360, ph: 7.2, turb: 10, od: 7.4, temp: 22.2 }
+        { min: 4, ph: 7.4, turb: 9, temp: 22.8 },
+        { min: 18, ph: 7.3, turb: 12, temp: 23.0 },
+        { min: 45, ph: 7.6, turb: 20, temp: 23.5 },
+        { min: 90, ph: 7.8, turb: 28, temp: 24.1 },
+        { min: 180, ph: 7.9, turb: 35, temp: 24.6 },
+        { min: 360, ph: 7.2, turb: 10, temp: 22.2 }
       ];
 
       state.history = sampleOffsets.map(item => {
@@ -614,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!Array.isArray(state.history) || state.history.length === 0) {
       historyTableBody.innerHTML = `
         <tr>
-          <td colspan="8" class="text-center py-8 text-slate-400 font-sans">
+          <td colspan="7" class="text-center py-8 text-slate-400 font-sans">
             Nenhum registro no histórico de telemetria. Inicie a simulação ou selecione um cenário para registrar dados.
           </td>
         </tr>
@@ -630,7 +650,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const p = item.params || {};
       const ph = p.ph !== undefined ? Number(p.ph).toFixed(1) : '--';
       const turb = p.turb !== undefined ? Math.round(p.turb) : '--';
-      const od = p.od !== undefined ? Number(p.od).toFixed(1) : '--';
       const temp = p.temp !== undefined ? Number(p.temp).toFixed(1) : '--';
       const ireVal = item.ire !== undefined ? Number(item.ire).toFixed(1) : '--';
       const statusCode = item.status ? item.status.code : 'REGULAR';
@@ -653,7 +672,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </td>
           <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${ph}</td>
           <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${turb} <span class="text-[10px] text-slate-400 font-normal">NTU</span></td>
-          <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${od} <span class="text-[10px] text-slate-400 font-normal">mg/L</span></td>
           <td class="py-2.5 px-3.5 text-center font-semibold text-slate-700">${temp} <span class="text-[10px] text-slate-400 font-normal">°C</span></td>
           <td class="py-2.5 px-3.5">
             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-semibold border" style="color: ${colorHex}; border-color: ${colorHex}30; background-color: ${colorHex}10">
@@ -680,13 +698,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let newTurb = state.params.turb + (Math.random() * 4 - 2);
     newTurb = Math.max(2, Math.min(140, newTurb));
 
-    let newOD = state.params.od + (Math.random() * 0.3 - 0.15);
-    newOD = Math.max(0.5, Math.min(10.0, newOD));
-
     let newTemp = state.params.temp + (Math.random() * 0.2 - 0.1);
     newTemp = Math.max(15, Math.min(32, newTemp));
 
-    state.params = { ph: newPH, turb: newTurb, od: newOD, temp: newTemp };
+    state.params = { ph: newPH, turb: newTurb, temp: newTemp };
 
     const diag = engine.diagnose(state.params);
     addHistoryLogEntry(state.params, diag);
@@ -718,13 +733,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Preset Scenario Quick Buttons Function
-  function applyPresetScenario(ph, turb, od, temp, tag, btnElement, activeClass) {
+  function applyPresetScenario(ph, turb, temp, tag, btnElement, activeClass) {
     if (simIntervalId) {
       clearInterval(simIntervalId);
       simIntervalId = null;
       state.isLoopRunning = false;
     }
-    state.params = { ph, turb, od, temp };
+    state.params = { ph, turb, temp };
     state.activeScenarioTag = tag;
     app.saveState(state);
 
@@ -754,9 +769,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const sc2 = document.getElementById('btnQuickScenario2');
   const sc4 = document.getElementById('btnQuickScenario4');
 
-  if (sc1) sc1.onclick = () => applyPresetScenario(7.2, 4.0, 8.6, 22.4, 'Água Boa', sc1, 'active-ideal');
-  if (sc2) sc2.onclick = () => applyPresetScenario(8.4, 48.0, 3.8, 26.5, 'Água Regular', sc2, 'active-regular');
-  if (sc4) sc4.onclick = () => applyPresetScenario(9.2, 120.0, 1.1, 29.5, 'Água Crítica', sc4, 'active-ruim');
+  if (sc1) sc1.onclick = () => applyPresetScenario(7.2, 4.0, 22.4, 'Água Boa', sc1, 'active-ideal');
+  if (sc2) sc2.onclick = () => applyPresetScenario(8.4, 48.0, 26.5, 'Água Regular', sc2, 'active-regular');
+  if (sc4) sc4.onclick = () => applyPresetScenario(9.2, 120.0, 29.5, 'Água Crítica', sc4, 'active-ruim');
 
   // Action Buttons
   if (btnToggleTelemetry) {

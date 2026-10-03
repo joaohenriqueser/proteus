@@ -57,7 +57,6 @@ router.get('/', async (req, res) => {
       params: {
         ph: r.ph !== null ? parseFloat(r.ph) : 7.2,
         turb: r.turb !== null ? parseFloat(r.turb) : 4.0,
-        od: r.od !== null ? parseFloat(r.od) : 8.6,
         temp: r.temp !== null ? parseFloat(r.temp) : 22.4
       },
       ire: r.ire !== null ? parseFloat(r.ire) : null,
