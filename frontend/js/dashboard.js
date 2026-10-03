@@ -556,16 +556,16 @@ document.addEventListener('DOMContentLoaded', () => {
       if (elBadge) {
         if (latest >= 80) {
           elBadge.textContent = 'ÓTIMO';
-          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200';
         } else if (latest >= 60) {
           elBadge.textContent = 'ATENÇÃO';
-          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-lg border bg-amber-50 text-amber-700 border-amber-200';
         } else if (latest >= 40) {
           elBadge.textContent = 'ALERTA';
-          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-orange-50 text-orange-700 border-orange-200';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-lg border bg-orange-50 text-orange-700 border-orange-200';
         } else {
           elBadge.textContent = 'CRÍTICO';
-          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200';
+          elBadge.className = 'text-[10px] font-bold font-mono px-2 py-0.5 rounded-lg border bg-rose-50 text-rose-700 border-rose-200';
         }
       }
     }
@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${station}
           </td>
           <td class="py-2.5 px-3.5 text-center whitespace-nowrap">
-            <span class="px-2 py-0.5 rounded-full font-bold text-xs border" style="color: ${colorHex}; border-color: ${colorHex}40; background-color: ${colorHex}15">
+            <span class="px-2 py-0.5 rounded-lg font-bold text-xs border" style="color: ${colorHex}; border-color: ${colorHex}40; background-color: ${colorHex}15">
               ${ireVal}
             </span>
           </td>

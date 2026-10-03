@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PROTEUS — Metodologia &amp; Modelagem IRE</title>
-  <meta name="description" content="Fundamentação técnica, critérios da Resolução CONAMA nº 357/2005 e funcionamento matemático do algoritmo de telemetria PROTEUS.">
+  <meta name="description" content="Entenda o funcionamento do algoritmo PROTEUS, os parâmetros monitorados e a modelagem do Índice de Risco de Eutrofização.">
+
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 
   <!-- Google Fonts: Plus Jakarta Sans, Inter & IBM Plex Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,7 +69,7 @@
           <span class="link-label">Simulador</span>
         </a>
 
-        <a href="metodologia.html" class="sidebar-link active" title="Metodologia & Índice IRE">
+        <a href="metodologia.html" class="sidebar-link active" title="Metodologia &amp; Índice IRE">
           <div class="link-icon">
             <i data-lucide="book-open" class="w-4 h-4"></i>
           </div>
@@ -104,7 +106,7 @@
             Metodologia &amp; Modelagem do Índice IRE
           </h1>
           <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            Fundamentação ambiental, critérios da Resolução CONAMA nº 357/2005 e funcionamento matemático do modelo de telemetria.
+            Entenda como funciona o monitoramento das águas, o que cada medição significa e a base técnica do algoritmo.
           </p>
         </div>
 
@@ -119,101 +121,104 @@
         </div>
       </div>
 
-      <!-- ==================== TAB 1: VISÃO GERAL (LIMPA & DIRETA) ==================== -->
+      <!-- ==================== TAB 1: VISÃO GERAL (SIMPLES, DIRETA & PARA LEIGOS) ==================== -->
       <div id="contentResumida" class="space-y-6 block">
 
-        <!-- 1. O que é o PROTEUS & o Índice IRE -->
+        <!-- 1. O que é o PROTEUS de forma simples -->
         <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
           <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
             <i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
             <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
-              O Projeto PROTEUS e o Índice IRE
+              Como o PROTEUS Funciona
             </h2>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 leading-relaxed font-sans">
             <div class="space-y-2">
-              <h3 class="font-bold text-slate-900 text-sm">Monitoramento Hídrico Contínuo</h3>
+              <h3 class="font-bold text-slate-900 text-sm">Cuidando do Rio 24 Horas por Dia</h3>
               <p>
-                O <strong class="text-slate-800">PROTEUS</strong> é uma plataforma de telemetria hídrica projetada para acompanhar em tempo real as variações físico-químicas em rios urbanos como o Tietê. Sondas acopladas a uma unidade microcontrolada (ESP32) realizam leituras automatizadas e transmitem os dados diretamente ao servidor.
+                O <strong class="text-slate-800">PROTEUS</strong> é um projeto criado para acompanhar a saúde de rios como o Rio Tietê de forma automática e contínua. Pequenos aparelhos equipados com sondas especiais ficam em contato direto com a água, medindo suas características dia e noite e enviando as leituras instantaneamente para este painel.
               </p>
               <p>
-                O acompanhamento contínuo permite identificar desequilíbrios precocemente, reduzindo o tempo de resposta a anomalias causadas por calor intenso, despejo de efluentes ou escoamento urbano.
+                Isso ajuda a identificar problemas de poluição ou calor excessivo rapidamente, muito antes que a água se degrade a ponto de causar mau cheiro ou mortandade de peixes.
               </p>
             </div>
 
-            <div class="space-y-2.5">
-              <h3 class="font-bold text-slate-900 text-sm">Índice de Risco de Eutrofização (IRE)</h3>
+            <div class="space-y-2">
+              <h3 class="font-bold text-slate-900 text-sm">Uma Nota de 0 a 100 para a Água</h3>
               <p>
-                O <strong class="text-slate-800">Índice IRE</strong> converte os parâmetros medidos pelos sensores em uma escala única de <strong>0 a 100</strong>. Notas próximas de 100 indicam água estável e em equilíbrio ecológico, enquanto notas mais baixas apontam condições propícias à proliferação desordenada de microalgas.
+                Em vez de obrigar qualquer pessoa a interpretar tabelas químicas complicadas, o sistema resume todas as medições em uma única nota fácil de entender: o <strong class="text-slate-800">Índice IRE</strong> (Índice de Risco de Eutrofização), variando de <strong>0 a 100</strong>.
               </p>
-              <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-200/70 text-[11px] text-blue-900 leading-relaxed">
-                <strong>Referência do Modelo:</strong> O IRE é um indicador experimental desenvolvido no âmbito do projeto, fundamentado nos parâmetros de <strong>Águas Doces de Classe 2 da Resolução CONAMA nº 357/2005</strong>. Não constitui índice fiscalizatório oficial.
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700">
+                <strong>Regra simples:</strong> Quanto mais perto de <strong>100</strong> a nota estiver, mais limpa, equilibrada e saudável está a água. Se a nota começar a cair, significa que a água está perdendo qualidade ou há risco de proliferação acelerada de algas.
               </div>
             </div>
           </div>
         </section>
 
-        <!-- 2. Parâmetros e Referência CONAMA Classe 2 -->
+        <!-- 2. O que os sensores medem (Explicado sem jargões) -->
         <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
-            <div class="flex items-center gap-2">
-              <i data-lucide="scale" class="w-4 h-4 text-blue-600"></i>
-              <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
-                Parâmetros e Padrão CONAMA Classe 2
-              </h2>
-            </div>
-            <span class="text-[11px] font-mono bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200 font-semibold">
-              Resolução CONAMA nº 357/2005 — Águas Doces Classe 2
-            </span>
+          <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <i data-lucide="droplets" class="w-4 h-4 text-blue-600"></i>
+            <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
+              O Que Medimos na Água
+            </h2>
           </div>
 
-          <p class="text-xs text-slate-500 leading-relaxed font-sans">
-            A Resolução CONAMA 357/2005 define a Classe 2 para corpos hídricos destinados à preservação da vida aquática, recreação de contato primário e abastecimento após tratamento convencional. O PROTEUS utiliza estes critérios como limites de referência:
+          <p class="text-xs text-slate-500 font-sans leading-relaxed">
+            Para entender a saúde do rio, o sistema acompanha três fatores fundamentais do dia a dia da água:
           </p>
 
-          <div class="overflow-x-auto border border-slate-200 rounded-xl">
-            <table class="w-full text-left font-sans text-xs border-collapse">
-              <thead class="bg-slate-50 text-slate-700 font-mono text-[11px] border-b border-slate-200">
-                <tr>
-                  <th class="py-2.5 px-4 font-bold">Parâmetro</th>
-                  <th class="py-2.5 px-4 font-bold">Padrão CONAMA Classe 2</th>
-                  <th class="py-2.5 px-4 font-bold">Importância para o Controle da Água</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100 text-slate-600">
-                <tr>
-                  <td class="py-3 px-4 font-semibold text-slate-900 font-mono">pH</td>
-                  <td class="py-3 px-4 font-mono font-bold text-indigo-700">6,0 a 9,0</td>
-                  <td class="py-3 px-4 leading-relaxed">
-                    Mede o equilíbrio ácido-básico. Em florações intensas de algas, o consumo de carbono dissolvido eleva o pH para faixas alcalinas excessivas (> 8,5).
-                  </td>
-                </tr>
-                <tr>
-                  <td class="py-3 px-4 font-semibold text-slate-900 font-mono">Turbidez</td>
-                  <td class="py-3 px-4 font-mono font-bold text-amber-700">Até 100 NTU</td>
-                  <td class="py-3 px-4 leading-relaxed">
-                    Mede a perda de transparência. Água turva indica excesso de partículas ou biomassa de algas em suspensão, bloqueando a luz solar essencial ao ecossistema.
-                  </td>
-                </tr>
-                <tr>
-                  <td class="py-3 px-4 font-semibold text-slate-900 font-mono">Temperatura</td>
-                  <td class="py-3 px-4 font-mono font-bold text-rose-700">Máx. 30 °C (Elevação &lt; 3 °C)</td>
-                  <td class="py-3 px-4 leading-relaxed">
-                    Temperaturas elevadas (&ge; 25 °C) aceleram as reações químicas, estimulam a rápida multiplicação biológica e reduzem a retenção natural de oxigênio na água.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-sans text-xs">
+            
+            <!-- pH -->
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-mono font-bold text-xs">
+                  pH
+                </div>
+                <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Acidez da Água</h3>
+              </div>
+              <p class="text-slate-600 leading-relaxed text-[11px]">
+                Mostra se a água está neutra, ácida ou alcalina. Em um rio equilibrado, a água fica neutra. Quando muitas algas se multiplicam rapidamente sob a luz do sol, elas consomem os gases da água e fazem o pH disparar para cima, o que serve de alarme imediato de desequilíbrio.
+              </p>
+            </div>
+
+            <!-- Turbidez -->
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold text-xs">
+                  NTU
+                </div>
+                <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Transparência</h3>
+              </div>
+              <p class="text-slate-600 leading-relaxed text-[11px]">
+                Avalia a claridade da água. Água limpa deixa os raios de sol entrarem até o fundo. Se a água ficar turva ou barrenta, a luz solar é bloqueada, sufocando as plantas aquáticas e indicando excesso de sedimentos ou de algas microscópicas em suspensão.
+              </p>
+            </div>
+
+            <!-- Temperatura -->
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-mono font-bold text-xs">
+                  °C
+                </div>
+                <h3 class="font-bold text-slate-900 text-xs sm:text-sm">Calor da Água</h3>
+              </div>
+              <p class="text-slate-600 leading-relaxed text-[11px]">
+                Mede a temperatura do rio. Água muito quente funciona como uma estufa: acelera a proliferação rápida de algas e bactérias, além de reduzir naturalmente a quantidade de oxigênio que os peixes têm disponível para respirar.
+              </p>
+            </div>
+
           </div>
         </section>
 
-        <!-- 3. Faixas de Classificação do IRE -->
+        <!-- 3. Faixas de Classificação da Nota (0 a 100) -->
         <section class="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-xs">
           <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
             <i data-lucide="bar-chart-3" class="w-4 h-4 text-blue-600"></i>
             <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
-              Faixas de Diagnóstico do Índice IRE
+              Como Entender a Pontuação da Água
             </h2>
           </div>
 
@@ -221,40 +226,40 @@
             <div class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-1">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-emerald-800">Ótimo / Bom</span>
-                <span class="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">80 – 100</span>
+                <span class="font-mono text-[11px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-lg">80 – 100</span>
               </div>
               <p class="text-[11px] text-slate-600 leading-relaxed">
-                Parâmetros dentro da normalidade e plenamente alinhados aos limites normativos da Classe 2.
+                Água límpida, bem oxigenada e em perfeito equilíbrio. Condição excelente para a vida aquática.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl border border-amber-200 bg-amber-50/50 space-y-1">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-amber-800">Atenção</span>
-                <span class="font-mono text-[11px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-md">60 – 79</span>
+                <span class="font-mono text-[11px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-lg">60 – 79</span>
               </div>
               <p class="text-[11px] text-slate-600 leading-relaxed">
-                Pequenas oscilações em turbidez ou temperatura. Nível preventivo para acompanhamento de rotina.
+                Pequenas variações na temperatura ou transparência. Água boa, mantida sob observação de rotina.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl border border-orange-200 bg-orange-50/50 space-y-1">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-orange-800">Alerta</span>
-                <span class="font-mono text-[11px] font-bold text-orange-700 bg-orange-100/80 px-2 py-0.5 rounded-md">40 – 59</span>
+                <span class="font-mono text-[11px] font-bold text-orange-700 bg-orange-100/80 px-2 py-0.5 rounded-lg">40 – 59</span>
               </div>
               <p class="text-[11px] text-slate-600 leading-relaxed">
-                Desvios expressivos que favorecem a floração de microalgas. Requer vigilância reforçada.
+                Indícios claros de proliferação de algas ou perda de transparência. Exige vigilância constante.
               </p>
             </div>
 
             <div class="p-3.5 rounded-xl border border-rose-200 bg-rose-50/50 space-y-1">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-rose-800">Crítico</span>
-                <span class="font-mono text-[11px] font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-md">0 – 39</span>
+                <span class="font-mono text-[11px] font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-lg">0 – 39</span>
               </div>
               <p class="text-[11px] text-slate-600 leading-relaxed">
-                Forte degradação físico-química e alto risco ecológico à vida aquática e às espécies locais.
+                Severo desequilíbrio e água degradada, com alto risco para peixes e para o ecossistema do rio.
               </p>
             </div>
           </div>
@@ -262,7 +267,7 @@
 
       </div>
 
-      <!-- ==================== TAB 2: MODELO DETALHADO (TÉCNICO & LIMPO) ==================== -->
+      <!-- ==================== TAB 2: MODELO DETALHADO (TÉCNICO, REGULATÓRIO & CONAMA) ==================== -->
       <div id="contentDetalhada" class="space-y-6 hidden">
 
         <!-- 1. Resolução CONAMA 357/2005 - Classe 2 -->
@@ -276,10 +281,10 @@
 
           <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-sans">
             <p>
-              O projeto adota formalmente os padrões estabelecidos na <strong class="text-slate-800">Resolução CONAMA nº 357/2005</strong> para <strong>Águas Doces de Classe 2</strong> (Art. 4º e Art. 15) como referência comparativa para a calibração do algoritmo.
+              O projeto adota formalmente os padrões estabelecidos na <strong class="text-slate-800">Resolução CONAMA nº 357/2005</strong> para <strong>Águas Doces de Classe 2</strong> (Art. 4º e Art. 15) como base comparativa para a calibração dos limites numéricos do algoritmo IRE.
             </p>
             <p>
-              A Classe 2 foi selecionada por representar o enquadramento mais frequente nos reservatórios e trechos metropolitanos da bacia do Rio Tietê, compreendendo águas voltadas à proteção das comunidades aquáticas e ao abastecimento após tratamento convencional.
+              A Classe 2 é a categoria legal padrão para a maioria dos reservatórios paulistas e trechos de uso múltiplo na bacia do Rio Tietê sob influência urbana, destinada à proteção das comunidades aquáticas, recreação de contato primário e abastecimento humano após tratamento convencional.
             </p>
 
             <div class="overflow-x-auto border border-slate-200 rounded-xl mt-3">
@@ -295,24 +300,24 @@
                   <tr>
                     <td class="py-3 px-4 font-mono font-bold text-slate-900">pH</td>
                     <td class="py-3 px-4 font-mono text-indigo-700 font-semibold">6,0 a 9,0</td>
-                    <td class="py-3 px-4">Penalização proporcional progressiva para valores fora do intervalo 6,0 a 9,0.</td>
+                    <td class="py-3 px-4">Penalização proporcional progressiva para valores fora do intervalo regulamentar (6,0 a 9,0).</td>
                   </tr>
                   <tr>
                     <td class="py-3 px-4 font-mono font-bold text-slate-900">Turbidez</td>
                     <td class="py-3 px-4 font-mono text-amber-700 font-semibold">Até 100 NTU</td>
-                    <td class="py-3 px-4">O teto legal de 100 NTU corresponde à pontuação nula no subíndice (S_turb = 0).</td>
+                    <td class="py-3 px-4">O teto normativo de 100 NTU corresponde à pontuação nula no subíndice (S_turb = 0).</td>
                   </tr>
                   <tr>
                     <td class="py-3 px-4 font-mono font-bold text-slate-900">Temperatura</td>
                     <td class="py-3 px-4 font-mono text-rose-700 font-semibold">Elevação &lt; 3 °C | Máx. 30 °C</td>
-                    <td class="py-3 px-4">Fator multiplicador de penalidade térmica (F_temp = 1,2 para Temp &ge; 25 °C).</td>
+                    <td class="py-3 px-4">Atua como multiplicador penalizador térmico (F_temp = 1,2 para Temp &ge; 25 °C).</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500">
-              <strong>Ressalva Institucional:</strong> Os valores normativos atuam estritamente como parâmetros matemáticos de calibração do modelo experimental. O PROTEUS não substitui laudos emitidos por órgãos reguladores como CETESB ou ANA.
+              <strong>Ressalva Institucional:</strong> Os critérios da resolução servem estritamente como parâmetros matemáticos de calibração do modelo experimental de pesquisa. O PROTEUS não substitui laudos analíticos nem certificações oficiais de órgãos ambientais reguladores como a CETESB ou a ANA.
             </div>
           </div>
         </section>
@@ -322,12 +327,12 @@
           <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
             <i data-lucide="sigma" class="w-4 h-4 text-blue-600"></i>
             <h2 class="text-sm font-bold text-slate-900 uppercase font-mono tracking-wide">
-              2. Formulação Matemática do Índice IRE
+              2. Formulação Matemática do Algoritmo IRE
             </h2>
           </div>
 
           <p class="text-xs text-slate-500 font-sans leading-relaxed">
-            O algoritmo utiliza uma formulação tri-paramétrica adaptada para telemetria em tempo real, eliminando a dependência de sondas galvânicas de oxigênio dissolvido:
+            O algoritmo utiliza uma formulação tri-paramétrica adaptada para telemetria automatizada em tempo real, sem dependência de sondas galvânicas de oxigênio dissolvido:
           </p>
 
           <!-- Formula Card -->
@@ -346,20 +351,20 @@
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-1.5">
               <div class="flex items-center justify-between">
                 <span class="font-bold text-slate-900">Subíndice de Turbidez (S_turb)</span>
-                <span class="font-mono text-[11px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">Peso: 60%</span>
+                <span class="font-mono text-[11px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-lg">Peso: 60%</span>
               </div>
               <p class="text-slate-600 text-[11px] leading-relaxed">
-                Decrescimento a partir da transparência máxima (&le; 5 NTU = 100 pts) até o limite de 100 NTU do CONAMA Classe 2 (0 pts). Reflete a proliferação celular e a turbidez suspensa.
+                Decrescimento linear a partir da transparência máxima (&le; 5 NTU = 100 pts) até o limite de 100 NTU do CONAMA Classe 2 (0 pts). Reflete a proliferação celular e sólidos em suspensão.
               </p>
             </div>
 
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-1.5">
               <div class="flex items-center justify-between">
                 <span class="font-bold text-slate-900">Subíndice de pH (S_pH)</span>
-                <span class="font-mono text-[11px] font-bold text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded-full">Peso: 40%</span>
+                <span class="font-mono text-[11px] font-bold text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded-lg">Peso: 40%</span>
               </div>
               <p class="text-slate-600 text-[11px] leading-relaxed">
-                Curva centrada no intervalo de neutralidade (6,5 a 8,0 = 100 pts), penalizando alcalinidade intensa provocada pelo consumo acelerado de carbono na fotossíntese.
+                Curva centrada no intervalo de neutralidade (6,5 a 8,0 = 100 pts), penalizando alcalinidade intensa provocada pelo consumo acelerado de carbono na fotossíntese de microalgas.
               </p>
             </div>
           </div>
@@ -367,7 +372,7 @@
           <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 text-xs font-sans text-slate-600 space-y-1">
             <span class="font-bold text-slate-900">Fator de Correção Térmica (F_temp):</span>
             <p class="text-[11px] leading-relaxed">
-              Quando a temperatura da água atinge ou supera <strong>25 °C</strong>, é aplicado um fator redutor de <strong>1,2</strong> (<code class="text-rose-700 font-mono">F_temp = 1.2</code>) sobre o índice ponderado, penalizando a pontuação para refletir a aceleração metabólica dos microrganismos e o menor oxigênio dissolvido disponível. Em temperaturas normais (&lt; 25 °C), <code class="text-slate-700 font-mono">F_temp = 1.0</code>.
+              Quando a temperatura da água atinge ou supera <strong>25 °C</strong>, é aplicado um fator redutor de <strong>1,2</strong> (<code class="text-rose-700 font-mono">F_temp = 1.2</code>) sobre o índice ponderado, penalizando a pontuação para refletir a aceleração metabólica dos microrganismos. Em temperaturas sazonais normais (&lt; 25 °C), <code class="text-slate-700 font-mono">F_temp = 1.0</code>.
             </p>
           </div>
         </section>
@@ -395,9 +400,9 @@
             <div class="space-y-2">
               <h3 class="font-bold text-slate-900 text-sm">Limitações Técnicas do Protótipo</h3>
               <ul class="space-y-1.5 list-disc pl-4 text-[11px]">
-                <li><strong class="text-slate-800">Escopo Físico-Químico:</strong> O modelo infere tendências ecológicas a partir de grandezas físicas e químicas, não realizando contagem direta de células algais ou identificação taxonômica.</li>
-                <li><strong class="text-slate-800">Bioincrustação e Calibração:</strong> A permanência dos sensores na água gera biofilme aderido, demandando manutenção física preventiva e calibração periódica em soluções tampão.</li>
-                <li><strong class="text-slate-800">Finalidade de Triagem:</strong> Desenvolvido como ferramenta de alerta rápido contínuo; não substitui ensaios laboratoriais completos (DBO, fósforo total, nitrogênio).</li>
+                <li><strong class="text-slate-800">Escopo Físico-Químico:</strong> O modelo infere tendências a partir de grandezas físicas e químicas, não realizando contagem celular direta nem identificação taxonômica de espécies.</li>
+                <li><strong class="text-slate-800">Bioincrustação e Calibração:</strong> A permanência dos sensores na água gera biofilme aderido, demandando manutenção mecânica preventiva e calibração periódica em soluções tampão.</li>
+                <li><strong class="text-slate-800">Finalidade de Triagem:</strong> Desenvolvido como ferramenta de alerta contínuo; não substitui ensaios laboratoriais completos (DBO, fósforo total, nitrogênio).</li>
               </ul>
             </div>
           </div>
