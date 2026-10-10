@@ -4,33 +4,67 @@ const db = require('../db');
 const crypto = require('crypto');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+function ehOperador(req) {
+  return req.usuario && req.usuario.papel === 'operador';
+}
+
+/**
+ * Carrega um equipamento e verifica se o solicitante pode acessá-lo.
+ * Admin geral: qualquer equipamento. Operador: apenas os da própria estação.
+ */
+async function obterEquipamentoPermitido(req, id) {
+  const { rows } = await db.query('SELECT * FROM equipamentos WHERE id = $1', [id]);
+  if (rows.length === 0) {
+    return { status: 404, error: 'Equipamento não encontrado.' };
+  }
+
+  const eq = rows[0];
+  if (ehOperador(req) && (!eq.estacao_id || eq.estacao_id !== req.usuario.estacao_id)) {
+    return { status: 403, error: 'Acesso negado. Este equipamento não pertence à sua estação.' };
+  }
+  return { eq };
+}
+
+const SELECT_EQUIPAMENTO = `
+  SELECT 
+    eq.id,
+    eq.mac_address,
+    eq.nome_dispositivo,
+    eq.modelo,
+    eq.estacao_id,
+    e.codigo AS estacao_codigo,
+    e.nome AS estacao_nome,
+    e.cidade AS estacao_cidade,
+    eq.api_key,
+    eq.firmware_versao,
+    eq.status,
+    eq.ultima_comunicacao,
+    eq.criado_em
+  FROM equipamentos eq
+  LEFT JOIN estacoes e ON eq.estacao_id = e.id
+`;
+
 /**
  * GET /api/equipamentos
- * Lista todos os equipamentos ESP32 cadastrados
+ * Admin geral: lista todos (aceita ?estacao_id=N ou ?estacao_id=none para os sem estação).
+ * Operador: lista apenas os equipamentos da própria estação.
  */
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const sql = `
-      SELECT 
-        eq.id,
-        eq.mac_address,
-        eq.nome_dispositivo,
-        eq.modelo,
-        eq.estacao_id,
-        e.codigo AS estacao_codigo,
-        e.nome AS estacao_nome,
-        e.cidade AS estacao_cidade,
-        eq.api_key,
-        eq.firmware_versao,
-        eq.status,
-        eq.ultima_comunicacao,
-        eq.criado_em
-      FROM equipamentos eq
-      LEFT JOIN estacoes e ON eq.estacao_id = e.id
-      ORDER BY eq.id DESC;
-    `;
+    const params = [];
+    let where = '';
 
-    const { rows } = await db.query(sql);
+    if (ehOperador(req)) {
+      params.push(req.usuario.estacao_id);
+      where = 'WHERE eq.estacao_id = $1';
+    } else if (req.query.estacao_id === 'none') {
+      where = 'WHERE eq.estacao_id IS NULL';
+    } else if (req.query.estacao_id) {
+      params.push(parseInt(req.query.estacao_id, 10));
+      where = 'WHERE eq.estacao_id = $1';
+    }
+
+    const { rows } = await db.query(`${SELECT_EQUIPAMENTO} ${where} ORDER BY eq.id DESC;`, params);
     res.json({ success: true, count: rows.length, data: rows });
   } catch (err) {
     console.error('Erro ao listar equipamentos:', err);
@@ -43,23 +77,12 @@ router.get('/', authMiddleware, async (req, res) => {
  */
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const { id } = req.params;
-    const sql = `
-      SELECT 
-        eq.*,
-        e.codigo AS estacao_codigo,
-        e.nome AS estacao_nome
-      FROM equipamentos eq
-      LEFT JOIN estacoes e ON eq.estacao_id = e.id
-      WHERE eq.id = $1
-      LIMIT 1;
-    `;
-    const { rows } = await db.query(sql, [id]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'Equipamento não encontrado.' });
+    const permissao = await obterEquipamentoPermitido(req, req.params.id);
+    if (permissao.error) {
+      return res.status(permissao.status).json({ success: false, error: permissao.error });
     }
 
+    const { rows } = await db.query(`${SELECT_EQUIPAMENTO} WHERE eq.id = $1 LIMIT 1;`, [req.params.id]);
     res.json({ success: true, data: rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Erro ao buscar equipamento.' });
@@ -68,7 +91,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
 /**
  * POST /api/equipamentos
- * Cadastra um novo equipamento (ESP32) vinculado ou não a uma estação
+ * Cadastra um novo equipamento (ESP32).
+ * Operador: o equipamento é sempre vinculado à própria estação.
  */
 router.post('/', authMiddleware, async (req, res) => {
   try {
@@ -76,10 +100,20 @@ router.post('/', authMiddleware, async (req, res) => {
       mac_address, 
       nome_dispositivo, 
       modelo, 
-      estacao_id, 
       firmware_versao, 
       status 
     } = req.body;
+    let { estacao_id } = req.body;
+
+    if (ehOperador(req)) {
+      estacao_id = req.usuario.estacao_id;
+      if (!estacao_id) {
+        return res.status(403).json({
+          success: false,
+          error: 'Seu usuário não está vinculado a nenhuma estação.'
+        });
+      }
+    }
 
     if (!mac_address || !nome_dispositivo) {
       return res.status(400).json({
@@ -88,10 +122,9 @@ router.post('/', authMiddleware, async (req, res) => {
       });
     }
 
-    // Validação simples de formato MAC Address (ex: 24:6F:28:7A:B9:4C)
     const macNormalizado = mac_address.trim().toUpperCase();
 
-    // Gera uma API Key segura de 48 caracteres hexadecimais para o ESP32 autenticar leituras
+    // Gera uma API Key segura para o ESP32 autenticar leituras
     const apiKey = 'prt_' + crypto.randomBytes(24).toString('hex');
 
     const sql = `
@@ -135,18 +168,30 @@ router.post('/', authMiddleware, async (req, res) => {
 
 /**
  * PUT /api/equipamentos/:id
- * Atualiza os dados de um equipamento
+ * Atualiza os dados de um equipamento.
+ * Operador: não pode mover o equipamento para outra estação.
  */
 router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+
+    const permissao = await obterEquipamentoPermitido(req, id);
+    if (permissao.error) {
+      return res.status(permissao.status).json({ success: false, error: permissao.error });
+    }
+
     const { 
       nome_dispositivo, 
       modelo, 
-      estacao_id, 
       firmware_versao, 
       status 
     } = req.body;
+
+    // Operador mantém sempre a estação atual; admin pode reatribuir (ou desvincular)
+    let novaEstacao = permissao.eq.estacao_id;
+    if (!ehOperador(req) && req.body.estacao_id !== undefined) {
+      novaEstacao = req.body.estacao_id ? parseInt(req.body.estacao_id, 10) : null;
+    }
 
     const sql = `
       UPDATE equipamentos 
@@ -163,17 +208,13 @@ router.put('/:id', authMiddleware, async (req, res) => {
     const values = [
       nome_dispositivo ? nome_dispositivo.trim() : null,
       modelo || null,
-      estacao_id !== undefined ? (estacao_id ? parseInt(estacao_id, 10) : null) : null,
+      novaEstacao,
       firmware_versao || null,
       status || null,
       id
     ];
 
     const { rows } = await db.query(sql, values);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'Equipamento não encontrado.' });
-    }
 
     res.json({
       success: true,
@@ -193,16 +234,18 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.post('/:id/regenerar-chave', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
+
+    const permissao = await obterEquipamentoPermitido(req, id);
+    if (permissao.error) {
+      return res.status(permissao.status).json({ success: false, error: permissao.error });
+    }
+
     const novaApiKey = 'prt_' + crypto.randomBytes(24).toString('hex');
 
     const { rows } = await db.query(
       'UPDATE equipamentos SET api_key = $1 WHERE id = $2 RETURNING id, nome_dispositivo, api_key',
       [novaApiKey, id]
     );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, error: 'Equipamento não encontrado.' });
-    }
 
     res.json({
       success: true,
@@ -221,11 +264,13 @@ router.post('/:id/regenerar-chave', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const { rowCount } = await db.query('DELETE FROM equipamentos WHERE id = $1', [id]);
 
-    if (rowCount === 0) {
-      return res.status(404).json({ success: false, error: 'Equipamento não encontrado.' });
+    const permissao = await obterEquipamentoPermitido(req, id);
+    if (permissao.error) {
+      return res.status(permissao.status).json({ success: false, error: permissao.error });
     }
+
+    await db.query('DELETE FROM equipamentos WHERE id = $1', [id]);
 
     res.json({ success: true, message: 'Equipamento excluído com sucesso.' });
   } catch (err) {

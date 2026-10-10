@@ -120,18 +120,59 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 /**
+ * Retorna true se o solicitante é operador de estação.
+ */
+function ehOperador(req) {
+  return req.usuario && req.usuario.papel === 'operador';
+}
+
+/**
+ * Busca o usuário alvo e verifica se o solicitante pode geri-lo.
+ * Admin geral: qualquer usuário. Operador: apenas operadores da própria estação.
+ */
+async function obterUsuarioGerenciavel(req, id) {
+  const { rows } = await db.query(
+    'SELECT id, papel, estacao_id FROM usuarios_admin WHERE id = $1',
+    [id]
+  );
+  if (rows.length === 0) return { status: 404, error: 'Usuário não encontrado.' };
+
+  const alvo = rows[0];
+  if (ehOperador(req)) {
+    const mesmaEstacao = alvo.estacao_id && alvo.estacao_id === req.usuario.estacao_id;
+    if (alvo.papel !== 'operador' || !mesmaEstacao) {
+      return { status: 403, error: 'Acesso negado. Você só pode gerenciar usuários da sua estação.' };
+    }
+  }
+  return { alvo };
+}
+
+/**
  * GET /api/auth/usuarios
- * Lista os usuários cadastrados (Administradores Gerais e Operadores por Estação)
+ * Admin geral: lista todos (aceita ?estacao_id= para filtrar).
+ * Operador: lista apenas os usuários da própria estação.
  */
 router.get('/usuarios', authMiddleware, async (req, res) => {
   try {
+    const params = [];
+    let where = '';
+
+    if (ehOperador(req)) {
+      params.push(req.usuario.estacao_id);
+      where = 'WHERE u.estacao_id = $1';
+    } else if (req.query.estacao_id) {
+      params.push(parseInt(req.query.estacao_id, 10));
+      where = 'WHERE u.estacao_id = $1';
+    }
+
     const { rows } = await db.query(`
       SELECT u.id, u.nome, u.usuario, u.email, u.papel, u.estacao_id, u.ativo, u.criado_em,
              e.nome AS estacao_nome, e.codigo AS estacao_codigo
       FROM usuarios_admin u
       LEFT JOIN estacoes e ON e.id = u.estacao_id
+      ${where}
       ORDER BY u.id ASC
-    `);
+    `, params);
     res.json({ success: true, count: rows.length, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Erro ao listar usuários.' });
@@ -140,19 +181,24 @@ router.get('/usuarios', authMiddleware, async (req, res) => {
 
 /**
  * POST /api/auth/usuarios
- * Cadastra um novo membro (Apenas Administrador Geral pode cadastrar administradores ou operadores)
+ * Admin geral: cria administradores ou operadores de qualquer estação.
+ * Operador: cria somente operadores, sempre vinculados à própria estação.
  */
 router.post('/usuarios', authMiddleware, async (req, res) => {
   try {
-    // Validação de papel do solicitante: apenas 'admin' geral pode criar membros
-    if (req.usuario.papel && req.usuario.papel !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Acesso negado. Apenas Administradores Gerais podem cadastrar novos membros.'
-      });
-    }
+    let { nome, usuario, email, senha, papel = 'admin', estacao_id = null } = req.body;
 
-    const { nome, usuario, email, senha, papel = 'admin', estacao_id = null } = req.body;
+    if (ehOperador(req)) {
+      // O operador não escolhe papel nem estação: ambos são impostos pelo servidor
+      papel = 'operador';
+      estacao_id = req.usuario.estacao_id;
+      if (!estacao_id) {
+        return res.status(403).json({
+          success: false,
+          error: 'Seu usuário não está vinculado a nenhuma estação.'
+        });
+      }
+    }
 
     if (!nome || !usuario || !email || !senha) {
       return res.status(400).json({
@@ -225,17 +271,10 @@ router.post('/usuarios', authMiddleware, async (req, res) => {
 
 /**
  * PUT /api/auth/usuarios/:id/status
- * Ativa ou desativa um usuário (Apenas Administrador Geral)
+ * Ativa ou desativa um usuário (admin geral: qualquer um; operador: apenas da própria estação)
  */
 router.put('/usuarios/:id/status', authMiddleware, async (req, res) => {
   try {
-    if (req.usuario.papel && req.usuario.papel !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Acesso negado. Apenas Administradores Gerais podem alterar o status de usuários.'
-      });
-    }
-
     const { id } = req.params;
     const { ativo } = req.body;
 
@@ -244,6 +283,11 @@ router.put('/usuarios/:id/status', authMiddleware, async (req, res) => {
         success: false,
         error: 'Você não pode desativar seu próprio usuário.'
       });
+    }
+
+    const permissao = await obterUsuarioGerenciavel(req, id);
+    if (permissao.error) {
+      return res.status(permissao.status).json({ success: false, error: permissao.error });
     }
 
     const { rows } = await db.query(
@@ -267,17 +311,10 @@ router.put('/usuarios/:id/status', authMiddleware, async (req, res) => {
 
 /**
  * DELETE /api/auth/usuarios/:id
- * Remove um usuário do sistema (Apenas Administrador Geral)
+ * Remove um usuário (admin geral: qualquer um; operador: apenas da própria estação)
  */
 router.delete('/usuarios/:id', authMiddleware, async (req, res) => {
   try {
-    if (req.usuario.papel && req.usuario.papel !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Acesso negado. Apenas Administradores Gerais podem excluir usuários.'
-      });
-    }
-
     const { id } = req.params;
 
     if (parseInt(id, 10) === req.usuario.id) {
@@ -285,6 +322,11 @@ router.delete('/usuarios/:id', authMiddleware, async (req, res) => {
         success: false,
         error: 'Você não pode excluir sua própria conta enquanto estiver logado.'
       });
+    }
+
+    const permissao = await obterUsuarioGerenciavel(req, id);
+    if (permissao.error) {
+      return res.status(permissao.status).json({ success: false, error: permissao.error });
     }
 
     const { rowCount } = await db.query('DELETE FROM usuarios_admin WHERE id = $1', [id]);

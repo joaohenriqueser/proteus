@@ -5,12 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PROTEUS — Painel Administrativo</title>
-  <meta name="description" content="Painel de Controle e Gestão da Plataforma P.R.O.T.E.U.S.">
+  <meta name="description" content="Painel de gestão de estações, equipamentos e equipes da plataforma P.R.O.T.E.U.S.">
 
-  <!-- Google Fonts: Plus Jakarta Sans, Inter & IBM Plex Mono -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,344 +21,286 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Leaflet Map CSS & JS -->
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    body { font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
-    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+    body { font-family: 'Inter', sans-serif; }
     .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
-    
-    /* Scrollbars customizados */
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-    /* Custom Leaflet Popups em Light Theme */
-    .leaflet-popup-content-wrapper {
-      background: rgba(255, 255, 255, 0.98) !important;
-      backdrop-filter: blur(12px) !important;
-      border: 1px solid #E2E8F0 !important;
-      color: #0F172A !important;
-      border-radius: 14px !important;
-      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1) !important;
-      padding: 4px !important;
-    }
-    .leaflet-popup-tip {
-      background: #FFFFFF !important;
-      border: 1px solid #E2E8F0 !important;
-    }
-    .leaflet-popup-close-button {
-      color: #64748B !important;
-      padding: 6px 8px !important;
-    }
-    .leaflet-popup-close-button:hover {
-      color: #0F172A !important;
-    }
+    /* Controles segmentados (mesmo padrão da página de metodologia) */
+    .seg-btn { color: #475569; font-weight: 600; transition: all .15s ease; }
+    .seg-btn:hover { color: #0F172A; }
+    .seg-btn.is-active { background: #FFFFFF; color: #0F172A; font-weight: 700; box-shadow: 0 1px 2px rgba(15,23,42,.08); }
 
-    /* Animação suave para cards e botões */
-    .metric-card {
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(226, 232, 240, 0.85);
-      border-radius: 1.125rem;
-      box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.04);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    .field {
+      width: 100%; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: .75rem;
+      padding: .5rem .75rem; font-size: .8125rem; color: #0F172A; transition: border-color .15s, box-shadow .15s;
     }
-    .metric-card:hover {
-      border-color: #CBD5E1;
-      transform: translateY(-2px);
-      box-shadow: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
-    }
+    .field:focus { outline: none; background: #fff; border-color: #64748B; box-shadow: 0 0 0 3px rgba(100,116,139,.15); }
+    .field[readonly] { color: #64748B; cursor: not-allowed; }
+    .label { display: block; font-size: .75rem; font-weight: 600; color: #334155; margin-bottom: .25rem; }
 
-    /* Segmented Control Tabs */
-    .tab-btn {
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .tab-btn.active-tab-estacoes {
-      background: #FFFFFF !important;
-      border-color: #E2E8F0 !important;
-      color: #2563EB !important;
-      box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-    }
-    .tab-btn.active-tab-equipamentos {
-      background: #FFFFFF !important;
-      border-color: #E2E8F0 !important;
-      color: #059669 !important;
-      box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-    }
-    .tab-btn.active-tab-usuarios {
-      background: #FFFFFF !important;
-      border-color: #E2E8F0 !important;
-      color: #9333EA !important;
-      box-shadow: 0 4px 12px -2px rgba(147, 51, 234, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-    }
+    .btn { display: inline-flex; align-items: center; gap: .5rem; border-radius: .75rem; padding: .5rem .875rem;
+           font-size: .8125rem; font-weight: 600; cursor: pointer; transition: all .15s ease; }
+    .btn-primary { background: #0F172A; color: #fff; }
+    .btn-primary:hover { background: #1E293B; }
+    .btn-ghost { background: #fff; color: #334155; border: 1px solid #E2E8F0; }
+    .btn-ghost:hover { background: #F8FAFC; border-color: #CBD5E1; }
+    .btn-danger { background: #fff; color: #B91C1C; border: 1px solid #E2E8F0; }
+    .btn-danger:hover { background: #FEF2F2; border-color: #FECACA; }
+    .icon-btn { padding: .4rem; border-radius: .6rem; border: 1px solid #E2E8F0; background: #fff; color: #475569; cursor: pointer; transition: all .15s; }
+    .icon-btn:hover { background: #F1F5F9; color: #0F172A; }
+    .icon-btn.danger:hover { background: #FEF2F2; color: #B91C1C; border-color: #FECACA; }
 
-    /* Marcador do Leaflet para Estações Existentes */
-    .existing-st-pin {
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .existing-st-pin:hover {
-      transform: scale(1.12);
-      z-index: 1000 !important;
-    }
+    .card { background: #fff; border: 1px solid #E2E8F0; border-radius: 1rem; }
+    th { font-weight: 600; }
+
+    .leaflet-popup-content-wrapper { border-radius: 10px !important; }
   </style>
 </head>
-<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col selection:bg-blue-500/20 selection:text-blue-900">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col">
 
+  <!-- ==================== CABEÇALHO ==================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between">
+    <a href="../index.html" class="flex items-center hover:opacity-90 transition-opacity" title="Ir ao portal público">
+      <img src="../assets/logo-full.svg" alt="PROTEUS" class="h-8 w-auto">
+    </a>
 
-
-  <!-- ==================== HEADER ADMIN MODERNO ==================== -->
-  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 px-4 sm:px-6 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <a href="../index.html" class="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Ir ao Portal Público">
-        <img src="../assets/logo-full.svg" alt="PROTEUS Logo" class="h-8 w-auto">
-      </a>
-    </div>
-
-    <!-- Info Usuário & Ações -->
-    <div class="flex items-center gap-3">
-      <!-- Usuário Logado (Texto na esquerda, Foto/Avatar na direita, sem container em volta) -->
-      <div class="flex items-center gap-2.5">
-        <span id="userNomeDisplay" class="text-xs font-mono font-bold text-slate-900 max-w-[180px] truncate">Administrador PROTEUS</span>
-        <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center font-mono font-bold text-xs text-white flex-shrink-0" id="userAvatarLetter">
-          A
-        </div>
+      <div class="text-right leading-tight">
+        <div id="userNomeDisplay" class="text-sm font-semibold text-slate-900 max-w-[200px] truncate">—</div>
+        <div id="userPapelDisplay" class="text-[11px] text-slate-500">—</div>
       </div>
-
-      <!-- Botão Sair -->
-      <button id="btnLogout" type="button" onclick="fazerLogout()" title="Sair do Sistema" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-rose-400 text-slate-500 hover:text-rose-600 transition-all active:scale-95 cursor-pointer flex items-center justify-center">
+      <button id="btnLogout" type="button" title="Sair" class="icon-btn">
         <i data-lucide="log-out" class="w-4 h-4 pointer-events-none"></i>
       </button>
     </div>
   </header>
 
-  <!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-5">
 
-    <!-- Toast Notification (Mensagens flutuantes modernas) -->
-    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-2xl shadow-2xl border font-mono text-xs flex items-center gap-2.5 backdrop-blur-xl transition-all">
-      <i id="toastIcon" data-lucide="check-circle-2" class="w-4 h-4 flex-shrink-0"></i>
-      <span id="toastMessage" class="font-medium">Operação realizada com sucesso!</span>
-    </div>
+    <!-- Aviso de erro global -->
+    <div id="globalError" class="hidden card p-4 text-sm text-slate-700"></div>
 
-    <!-- ==================== CARDS ANALÍTICOS (KPIS) MODERNOS EM LIGHT MODE ==================== -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- Card 1: Estações -->
-      <div class="metric-card p-5">
-        <div>
-          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Estações de Coleta</span>
-          <span class="text-xs text-slate-500 block mt-0.5">Pontos físicos no Rio Tietê</span>
-        </div>
-        <div class="mt-3">
-          <span id="kpiEstacoesTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
-        </div>
-      </div>
-
-      <!-- Card 2: Sensores IoT ESP32 -->
-      <div class="metric-card p-5">
-        <div>
-          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Dispositivos IoT ESP32</span>
-          <span class="text-xs text-slate-500 block mt-0.5">Sondas e microcontroladores</span>
-        </div>
-        <div class="mt-3">
-          <span id="kpiEquipamentosTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
-        </div>
-      </div>
-
-      <!-- Card 3: Cobertura Hídrica -->
-      <div class="metric-card p-5">
-        <div>
-          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Raio Coberto Estimado</span>
-          <span class="text-xs text-slate-500 block mt-0.5">Abrangência física somada</span>
-        </div>
-        <div class="flex items-baseline gap-1 mt-3">
-          <span id="kpiCoberturaTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0.0</span>
-          <span class="text-sm font-mono font-semibold text-slate-500">km</span>
-        </div>
-      </div>
-
-      <!-- Card 4: Administradores -->
-      <div class="metric-card p-5">
-        <div>
-          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500">Membros da Equipe</span>
-          <span class="text-xs text-slate-500 block mt-0.5">Contas com acesso autorizado</span>
-        </div>
-        <div class="mt-3">
-          <span id="kpiUsuariosTotal" class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900">0</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== NAVEGAÇÃO EM ABAS (SEGMENTED CONTROL LIGHT) ==================== -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
-      <div class="bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/70 flex items-center gap-1.5 overflow-x-auto shadow-inner">
-        <button type="button" class="tab-btn active-tab-estacoes px-4 py-2.5 rounded-xl border border-transparent font-mono text-xs font-bold flex items-center gap-2 cursor-pointer" data-tab="tabEstacoes">
-          <i data-lucide="radio" class="w-4 h-4 text-blue-600"></i>
-          <span>Estações de Coleta</span>
-          <span id="badgeCountEstacoes" class="px-2 py-0.5 rounded-lg bg-slate-200/80 text-[11px] font-mono text-slate-700 font-bold">0</span>
-        </button>
-
-        <button type="button" class="tab-btn px-4 py-2.5 rounded-xl border border-transparent font-mono text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/50 flex items-center gap-2 cursor-pointer" data-tab="tabEquipamentos">
-          <i data-lucide="cpu" class="w-4 h-4 text-emerald-600"></i>
-          <span>Equipamentos IoT (ESP32)</span>
-          <span id="badgeCountEquipamentos" class="px-2 py-0.5 rounded-lg bg-slate-200/80 text-[11px] font-mono text-slate-700 font-bold">0</span>
-        </button>
-
-        <button type="button" class="tab-btn px-4 py-2.5 rounded-xl border border-transparent font-mono text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/50 flex items-center gap-2 cursor-pointer" data-tab="tabUsuarios">
-          <i data-lucide="users" class="w-4 h-4 text-purple-600"></i>
-          <span>Administradores</span>
-          <span id="badgeCountUsuarios" class="px-2 py-0.5 rounded-lg bg-slate-200/80 text-[11px] font-mono text-slate-700 font-bold">0</span>
-        </button>
+    <!-- Navegação principal (apenas administrador geral) -->
+    <div id="adminNav" class="hidden">
+      <div class="bg-slate-100 p-1 rounded-xl inline-flex items-center gap-1 border border-slate-200/80">
+        <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs is-active" data-seg="main" data-view="viewEstacoes">Estações <span id="countEstacoes" class="ml-1 text-slate-500 font-normal">0</span></button>
+        <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="main" data-view="viewUsuarios">Usuários <span id="countUsuarios" class="ml-1 text-slate-500 font-normal">0</span></button>
+        <button type="button" id="navEstoque" class="seg-btn px-4 py-1.5 rounded-lg text-xs hidden" data-seg="main" data-view="viewEstoque">Sem estação <span id="countEstoque" class="ml-1 text-slate-500 font-normal">0</span></button>
       </div>
     </div>
 
-    <!-- ==================== ABA 1: ESTAÇÕES ==================== -->
-    <section id="tabEstacoes" class="tab-content space-y-4">
-      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+    <!-- ==================== VISÃO: LISTA DE ESTAÇÕES (ADMIN GERAL) ==================== -->
+    <section id="viewEstacoes" class="main-view hidden space-y-4">
+      <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-base font-bold text-slate-900 font-heading flex items-center gap-2">
-            <i data-lucide="map-pin" class="w-4 h-4 text-blue-600"></i>
-            Gestão de Estações de Monitoramento
-          </h2>
-          <p class="text-xs text-slate-500 mt-1">Cadastre, edite e localize os pontos de monitoramento no Rio Tietê e afluentes.</p>
+          <h1 class="text-lg font-bold text-slate-900 font-heading">Estações de monitoramento</h1>
+          <p class="text-xs text-slate-500 mt-1">Selecione uma estação para gerenciar seus equipamentos e sua equipe.</p>
         </div>
-
         <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <!-- Campo de Busca em Tempo Real -->
-          <div class="relative w-full sm:w-72">
+          <div class="relative w-full sm:w-64">
             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input type="text" id="searchEstacoes" placeholder="Buscar estação, rio, cidade..." class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <input type="text" id="searchEstacoes" placeholder="Buscar estação, rio, cidade" class="field pl-9">
           </div>
-
-          <button id="btnOpenModalNovaEstacao" type="button" class="flex-shrink-0 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-mono font-bold text-xs flex items-center gap-2 shadow-md hover:shadow-lg shadow-blue-600/20 transition-all active:scale-95 cursor-pointer">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>NOVA ESTAÇÃO</span>
+          <button id="btnNovaEstacao" type="button" class="btn btn-primary flex-shrink-0">
+            <i data-lucide="plus" class="w-4 h-4"></i><span>Nova estação</span>
           </button>
         </div>
       </div>
 
-      <!-- Tabela de Estações em Light Mode -->
-      <div class="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
+      <div class="card overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left font-mono text-xs">
-            <thead class="bg-slate-50/90 border-b border-slate-200 text-slate-600 uppercase text-[11px] font-semibold tracking-wider font-mono">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
               <tr>
-                <th class="py-3.5 px-4">Código</th>
-                <th class="py-3.5 px-4">Nome da Estação</th>
-                <th class="py-3.5 px-4">Corpo Hídrico / Rio</th>
-                <th class="py-3.5 px-4">Cidade/UF</th>
-                <th class="py-3.5 px-4">Coordenadas</th>
-                <th class="py-3.5 px-4">Status</th>
-                <th class="py-3.5 px-4 text-right">Ações</th>
+                <th class="py-3 px-4">Código</th>
+                <th class="py-3 px-4">Estação</th>
+                <th class="py-3 px-4">Corpo hídrico</th>
+                <th class="py-3 px-4">Cidade/UF</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="tbodyEstacoes" class="divide-y divide-slate-100 text-slate-800">
-              <tr>
-                <td colspan="7" class="py-10 text-center text-slate-400 font-mono">Carregando estações cadastradas...</td>
-              </tr>
-            </tbody>
+            <tbody id="tbodyEstacoes" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ==================== ABA 2: EQUIPAMENTOS ESP32 ==================== -->
-    <section id="tabEquipamentos" class="tab-content space-y-4 hidden">
-      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-5 shadow-sm">
-        <div>
-          <h2 class="text-base font-bold text-slate-900 font-heading flex items-center gap-2">
-            <i data-lucide="cpu" class="w-4 h-4 text-emerald-600"></i>
-            Equipamentos de Telemetria (ESP32 &amp; Sondas)
-          </h2>
-          <p class="text-xs text-slate-500 mt-1">Vincule placas microcontroladoras às estações e gerencie chaves de telemetria.</p>
+    <!-- ==================== VISÃO: DETALHE DA ESTAÇÃO ==================== -->
+    <section id="viewEstacao" class="main-view hidden space-y-4">
+      <div class="card p-5 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div class="min-w-0">
+            <button id="btnVoltarLista" type="button" class="hidden text-xs text-slate-500 hover:text-slate-900 items-center gap-1 mb-2 cursor-pointer">
+              <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i><span>Todas as estações</span>
+            </button>
+            <div class="flex items-center gap-3 flex-wrap">
+              <h1 id="estNome" class="text-lg font-bold text-slate-900 font-heading">—</h1>
+              <span id="estCodigo" class="font-mono text-xs px-2 py-0.5 rounded-md border border-slate-200 text-slate-600">—</span>
+              <span id="estStatus"></span>
+            </div>
+            <p id="estSub" class="text-xs text-slate-500 mt-1"></p>
+          </div>
+          <div id="estAcoes" class="flex items-center gap-2 flex-shrink-0"></div>
         </div>
 
-        <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <div class="relative w-full sm:w-72">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input type="text" id="searchEquipamentos" placeholder="Buscar dispositivo, MAC..." class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+        <div class="grid grid-cols-3 gap-3 pt-4 border-t border-slate-100">
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-500">Equipamentos</div>
+            <div id="estKpiEquip" class="text-xl font-semibold text-slate-900 font-mono mt-0.5">0</div>
           </div>
-
-          <button id="btnOpenModalNovoEquipamento" type="button" class="flex-shrink-0 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs flex items-center gap-2 shadow-md hover:shadow-lg shadow-emerald-600/20 transition-all active:scale-95 cursor-pointer">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>NOVO ESP32</span>
-          </button>
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-500">Em operação</div>
+            <div id="estKpiAtivos" class="text-xl font-semibold text-slate-900 font-mono mt-0.5">0</div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-slate-500">Equipe</div>
+            <div id="estKpiEquipe" class="text-xl font-semibold text-slate-900 font-mono mt-0.5">0</div>
+          </div>
         </div>
       </div>
 
-      <!-- Tabela de Equipamentos em Light Mode -->
-      <div class="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
+      <!-- Abas da estação -->
+      <div class="bg-slate-100 p-1 rounded-xl inline-flex items-center gap-1 border border-slate-200/80">
+        <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs is-active" data-seg="est" data-view="tabEquipamentos">Equipamentos</button>
+        <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="est" data-view="tabEquipe">Equipe</button>
+        <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="est" data-view="tabDados">Dados da estação</button>
+      </div>
+
+      <!-- Aba: Equipamentos da estação -->
+      <div id="tabEquipamentos" class="est-view space-y-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <p class="text-xs text-slate-500">Placas e sondas instaladas nesta estação.</p>
+          <button id="btnNovoEquipamento" type="button" class="btn btn-primary">
+            <i data-lucide="plus" class="w-4 h-4"></i><span>Novo equipamento</span>
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Dispositivo</th>
+                  <th class="py-3 px-4">MAC</th>
+                  <th class="py-3 px-4">Firmware</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Última comunicação</th>
+                  <th class="py-3 px-4">Chave de API</th>
+                  <th class="py-3 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyEquipamentos" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba: Equipe da estação -->
+      <div id="tabEquipe" class="est-view hidden space-y-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <p class="text-xs text-slate-500">Operadores com acesso somente a esta estação.</p>
+          <button id="btnNovoOperador" type="button" class="btn btn-primary">
+            <i data-lucide="user-plus" class="w-4 h-4"></i><span>Novo operador</span>
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Nome</th>
+                  <th class="py-3 px-4">Usuário</th>
+                  <th class="py-3 px-4">E-mail</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Cadastro</th>
+                  <th class="py-3 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyEquipe" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba: Dados da estação -->
+      <div id="tabDados" class="est-view hidden">
+        <div class="card p-5">
+          <dl id="dadosEstacao" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm"></dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VISÃO: USUÁRIOS (ADMIN GERAL) ==================== -->
+    <section id="viewUsuarios" class="main-view hidden space-y-4">
+      <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 font-heading">Usuários</h1>
+          <p class="text-xs text-slate-500 mt-1">Administradores gerais e operadores de todas as estações.</p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+          <div class="relative w-full sm:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="searchUsuarios" placeholder="Buscar nome, usuário, e-mail" class="field pl-9">
+          </div>
+          <button id="btnNovoUsuarioGlobal" type="button" class="btn btn-primary flex-shrink-0">
+            <i data-lucide="user-plus" class="w-4 h-4"></i><span>Novo usuário</span>
+          </button>
+        </div>
+      </div>
+      <div class="card overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left font-mono text-xs">
-            <thead class="bg-slate-50/90 border-b border-slate-200 text-slate-600 uppercase text-[11px] font-semibold tracking-wider font-mono">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
               <tr>
-                <th class="py-3.5 px-4">Dispositivo</th>
-                <th class="py-3.5 px-4">MAC Address</th>
-                <th class="py-3.5 px-4">Estação Vinculada</th>
-                <th class="py-3.5 px-4">API Key de Envio</th>
-                <th class="py-3.5 px-4">Firmware</th>
-                <th class="py-3.5 px-4">Status</th>
-                <th class="py-3.5 px-4 text-right">Ações</th>
+                <th class="py-3 px-4">Nome</th>
+                <th class="py-3 px-4">Usuário</th>
+                <th class="py-3 px-4">Perfil</th>
+                <th class="py-3 px-4">E-mail</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="tbodyEquipamentos" class="divide-y divide-slate-100 text-slate-800">
-              <tr>
-                <td colspan="7" class="py-10 text-center text-slate-400 font-mono">Carregando equipamentos cadastrados...</td>
-              </tr>
-            </tbody>
+            <tbody id="tbodyUsuarios" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- ==================== ABA 3: ADMINISTRADORES ==================== -->
-    <section id="tabUsuarios" class="tab-content space-y-4 hidden">
-      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-2xl p-5 shadow-sm">
+    <!-- ==================== VISÃO: EQUIPAMENTOS SEM ESTAÇÃO (ADMIN GERAL) ==================== -->
+    <section id="viewEstoque" class="main-view hidden space-y-4">
+      <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-base font-bold text-slate-900 font-heading flex items-center gap-2">
-            <i data-lucide="shield-check" class="w-4 h-4 text-purple-600"></i>
-            Gestão de Administradores e Pesquisadores
-          </h2>
-          <p class="text-xs text-slate-500 mt-1">Cadastre os membros autorizados com acesso ao painel de controle.</p>
+          <h1 class="text-lg font-bold text-slate-900 font-heading">Equipamentos sem estação</h1>
+          <p class="text-xs text-slate-500 mt-1">Equipamentos cadastrados que ainda não foram vinculados a uma estação.</p>
         </div>
-
-        <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <div class="relative w-full sm:w-72">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input type="text" id="searchUsuarios" placeholder="Buscar nome, usuário, e-mail..." class="w-full bg-slate-50 hover:bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
-          </div>
-
-          <button id="btnOpenModalNovoAdmin" type="button" class="flex-shrink-0 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-mono font-bold text-xs flex items-center gap-2 shadow-md hover:shadow-lg shadow-purple-600/20 transition-all active:scale-95 cursor-pointer">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            <span>NOVO ADMINISTRADOR</span>
-          </button>
-        </div>
+        <button id="btnNovoEquipamentoEstoque" type="button" class="btn btn-primary flex-shrink-0">
+          <i data-lucide="plus" class="w-4 h-4"></i><span>Novo equipamento</span>
+        </button>
       </div>
-
-      <!-- Tabela de Usuários em Light Mode -->
-      <div class="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm">
+      <div class="card overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left font-mono text-xs">
-            <thead class="bg-slate-50/90 border-b border-slate-200 text-slate-600 uppercase text-[11px] font-semibold tracking-wider font-mono">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
               <tr>
-                <th class="py-3.5 px-4">Nome</th>
-                <th class="py-3.5 px-4">Usuário (@)</th>
-                <th class="py-3.5 px-4">Perfil / Papel</th>
-                <th class="py-3.5 px-4">E-mail</th>
-                <th class="py-3.5 px-4">Status</th>
-                <th class="py-3.5 px-4">Cadastrado em</th>
-                <th class="py-3.5 px-4 text-right">Ações</th>
+                <th class="py-3 px-4">Dispositivo</th>
+                <th class="py-3 px-4">MAC</th>
+                <th class="py-3 px-4">Firmware</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4">Última comunicação</th>
+                <th class="py-3 px-4">Chave de API</th>
+                <th class="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody id="tbodyUsuarios" class="divide-y divide-slate-100 text-slate-800">
-              <tr>
-                <td colspan="7" class="py-10 text-center text-slate-400 font-mono">Carregando membros...</td>
-              </tr>
-            </tbody>
+            <tbody id="tbodyEstoque" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
@@ -366,43 +308,39 @@
 
   </main>
 
-  <!-- ==================== MODAL 1: ESTAÇÃO COM MAPA INTERATIVO LIGHT ==================== -->
-  <div id="modalEstacao" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full p-6 sm:p-7 space-y-5 shadow-2xl max-h-[94vh] overflow-y-auto text-slate-800">
-      
-      <!-- Cabeçalho do Modal -->
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
-        <h3 id="modalEstacaoTitle" class="text-sm font-mono font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="radio" class="w-4 h-4 text-blue-600"></i>
-          <span>Cadastrar Nova Estação</span>
-        </h3>
-        <button type="button" class="btn-close-modal text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" data-modal="modalEstacao">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-[60] hidden px-4 py-3 rounded-xl shadow-lg border bg-slate-900 text-white text-sm max-w-sm"></div>
+
+  <!-- ==================== MODAL: ESTAÇÃO ==================== -->
+  <div id="modalEstacao" class="fixed inset-0 bg-slate-900/50 z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl max-h-[94vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modalEstacaoTitle" class="text-base font-bold text-slate-900 font-heading">Nova estação</h3>
+        <button type="button" class="btn-close-modal icon-btn" data-modal="modalEstacao" aria-label="Fechar"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
-      <form id="formEstacao" class="space-y-4 font-mono text-xs">
-        <input type="hidden" id="inputEstacaoDbId" value="">
+      <form id="formEstacao" class="space-y-4">
+        <input type="hidden" id="inputEstacaoEditId" value="">
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label class="block text-slate-700 font-semibold mb-1">Código Identificador *</label>
-            <input type="text" id="inputEstacaoCodigo" placeholder="Ex: BRB-04" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <label class="label" for="inputEstacaoCodigo">Código *</label>
+            <input type="text" id="inputEstacaoCodigo" placeholder="BRB-04" required class="field font-mono uppercase">
           </div>
           <div class="sm:col-span-2">
-            <label class="block text-slate-700 font-semibold mb-1">Nome Oficial da Estação *</label>
-            <input type="text" id="inputEstacaoNome" placeholder="Ex: BRB-04 · Barbosa-SP" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <label class="label" for="inputEstacaoNome">Nome da estação *</label>
+            <input type="text" id="inputEstacaoNome" placeholder="BRB-04 · Barbosa-SP" required class="field">
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
-            <label class="block text-slate-700 font-semibold mb-1">Corpo D'água / Trecho do Rio *</label>
-            <input type="text" id="inputEstacaoRio" placeholder="Ex: Rio Tietê · Trecho Ponte Barbosa" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <label class="label" for="inputEstacaoRio">Corpo d'água / trecho *</label>
+            <input type="text" id="inputEstacaoRio" placeholder="Rio Tietê · Barbosa-SP" required class="field">
           </div>
           <div>
-            <label class="block text-slate-700 font-semibold mb-1">Status Operacional</label>
-            <select id="inputEstacaoStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <label class="label" for="inputEstacaoStatus">Status operacional</label>
+            <select id="inputEstacaoStatus" class="field">
               <option value="Ativo">Ativo</option>
               <option value="Manutenção">Manutenção</option>
               <option value="Inativo">Inativo</option>
@@ -412,1418 +350,928 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label class="block text-slate-700 font-semibold mb-1">Cidade *</label>
-            <input type="text" id="inputEstacaoCidade" placeholder="Barbosa" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <label class="label" for="inputEstacaoCidade">Cidade *</label>
+            <input type="text" id="inputEstacaoCidade" placeholder="Barbosa" required class="field">
           </div>
           <div>
-            <label class="block text-slate-700 font-semibold mb-1">Estado (UF) *</label>
-            <input type="text" id="inputEstacaoEstado" placeholder="SP" maxlength="2" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 uppercase font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <label class="label" for="inputEstacaoEstado">UF *</label>
+            <input type="text" id="inputEstacaoEstado" placeholder="SP" maxlength="2" required class="field uppercase">
           </div>
           <div>
-            <label class="block text-slate-700 font-semibold mb-1">Bacia Hidrográfica</label>
-            <input type="text" id="inputEstacaoBacia" placeholder="Ex: Baixo Tietê" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+            <label class="label" for="inputEstacaoBacia">Bacia hidrográfica</label>
+            <input type="text" id="inputEstacaoBacia" placeholder="Baixo Tietê" class="field">
           </div>
         </div>
 
-        <!-- ==================== SEÇÃO DO MAPA INTERATIVO LIGHT ==================== -->
         <div class="space-y-3 pt-3 border-t border-slate-100">
-          
-          <!-- Top bar do mapa com legenda e toggle de estações existentes -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-            <div class="flex items-center gap-3 text-xs">
-              <div class="flex items-center gap-1.5 text-blue-700 font-bold">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-600 border border-white shadow-sm"></span>
-                <span>Ponto da Estação (Arrastável)</span>
-              </div>
-              <div class="flex items-center gap-1.5 text-emerald-700 font-bold">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                <span>Estações Existentes</span>
-              </div>
-            </div>
-
-            <!-- Toggle para exibir/ocultar estações existentes -->
-            <label class="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-600 hover:text-slate-900 transition-colors">
-              <input type="checkbox" id="chkToggleExistingStations" checked class="w-4 h-4 accent-blue-600 rounded cursor-pointer">
-              <span>Mostrar estações no mapa</span>
-              <span id="badgeExistingCount" class="px-2 py-0.5 rounded-lg bg-emerald-50 text-[11px] text-emerald-700 border border-emerald-200 font-bold">0</span>
-            </label>
+          <div>
+            <div class="label">Localização no mapa</div>
+            <p class="text-[11px] text-slate-500 mb-2">Clique no mapa ou arraste o marcador para definir o ponto. Estações existentes aparecem em cinza.</p>
+            <div id="modalMapPicker" class="w-full h-64 rounded-xl border border-slate-200 overflow-hidden relative z-10"></div>
           </div>
 
-          <!-- Container do Mapa Leaflet -->
-          <div id="modalMapPicker" class="w-full h-72 rounded-2xl border border-slate-200 overflow-hidden relative shadow-inner z-10"></div>
-
-          <!-- Controle do Raio (Range Slider) -->
-          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2.5">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-slate-700 font-bold flex items-center gap-2 text-xs">
-                <i data-lucide="radar" class="w-4 h-4 text-blue-600"></i>
-                Raio de Abrangência de Coleta:
-              </span>
-              <span id="labelRaioDisplay" class="text-blue-700 font-bold text-xs bg-blue-50 px-3 py-1 rounded-lg border border-blue-200/80 shadow-sm font-mono">
-                1000 metros (1.0 km)
-              </span>
+              <span class="label !mb-0">Raio de abrangência</span>
+              <span id="labelRaioDisplay" class="text-xs font-mono text-slate-700">1000 m (1,0 km)</span>
             </div>
-            <input type="range" id="inputEstacaoRaio" min="100" max="10000" step="100" value="1000" class="w-full accent-blue-600 cursor-pointer">
-            <div class="flex justify-between text-[10px] text-slate-500 font-mono">
-              <span>100m (Ponto local)</span>
-              <span>1.000m (1 km)</span>
-              <span>5.000m (5 km)</span>
-              <span>10.000m (10 km)</span>
-            </div>
+            <input type="range" id="inputEstacaoRaio" min="100" max="10000" step="100" value="1000" class="w-full accent-slate-700 cursor-pointer">
           </div>
 
-          <!-- Coordenadas Geográficas -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-slate-600 text-[11px] font-semibold mb-1">Latitude (Decimal):</label>
-              <input type="number" step="0.000001" id="inputEstacaoLat" placeholder="-21.2662" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              <label class="label" for="inputEstacaoLat">Latitude</label>
+              <input type="number" step="0.000001" id="inputEstacaoLat" placeholder="-21.2662" required class="field font-mono">
             </div>
             <div>
-              <label class="block text-slate-600 text-[11px] font-semibold mb-1">Longitude (Decimal):</label>
-              <input type="number" step="0.000001" id="inputEstacaoLng" placeholder="-49.9482" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              <label class="label" for="inputEstacaoLng">Longitude</label>
+              <input type="number" step="0.000001" id="inputEstacaoLng" placeholder="-49.9482" required class="field font-mono">
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-          <button type="button" class="btn-close-modal px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer" data-modal="modalEstacao">
-            Cancelar
-          </button>
-          <button type="submit" id="btnSalvarEstacao" class="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-md hover:shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2 active:scale-95 cursor-pointer">
-            <i data-lucide="check" class="w-4 h-4"></i>
-            <span>Salvar Estação</span>
-          </button>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" class="btn-close-modal btn btn-ghost" data-modal="modalEstacao">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar estação</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ==================== MODAL 2: EQUIPAMENTO (ESP32) LIGHT ==================== -->
-  <div id="modalEquipamento" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-4 shadow-2xl text-slate-800">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
-        <h3 id="modalEquipamentoTitle" class="text-sm font-mono font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="cpu" class="w-4 h-4 text-emerald-600"></i>
-          <span>Cadastrar Equipamento ESP32</span>
-        </h3>
-        <button type="button" class="btn-close-modal text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" data-modal="modalEquipamento">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
+  <!-- ==================== MODAL: EQUIPAMENTO ==================== -->
+  <div id="modalEquipamento" class="fixed inset-0 bg-slate-900/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[94vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modalEquipamentoTitle" class="text-base font-bold text-slate-900 font-heading">Novo equipamento</h3>
+        <button type="button" class="btn-close-modal icon-btn" data-modal="modalEquipamento" aria-label="Fechar"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
-      <form id="formEquipamento" class="space-y-4 font-mono text-xs">
+      <form id="formEquipamento" class="space-y-4">
         <input type="hidden" id="inputEquipamentoId" value="">
 
         <div>
-          <label class="block text-slate-700 font-semibold mb-1">Endereço MAC da Placa (Físico) *</label>
-          <input type="text" id="inputEquipamentoMac" placeholder="Ex: 24:6F:28:7A:B9:4C" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono">
-          <p class="text-[10px] text-slate-500 mt-1">Identificador único de fábrica gravado no chip Wi-Fi do ESP32.</p>
+          <label class="label" for="inputEquipamentoMac">Endereço MAC *</label>
+          <input type="text" id="inputEquipamentoMac" placeholder="24:6F:28:7A:B9:4C" required class="field font-mono uppercase">
+          <p class="text-[11px] text-slate-500 mt-1">Identificador único gravado no chip Wi-Fi do ESP32.</p>
         </div>
 
         <div>
-          <label class="block text-slate-700 font-semibold mb-1">Nome de Identificação *</label>
-          <input type="text" id="inputEquipamentoNome" placeholder="Ex: ESP32-Sonda-Barbosa-01" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all">
+          <label class="label" for="inputEquipamentoNome">Nome de identificação *</label>
+          <input type="text" id="inputEquipamentoNome" placeholder="Sonda Barbosa 01" required class="field">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-slate-700 font-semibold mb-1">Modelo da Placa</label>
-            <input type="text" id="inputEquipamentoModelo" placeholder="ESP32 DevKit V1" value="ESP32 DevKit V1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500">
+            <label class="label" for="inputEquipamentoModelo">Modelo</label>
+            <input type="text" id="inputEquipamentoModelo" value="ESP32 DevKit V1" class="field">
           </div>
           <div>
-            <label class="block text-slate-700 font-semibold mb-1">Versão Firmware</label>
-            <input type="text" id="inputEquipamentoFirmware" placeholder="1.0.0" value="1.0.0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500">
+            <label class="label" for="inputEquipamentoFirmware">Firmware</label>
+            <input type="text" id="inputEquipamentoFirmware" value="1.0.0" class="field font-mono">
           </div>
         </div>
 
-        <div>
-          <label class="block text-slate-700 font-semibold mb-1">Estação Vinculada (Local de Instalação)</label>
-          <select id="selectEquipamentoEstacao" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500">
-            <option value="">-- Nenhuma (Em estoque / Não vinculada) --</option>
-          </select>
+        <div id="boxEquipamentoEstacao" class="hidden">
+          <label class="label" for="selectEquipamentoEstacao">Estação</label>
+          <select id="selectEquipamentoEstacao" class="field"></select>
         </div>
 
         <div>
-          <label class="block text-slate-700 font-semibold mb-1">Status Operacional</label>
-          <select id="selectEquipamentoStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:border-emerald-500">
+          <label class="label" for="selectEquipamentoStatus">Status</label>
+          <select id="selectEquipamentoStatus" class="field">
             <option value="Ativo">Ativo</option>
             <option value="Manutenção">Manutenção</option>
             <option value="Offline">Offline</option>
           </select>
         </div>
 
-        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-          <button type="button" class="btn-close-modal px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer" data-modal="modalEquipamento">
-            Cancelar
-          </button>
-          <button type="submit" id="btnSalvarEquipamento" class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-md hover:shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 active:scale-95 cursor-pointer">
-            <i data-lucide="check" class="w-4 h-4"></i>
-            <span>Salvar Equipamento</span>
-          </button>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" class="btn-close-modal btn btn-ghost" data-modal="modalEquipamento">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar equipamento</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ==================== MODAL 3: ADMINISTRADOR (CRIAR) LIGHT ==================== -->
-  <div id="modalAdmin" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-4 shadow-2xl text-slate-800">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
-        <h3 class="text-sm font-mono font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="user-plus" class="w-4 h-4 text-purple-600"></i>
-          <span>Cadastrar Novo Administrador</span>
-        </h3>
-        <button type="button" class="btn-close-modal text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer" data-modal="modalAdmin">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
+  <!-- ==================== MODAL: USUÁRIO ==================== -->
+  <div id="modalUsuario" class="fixed inset-0 bg-slate-900/50 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl max-h-[94vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 id="modalUsuarioTitle" class="text-base font-bold text-slate-900 font-heading">Novo usuário</h3>
+        <button type="button" class="btn-close-modal icon-btn" data-modal="modalUsuario" aria-label="Fechar"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
-      <form id="formAdmin" class="space-y-3.5 font-mono text-xs">
+      <form id="formUsuario" class="space-y-3.5">
         <div>
-          <label class="block text-slate-700 font-semibold mb-1">Nome Completo *</label>
-          <input type="text" id="inputAdminNome" placeholder="Ex: Cauã Cristal Lemes" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
+          <label class="label" for="inputUsuarioNome">Nome completo *</label>
+          <input type="text" id="inputUsuarioNome" required class="field">
+        </div>
+        <div>
+          <label class="label" for="inputUsuarioLogin">Nome de usuário *</label>
+          <input type="text" id="inputUsuarioLogin" required class="field lowercase" autocomplete="off">
+          <p class="text-[11px] text-slate-500 mt-1">Usado para entrar no sistema (sem espaços ou acentos).</p>
+        </div>
+        <div>
+          <label class="label" for="inputUsuarioEmail">E-mail *</label>
+          <input type="email" id="inputUsuarioEmail" required class="field" autocomplete="off">
         </div>
 
-        <div>
-          <label class="block text-slate-700 font-semibold mb-1">Nome de Usuário (@) *</label>
-          <input type="text" id="inputAdminUsuario" placeholder="Ex: caua" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 lowercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
-          <p class="text-[10px] text-slate-500 mt-1">Usado para fazer login (sem espaços ou acentos).</p>
-        </div>
-
-        <div>
-          <label class="block text-slate-700 font-semibold mb-1">E-mail Profissional *</label>
-          <input type="email" id="inputAdminEmail" placeholder="caua@proteus.com" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
-        </div>
-
-        <div>
-          <label class="block text-slate-700 font-semibold mb-1">Perfil de Acesso / Papel *</label>
-          <select id="selectAdminPapel" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
-            <option value="admin">Administrador Geral (Acesso Total)</option>
-            <option value="operador">Operador de Estação (Acesso Local)</option>
+        <div id="boxUsuarioPapel" class="hidden">
+          <label class="label" for="selectUsuarioPapel">Perfil *</label>
+          <select id="selectUsuarioPapel" class="field">
+            <option value="admin">Administrador geral (todas as estações)</option>
+            <option value="operador">Operador (uma estação)</option>
           </select>
         </div>
 
-        <div id="containerAdminEstacao" class="hidden">
-          <label class="block text-slate-700 font-semibold mb-1">Estação Atribuída ao Operador *</label>
-          <select id="selectAdminEstacao" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
-            <option value="">-- Selecione a Estação --</option>
-          </select>
-          <p class="text-[10px] text-slate-500 mt-1">O operador terá foco operacional e monitoramento na estação indicada.</p>
+        <div id="boxUsuarioEstacao" class="hidden">
+          <label class="label" for="selectUsuarioEstacao">Estação *</label>
+          <select id="selectUsuarioEstacao" class="field"></select>
         </div>
+
+        <p id="avisoUsuarioEstacao" class="hidden text-[11px] text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"></p>
 
         <div>
-          <label class="block text-slate-700 font-semibold mb-1">Senha Provisória (Mínimo 6 dígitos) *</label>
-          <input type="password" id="inputAdminSenha" placeholder="••••••••" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all">
+          <label class="label" for="inputUsuarioSenha">Senha provisória (mín. 6 caracteres) *</label>
+          <input type="password" id="inputUsuarioSenha" required minlength="6" class="field" autocomplete="new-password">
         </div>
 
-        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-          <button type="button" class="btn-close-modal px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer" data-modal="modalAdmin">
-            Cancelar
-          </button>
-          <button type="submit" id="btnSalvarAdmin" class="px-5 py-2.5 rounded-xl bg-purple-600 text-white font-bold hover:bg-purple-700 shadow-md hover:shadow-lg shadow-purple-600/20 transition-all flex items-center gap-2 active:scale-95 cursor-pointer">
-            <i data-lucide="check" class="w-4 h-4"></i>
-            <span>Cadastrar Membro</span>
-          </button>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" class="btn-close-modal btn btn-ghost" data-modal="modalUsuario">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Cadastrar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ==================== SCRIPTS JS ==================== -->
   <script>
-    // Função Global de Logout Imediato
+    // =====================================================================
+    // Utilidades
+    // =====================================================================
+    const TOKEN_KEY = 'proteus_admin_token';
+    const USER_KEY = 'proteus_admin_user';
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    const $ = (id) => document.getElementById(id);
+
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
     function fazerLogout() {
       try {
-        localStorage.removeItem('proteus_admin_token');
-        localStorage.removeItem('proteus_admin_user');
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
         sessionStorage.clear();
       } catch (e) {}
       window.location.replace('login.html');
     }
-    window.fazerLogout = fazerLogout;
 
-    // 1. Verificação Estrita de Autenticação com o Servidor (Neon Tech PostgreSQL)
-    const token = localStorage.getItem('proteus_admin_token');
-    const userJson = localStorage.getItem('proteus_admin_user');
+    if (!token || token === 'DEV_MOCK_TOKEN_ADMIN') fazerLogout();
 
-    if (!token || token === 'DEV_MOCK_TOKEN_ADMIN') {
-      localStorage.removeItem('proteus_admin_token');
-      localStorage.removeItem('proteus_admin_user');
-      window.location.href = 'login.html';
-    }
-
-    let usuarioLogado = {};
-    function aplicarPerfilUsuario(u) {
-      if (!u) return;
-      const nomeEl = document.getElementById('userNomeDisplay');
-      if (nomeEl) nomeEl.textContent = u.nome || 'Administrador';
-      
-      const loginEl = document.getElementById('userLoginDisplay');
-      if (loginEl) loginEl.textContent = '@' + (u.usuario || 'admin');
-      
-      const firstLetter = (u.nome || 'A').charAt(0).toUpperCase();
-      const avatarEl = document.getElementById('userAvatarLetter');
-      if (avatarEl) avatarEl.textContent = firstLetter;
-
-      const papelBadge = document.getElementById('userPapelBadge');
-      if (papelBadge) {
-        papelBadge.classList.remove('hidden');
-        if (u.papel === 'operador') {
-          papelBadge.className = 'px-2 py-0.2 rounded-lg text-[9px] font-mono font-bold bg-blue-100 text-blue-700 border border-blue-200';
-          papelBadge.textContent = `OPERADOR · ${u.estacao_codigo || ('ESTAÇÃO ' + (u.estacao_id || ''))}`;
-        } else {
-          papelBadge.className = 'px-2 py-0.2 rounded-lg text-[9px] font-mono font-bold bg-purple-100 text-purple-700 border border-purple-200';
-          papelBadge.textContent = 'ADMIN GERAL';
-        }
-      }
-    }
-
-    try {
-      usuarioLogado = JSON.parse(userJson || '{}');
-      aplicarPerfilUsuario(usuarioLogado);
-    } catch(e) {}
-
-    // Validação contínua do token JWT com a base Neon Tech
-    fetch('/api/auth/me', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(r => r.json())
-    .then(r => {
-      if (!r || !r.success) {
-        localStorage.removeItem('proteus_admin_token');
-        localStorage.removeItem('proteus_admin_user');
-        window.location.href = 'login.html';
-      } else {
-        usuarioLogado = r.usuario;
-        localStorage.setItem('proteus_admin_user', JSON.stringify(usuarioLogado));
-        aplicarPerfilUsuario(usuarioLogado);
-      }
-    })
-    .catch(() => {});
-
-    // Geradores de Dados Simulados (Fallback quando o banco PostgreSQL não está local)
-    function getMockEstacoes() {
-      return [
-        {
-          id: 'BRB-04',
-          db_id: 1,
-          name: 'Estação Central Barbosa',
-          river: 'Rio Tietê · Trecho Ponte Barbosa',
-          cidade: 'Barbosa',
-          estado: 'SP',
-          coords: [-21.2662, -49.9482],
-          raio_metros: 2500,
-          status: 'Ativo'
-        },
-        {
-          id: 'PNP-02',
-          db_id: 2,
-          name: 'Ponte Rodoviária Penápolis',
-          river: 'Res. Nova Avanhandava',
-          cidade: 'Penápolis',
-          estado: 'SP',
-          coords: [-21.4285, -50.0775],
-          raio_metros: 1800,
-          status: 'Ativo'
-        },
-        {
-          id: 'BRG-01',
-          db_id: 3,
-          name: 'Laboratório Fluvial IFSP',
-          river: 'Córrego Birigui',
-          cidade: 'Birigui',
-          estado: 'SP',
-          coords: [-21.2889, -50.3411],
-          raio_metros: 1200,
-          status: 'Manutenção'
-        }
-      ];
-    }
-
-    function getMockEquipamentos() {
-      return [
-        {
-          id: 1,
-          nome_dispositivo: 'Sonda IoT Flutuante 01',
-          modelo: 'ESP32 DevKit V1 (Blindado)',
-          mac_address: '24:6F:28:B1:C4:10',
-          estacao_id: 1,
-          estacao_codigo: 'BRB-04',
-          estacao_nome: 'Estação Central Barbosa',
-          api_key: 'prot_live_89f4b7a1e0c2',
-          firmware_versao: '1.2.4',
-          status: 'Ativo'
-        },
-        {
-          id: 2,
-          nome_dispositivo: 'Módulo de Telemetria Margem',
-          modelo: 'ESP32-WROOM-32U',
-          mac_address: '30:AE:A4:05:88:6A',
-          estacao_id: 2,
-          estacao_codigo: 'PNP-02',
-          estacao_nome: 'Ponte Rodoviária Penápolis',
-          api_key: 'prot_live_14d9e2c8a7f1',
-          firmware_versao: '1.2.0',
-          status: 'Ativo'
-        },
-        {
-          id: 3,
-          nome_dispositivo: 'Bancada de Calibração IFSP',
-          modelo: 'ESP32 NodeMCU',
-          mac_address: 'AC:67:B2:1F:45:90',
-          estacao_id: 3,
-          estacao_codigo: 'BRG-01',
-          estacao_nome: 'Laboratório Fluvial IFSP',
-          api_key: 'prot_live_99a3c1d4e5f6',
-          firmware_versao: '1.1.8',
-          status: 'Manutenção'
-        }
-      ];
-    }
-
-    function getMockUsuarios() {
-      return [
-        {
-          id: 1,
-          nome: 'Cauã Lemes',
-          usuario: 'caua.lemes',
-          papel: 'admin',
-          email: 'caua.lemes@aluno.ifsp.edu.br',
-          ativo: true,
-          criado_em: '2026-03-01T10:00:00Z'
-        },
-        {
-          id: 2,
-          nome: 'João Henrique Lemos',
-          usuario: 'joao.lemos',
-          papel: 'admin',
-          email: 'joao.lemos@aluno.ifsp.edu.br',
-          ativo: true,
-          criado_em: '2026-03-01T10:00:00Z'
-        },
-        {
-          id: 3,
-          nome: 'Dr. Rogério Alexandre (Orientador)',
-          usuario: 'rogerio.alexandre',
-          papel: 'operador',
-          estacao_id: 1,
-          estacao_codigo: 'BRB-04',
-          estacao_nome: 'Estação Central Barbosa',
-          email: 'rogerio.alexandre@ifsp.edu.br',
-          ativo: true,
-          criado_em: '2026-02-15T14:30:00Z'
-        }
-      ];
-    }
-
-    // Logout
-    const btnLogoutEl = document.getElementById('btnLogout');
-    if (btnLogoutEl) {
-      btnLogoutEl.addEventListener('click', (e) => {
-        e.preventDefault();
-        fazerLogout();
-      });
-    }
-
-    // Toasts Modernos em Light Mode
+    let toastTimer = null;
     function showToast(msg, isError = false) {
-      const toast = document.getElementById('toastNotification');
-      const toastMsg = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
+      const t = $('toast');
+      t.textContent = msg;
+      t.className = 'fixed bottom-5 right-5 z-[60] px-4 py-3 rounded-xl shadow-lg border text-sm max-w-sm ' +
+        (isError ? 'bg-white text-red-700 border-red-200' : 'bg-slate-900 text-white border-slate-900');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add('hidden'), 3500);
+    }
 
-      toast.className = 'fixed bottom-5 right-5 z-50 px-4 py-3 rounded-2xl shadow-2xl border font-mono text-xs flex items-center gap-2.5 backdrop-blur-xl transition-all';
-      
-      if (isError) {
-        toast.classList.add('bg-white/95', 'border-rose-300', 'text-rose-700');
-        toastIcon.setAttribute('data-lucide', 'alert-circle');
-      } else {
-        toast.classList.add('bg-white/95', 'border-emerald-300', 'text-emerald-800');
-        toastIcon.setAttribute('data-lucide', 'check-circle-2');
+    function refreshIcons() { if (window.lucide) lucide.createIcons(); }
+
+    async function api(path, options = {}) {
+      const res = await fetch(path, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...(options.headers || {})
+        }
+      });
+      if (res.status === 401) { fazerLogout(); throw new Error('Sessão expirada.'); }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) throw new Error(data.error || 'Falha na requisição.');
+      return data;
+    }
+
+    function statusBadge(status) {
+      const s = status || 'Ativo';
+      const dot = s === 'Ativo' ? 'bg-emerald-500' : (s === 'Manutenção' ? 'bg-amber-500' : 'bg-slate-400');
+      return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-slate-200 text-xs text-slate-700"><span class="w-1.5 h-1.5 rounded-full ${dot}"></span>${esc(s)}</span>`;
+    }
+
+    function formatarData(v) {
+      if (!v) return '—';
+      const d = new Date(v);
+      return isNaN(d) ? '—' : d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    }
+
+    // =====================================================================
+    // Estado
+    // =====================================================================
+    let me = null;                // usuário autenticado
+    let estacoes = [];            // todas as estações (a API é pública)
+    let estacaoAtual = null;      // estação aberta no detalhe
+    let equipamentosEstacao = [];
+    let equipeEstacao = [];
+    let usuariosGlobais = [];
+    let equipamentosEstoque = [];
+    let contextoEquipamento = null; // 'estacao' | 'estoque'
+    let contextoUsuario = null;     // { estacao } quando fixo na estação | null no global
+
+    const ehAdmin = () => me && me.papel !== 'operador';
+
+    // =====================================================================
+    // Navegação (controles segmentados)
+    // =====================================================================
+    function ativarSegmento(grupo, viewId) {
+      document.querySelectorAll(`.seg-btn[data-seg="${grupo}"]`).forEach((b) => {
+        b.classList.toggle('is-active', b.dataset.view === viewId);
+      });
+      const seletor = grupo === 'main' ? '.main-view' : '.est-view';
+      document.querySelectorAll(seletor).forEach((el) => el.classList.add('hidden'));
+      $(viewId).classList.remove('hidden');
+    }
+
+    document.querySelectorAll('.seg-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        ativarSegmento(btn.dataset.seg, btn.dataset.view);
+        if (btn.dataset.seg === 'main') {
+          if (btn.dataset.view === 'viewUsuarios') carregarUsuariosGlobais();
+          if (btn.dataset.view === 'viewEstoque') carregarEstoque();
+        }
+      });
+    });
+
+    document.querySelectorAll('.btn-close-modal').forEach((b) => {
+      b.addEventListener('click', () => fecharModal(b.dataset.modal));
+    });
+
+    function abrirModal(id) { const m = $(id); m.classList.remove('hidden'); m.classList.add('flex'); refreshIcons(); }
+    function fecharModal(id) { const m = $(id); m.classList.add('hidden'); m.classList.remove('flex'); }
+
+    $('btnLogout').addEventListener('click', fazerLogout);
+
+    // =====================================================================
+    // Inicialização
+    // =====================================================================
+    async function iniciar() {
+      try {
+        const r = await api('/api/auth/me');
+        me = r.usuario;
+        localStorage.setItem(USER_KEY, JSON.stringify(me));
+      } catch (err) {
+        mostrarErroGlobal('Não foi possível validar sua sessão. Verifique a conexão com o servidor.');
+        return;
       }
 
-      toastMsg.textContent = msg;
-      lucide.createIcons();
+      $('userNomeDisplay').textContent = me.nome || 'Usuário';
+      $('userPapelDisplay').textContent = ehAdmin()
+        ? 'Administrador geral'
+        : `Operador · ${me.estacao_codigo || 'sem estação'}`;
 
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 3500);
+      await carregarEstacoes();
+
+      if (ehAdmin()) {
+        $('adminNav').classList.remove('hidden');
+        ativarSegmento('main', 'viewEstacoes');
+        atualizarContagens();
+      } else {
+        if (!me.estacao_id) {
+          mostrarErroGlobal('Seu usuário não está vinculado a nenhuma estação. Procure um administrador geral.');
+          return;
+        }
+        const st = estacoes.find((s) => s.db_id === me.estacao_id);
+        if (!st) {
+          mostrarErroGlobal('A estação vinculada ao seu usuário não foi encontrada.');
+          return;
+        }
+        abrirEstacao(st.db_id);
+      }
+      refreshIcons();
     }
 
-    // Gerenciador de Abas Modernizado (Segmented Control Light)
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetTab = btn.getAttribute('data-tab');
-
-        tabBtns.forEach(b => {
-          b.classList.remove('active-tab-estacoes', 'active-tab-equipamentos', 'active-tab-usuarios');
-          b.classList.add('text-slate-600');
-        });
-
-        btn.classList.remove('text-slate-600');
-        if (targetTab === 'tabEstacoes') btn.classList.add('active-tab-estacoes');
-        else if (targetTab === 'tabEquipamentos') btn.classList.add('active-tab-equipamentos');
-        else if (targetTab === 'tabUsuarios') btn.classList.add('active-tab-usuarios');
-
-        tabContents.forEach(tc => tc.classList.add('hidden'));
-        document.getElementById(targetTab).classList.remove('hidden');
-      });
-    });
-
-    // Modais - Fechamento genérico
-    document.querySelectorAll('.btn-close-modal').forEach(b => {
-      b.addEventListener('click', () => {
-        const modalId = b.getAttribute('data-modal');
-        document.getElementById(modalId).classList.add('hidden');
-      });
-    });
-
-    // ==========================================
-    // MÉTRICAS KPI DO TOPO
-    // ==========================================
-    function atualizarMetricasKPI() {
-      // Estações
-      const totalEst = cacheEstacoes.length;
-      const elEstacoes = document.getElementById('kpiEstacoesTotal');
-      if (elEstacoes) elEstacoes.textContent = totalEst;
-
-      // Raio Coberto
-      const raioTotalMetros = cacheEstacoes.reduce((acc, s) => acc + (s.raio_metros || 1000), 0);
-      const raioKm = (raioTotalMetros / 1000).toFixed(1);
-      const elCobertura = document.getElementById('kpiCoberturaTotal');
-      if (elCobertura) elCobertura.textContent = raioKm;
-
-      // Equipamentos
-      const totalEq = cacheEquipamentos.length;
-      const elEq = document.getElementById('kpiEquipamentosTotal');
-      if (elEq) elEq.textContent = totalEq;
-
-      // Usuários
-      const totalUsr = cacheUsuarios.length;
-      const elUsr = document.getElementById('kpiUsuariosTotal');
-      if (elUsr) elUsr.textContent = totalUsr;
+    function mostrarErroGlobal(msg) {
+      const el = $('globalError');
+      el.textContent = msg;
+      el.classList.remove('hidden');
     }
 
-    // ==========================================
-    // SEÇÃO 1: ESTAÇÕES DE MONITORAMENTO
-    // ==========================================
-    let cacheEstacoes = [];
+    async function atualizarContagens() {
+      $('countEstacoes').textContent = estacoes.length;
+      try {
+        const [u, e] = await Promise.all([
+          api('/api/auth/usuarios'),
+          api('/api/equipamentos?estacao_id=none')
+        ]);
+        usuariosGlobais = u.data;
+        equipamentosEstoque = e.data;
+        $('countUsuarios').textContent = u.count;
+        $('countEstoque').textContent = e.count;
+        $('navEstoque').classList.toggle('hidden', e.count === 0);
+      } catch (err) { /* contagens são auxiliares */ }
+    }
 
+    // =====================================================================
+    // Estações
+    // =====================================================================
     async function carregarEstacoes() {
       try {
         const res = await fetch('/api/estacoes');
         const data = await res.json();
-
-        if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
-          cacheEstacoes = data.data;
-        } else {
-          cacheEstacoes = getMockEstacoes();
-        }
+        estacoes = (data && data.success && Array.isArray(data.data)) ? data.data : [];
       } catch (err) {
-        console.log('Backend sem banco PostgreSQL. Usando estações locais simuladas (Modo Dev).');
-        cacheEstacoes = getMockEstacoes();
+        estacoes = [];
+        showToast('Não foi possível carregar as estações.', true);
       }
-
-      document.getElementById('badgeCountEstacoes').textContent = cacheEstacoes.length;
-      document.getElementById('badgeExistingCount').textContent = cacheEstacoes.length;
-      renderizarTabelaEstacoes(cacheEstacoes);
-      preencherSelectEstacoes(cacheEstacoes);
-      atualizarMetricasKPI();
+      renderizarListaEstacoes($('searchEstacoes').value);
     }
 
-    function renderizarTabelaEstacoes(lista) {
-      const tbody = document.getElementById('tbodyEstacoes');
-      if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-400 font-mono">Nenhuma estação encontrada.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(st => {
-        const coordsText = Array.isArray(st.coords) ? `${st.coords[0].toFixed(4)}, ${st.coords[1].toFixed(4)}` : '--, --';
-        const raioKm = ((st.raio_metros || 1000) / 1000).toFixed(1);
-        
-        const statusVal = st.status || 'Ativo';
-        let statusBadge = '';
-        if (statusVal === 'Ativo') {
-          statusBadge = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Ativo</span>';
-        } else if (statusVal === 'Manutenção') {
-          statusBadge = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Manutenção</span>';
-        } else {
-          statusBadge = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200/80"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Inativo</span>';
-        }
-
-        return `
-          <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
-            <td class="py-3.5 px-4 font-bold font-mono">
-              <span class="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-700 font-bold text-xs">
-                ${st.id}
-              </span>
-            </td>
-            <td class="py-3.5 px-4">
-              <div class="font-bold text-slate-900 font-heading text-xs sm:text-sm">${st.name}</div>
-              <div class="text-[11px] text-blue-600 font-mono font-medium mt-0.5 flex items-center gap-1">
-                <i data-lucide="radar" class="w-3 h-3 text-blue-500"></i>
-                Raio: ${st.raio_metros || 1000}m (${raioKm} km)
-              </div>
-            </td>
-            <td class="py-3.5 px-4 text-slate-600 font-medium">${st.river}</td>
-            <td class="py-3.5 px-4 text-slate-700 font-medium">${st.cidade} - ${st.estado}</td>
-            <td class="py-3.5 px-4 text-[11px] text-slate-500 font-mono">${coordsText}</td>
-            <td class="py-3.5 px-4">${statusBadge}</td>
-            <td class="py-3.5 px-4 text-right space-x-1.5">
-              <button onclick="editarEstacao('${st.id}')" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all cursor-pointer" title="Editar Estação">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="excluirEstacao('${st.id}')" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-rose-400 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all cursor-pointer" title="Excluir Estação">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      lucide.createIcons();
-    }
-
-    // Busca rápida em Estações
-    document.getElementById('searchEstacoes').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        renderizarTabelaEstacoes(cacheEstacoes);
-        return;
-      }
-      const filtradas = cacheEstacoes.filter(st => 
-        (st.id && st.id.toLowerCase().includes(q)) ||
-        (st.name && st.name.toLowerCase().includes(q)) ||
-        (st.river && st.river.toLowerCase().includes(q)) ||
-        (st.cidade && st.cidade.toLowerCase().includes(q))
+    function renderizarListaEstacoes(filtro = '') {
+      const q = filtro.toLowerCase().trim();
+      const lista = !q ? estacoes : estacoes.filter((s) =>
+        [s.id, s.name, s.river, s.cidade].some((v) => v && String(v).toLowerCase().includes(q))
       );
-      renderizarTabelaEstacoes(filtradas);
+
+      const tbody = $('tbodyEstacoes');
+      if (lista.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-400">Nenhuma estação encontrada.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = lista.map((st) => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-3 px-4"><span class="font-mono text-xs px-2 py-0.5 rounded-md border border-slate-200 text-slate-700">${esc(st.id)}</span></td>
+          <td class="py-3 px-4 font-semibold text-slate-900">${esc(st.name)}</td>
+          <td class="py-3 px-4 text-slate-600">${esc(st.river)}</td>
+          <td class="py-3 px-4 text-slate-600">${esc(st.cidade)} - ${esc(st.estado)}</td>
+          <td class="py-3 px-4">${statusBadge(st.status)}</td>
+          <td class="py-3 px-4 text-right">
+            <button type="button" class="btn btn-ghost !py-1.5" data-acao="abrir-estacao" data-id="${st.db_id}">
+              <span>Gerenciar</span><i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      refreshIcons();
+    }
+
+    $('searchEstacoes').addEventListener('input', (e) => renderizarListaEstacoes(e.target.value));
+
+    $('tbodyEstacoes').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-acao="abrir-estacao"]');
+      if (btn) abrirEstacao(parseInt(btn.dataset.id, 10));
     });
 
-    // =======================================================
-    // MAPA INTERATIVO NO MODAL (ESRI LIGHT GRAY CANVAS SEM WATERMARK)
-    // =======================================================
-    let pickerMap = null;
-    let pickerMarker = null;
-    let pickerCircle = null;
-    let existingStationsLayer = null;
-    let showExistingStations = true;
+    $('btnVoltarLista').addEventListener('click', () => {
+      estacaoAtual = null;
+      ativarSegmento('main', 'viewEstacoes');
+      $('adminNav').classList.remove('hidden');
+      atualizarContagens();
+    });
 
-    function initPickerMap() {
-      if (!pickerMap) {
-        pickerMap = L.map('modalMapPicker', {
-          zoomControl: true,
-          attributionControl: false,
-          scrollWheelZoom: true
-        }).setView([-21.2662, -49.9482], 12);
+    async function abrirEstacao(dbId) {
+      const st = estacoes.find((s) => s.db_id === dbId);
+      if (!st) return;
+      estacaoAtual = st;
 
-        // Tile layer limpo sem exigência de API Key
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-          attribution: '© Esri · OpenStreetMap',
-          maxZoom: 16
-        }).addTo(pickerMap);
+      // Admin geral volta para a lista; operador não possui lista
+      $('btnVoltarLista').classList.toggle('hidden', !ehAdmin());
+      $('btnVoltarLista').classList.toggle('flex', ehAdmin());
+      $('adminNav').classList.add('hidden');
 
-        // Layer Group dedicado para estações existentes
-        existingStationsLayer = L.layerGroup().addTo(pickerMap);
+      ativarSegmento('main', 'viewEstacao');
+      ativarSegmento('est', 'tabEquipamentos');
+      renderizarCabecalhoEstacao();
 
-        // Ao clicar no mapa, move o ponto e o círculo
-        pickerMap.on('click', (e) => {
-          atualizarPosicaoMapa(e.latlng.lat, e.latlng.lng);
-        });
+      await Promise.all([carregarEquipamentosEstacao(), carregarEquipeEstacao()]);
+    }
+
+    function renderizarCabecalhoEstacao() {
+      const st = estacaoAtual;
+      $('estNome').textContent = st.name;
+      $('estCodigo').textContent = st.id;
+      $('estStatus').innerHTML = statusBadge(st.status);
+      $('estSub').textContent = `${st.river} · ${st.cidade}/${st.estado}`;
+
+      $('estAcoes').innerHTML = `
+        <button type="button" class="btn btn-ghost" data-acao="editar-estacao"><i data-lucide="pencil" class="w-4 h-4"></i><span>Editar</span></button>
+        ${ehAdmin() ? `<button type="button" class="btn btn-danger" data-acao="excluir-estacao"><i data-lucide="trash-2" class="w-4 h-4"></i><span>Excluir</span></button>` : ''}
+      `;
+
+      const coords = Array.isArray(st.coords) ? `${st.coords[0].toFixed(5)}, ${st.coords[1].toFixed(5)}` : '—';
+      const raio = st.raio_metros || 1000;
+      const dados = [
+        ['Código', st.id],
+        ['Nome', st.name],
+        ['Corpo hídrico', st.river],
+        ['Cidade / UF', `${st.cidade} / ${st.estado}`],
+        ['Bacia hidrográfica', st.bacia || '—'],
+        ['Coordenadas', coords],
+        ['Raio de abrangência', `${raio} m (${(raio / 1000).toFixed(1).replace('.', ',')} km)`],
+        ['Status operacional', st.status || 'Ativo']
+      ];
+      $('dadosEstacao').innerHTML = dados.map(([k, v]) => `
+        <div><dt class="text-[11px] uppercase tracking-wider text-slate-500">${esc(k)}</dt><dd class="mt-0.5 text-slate-900 font-medium">${esc(v)}</dd></div>
+      `).join('');
+      refreshIcons();
+    }
+
+    $('estAcoes').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-acao]');
+      if (!btn) return;
+      if (btn.dataset.acao === 'editar-estacao') abrirModalEstacao(estacaoAtual);
+      if (btn.dataset.acao === 'excluir-estacao') excluirEstacaoAtual();
+    });
+
+    async function excluirEstacaoAtual() {
+      const st = estacaoAtual;
+      if (!st) return;
+      if (!confirm(`Excluir a estação ${st.id}? Os equipamentos vinculados ficarão sem estação e os operadores perderão o vínculo. Esta ação não pode ser desfeita.`)) return;
+      try {
+        await api(`/api/estacoes/${encodeURIComponent(st.id)}`, { method: 'DELETE' });
+        showToast('Estação excluída.');
+        estacaoAtual = null;
+        await carregarEstacoes();
+        ativarSegmento('main', 'viewEstacoes');
+        $('adminNav').classList.remove('hidden');
+        atualizarContagens();
+      } catch (err) {
+        showToast(err.message, true);
       }
     }
 
-    /**
-     * Renderiza no mapa todas as estações já cadastradas (exceto a que está sendo editada)
-     */
-    function renderizarEstacoesExistentesNoMapa(currentEditingId = null) {
-      if (!existingStationsLayer) return;
-      existingStationsLayer.clearLayers();
+    // ---- Modal da estação com mapa ----
+    let pickerMap = null, pickerMarker = null, pickerCircle = null, existingLayer = null;
+    const CENTRO_PADRAO = [-21.2662, -49.9482];
 
-      if (!showExistingStations || !cacheEstacoes || cacheEstacoes.length === 0) return;
+    function initPickerMap() {
+      if (pickerMap) return;
+      pickerMap = L.map('modalMapPicker', { zoomControl: true, attributionControl: false, scrollWheelZoom: true }).setView(CENTRO_PADRAO, 12);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(pickerMap);
+      existingLayer = L.layerGroup().addTo(pickerMap);
+      pickerMap.on('click', (e) => posicionarPonto(e.latlng.lat, e.latlng.lng));
+    }
 
-      cacheEstacoes.forEach(st => {
-        // Se estivermos editando esta mesma estação, não a renderiza como existente
-        if (currentEditingId && String(st.id) === String(currentEditingId)) return;
-
-        if (!Array.isArray(st.coords) || st.coords.length < 2) return;
-        const lat = st.coords[0];
-        const lng = st.coords[1];
-        const raio = st.raio_metros || 1000;
-        const isAtivo = (st.status || 'Ativo') === 'Ativo';
-        const color = isAtivo ? '#10B981' : '#F59E0B';
-
-        // 1. Círculo Translúcido de Cobertura da Estação Existente
-        const stCircle = L.circle([lat, lng], {
-          radius: raio,
-          color: color,
-          weight: 1.5,
-          dashArray: '4, 6',
-          fillColor: color,
-          fillOpacity: 0.08
-        });
-
-        // 2. Marcador Elegante com Badge do Código em Light Mode
-        const customExistingIcon = L.divIcon({
-          className: 'existing-st-pin',
-          html: `
-            <div style="background: rgba(255, 255, 255, 0.95); border: 1.5px solid ${color}; color: #0F172A; padding: 2px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: bold; white-space: nowrap;">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: ${color};"></span>
-              <span>${st.id}</span>
-            </div>
-          `,
-          iconSize: [60, 22],
-          iconAnchor: [30, 11]
-        });
-
-        const stMarker = L.marker([lat, lng], { icon: customExistingIcon });
-
-        // Popup Informativo em Light Mode
-        stMarker.bindPopup(`
-          <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; line-height:1.45; min-width: 170px;">
-            <div style="font-weight:bold; color:#2563EB; font-size:12px; margin-bottom:4px; border-bottom:1px solid #E2E8F0; padding-bottom:3px;">
-              ${st.id} — ${st.name}
-            </div>
-            <div style="color:#64748B;">Corpo Hídrico: <span style="color:#0F172A; font-weight:600;">${st.river}</span></div>
-            <div style="color:#64748B;">Cidade: <span style="color:#0F172A;">${st.cidade} - ${st.estado}</span></div>
-            <div style="color:#64748B;">Raio Coberto: <span style="color:${color}; font-weight:bold;">${raio}m (${(raio/1000).toFixed(1)} km)</span></div>
-            <div style="color:#64748B; margin-top:3px;">Status: <span style="color:${color}; font-weight:bold;">${st.status || 'Ativo'}</span></div>
-          </div>
-        `);
-
-        existingStationsLayer.addLayer(stCircle);
-        existingStationsLayer.addLayer(stMarker);
+    function desenharEstacoesExistentes(ignorarDbId) {
+      existingLayer.clearLayers();
+      estacoes.forEach((st) => {
+        if (st.db_id === ignorarDbId || !Array.isArray(st.coords)) return;
+        L.circle(st.coords, { radius: st.raio_metros || 1000, color: '#94A3B8', weight: 1, dashArray: '4,6', fillColor: '#94A3B8', fillOpacity: 0.08 })
+          .bindTooltip(st.id).addTo(existingLayer);
       });
     }
 
-    // Toggle de exibição das estações existentes
-    document.getElementById('chkToggleExistingStations').addEventListener('change', (e) => {
-      showExistingStations = e.target.checked;
-      const currentEditingId = document.getElementById('inputEstacaoDbId').value;
-      renderizarEstacoesExistentesNoMapa(currentEditingId);
-    });
+    function posicionarPonto(lat, lng, zoom = false) {
+      const raio = parseInt($('inputEstacaoRaio').value, 10) || 1000;
+      $('inputEstacaoLat').value = parseFloat(lat).toFixed(6);
+      $('inputEstacaoLng').value = parseFloat(lng).toFixed(6);
 
-    function atualizarPosicaoMapa(lat, lng, forcarZoom = false) {
-      const inputLat = document.getElementById('inputEstacaoLat');
-      const inputLng = document.getElementById('inputEstacaoLng');
-      const inputRaio = document.getElementById('inputEstacaoRaio');
-      const raio = parseInt(inputRaio.value, 10) || 1000;
-
-      inputLat.value = parseFloat(lat).toFixed(6);
-      inputLng.value = parseFloat(lng).toFixed(6);
-
-      // Marcador do Ponto (Azul Vibrante, Arrastável)
       if (!pickerMarker) {
-        const customIcon = L.divIcon({
-          className: 'custom-picker-pin',
-          html: `<div style="background-color: #2563EB; width: 18px; height: 18px; border-radius: 50%; border: 3px solid white; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5);"></div>`,
-          iconSize: [18, 18],
-          iconAnchor: [9, 9]
-        });
-
-        pickerMarker = L.marker([lat, lng], { icon: customIcon, draggable: true, zIndexOffset: 2000 }).addTo(pickerMap);
-        pickerMarker.on('dragend', (ev) => {
-          const pos = ev.target.getLatLng();
-          atualizarPosicaoMapa(pos.lat, pos.lng);
-        });
+        pickerMarker = L.marker([lat, lng], { draggable: true }).addTo(pickerMap);
+        pickerMarker.on('dragend', (ev) => { const p = ev.target.getLatLng(); posicionarPonto(p.lat, p.lng); });
       } else {
         pickerMarker.setLatLng([lat, lng]);
       }
 
-      // Círculo Translúcido do Raio de Cobertura do Novo Ponto
       if (!pickerCircle) {
-        pickerCircle = L.circle([lat, lng], {
-          radius: raio,
-          color: '#2563EB',
-          weight: 2,
-          fillColor: '#3B82F6',
-          fillOpacity: 0.18,
-          dashArray: '4, 4'
-        }).addTo(pickerMap);
+        pickerCircle = L.circle([lat, lng], { radius: raio, color: '#0F172A', weight: 1.5, fillColor: '#0F172A', fillOpacity: 0.1 }).addTo(pickerMap);
       } else {
         pickerCircle.setLatLng([lat, lng]);
         pickerCircle.setRadius(raio);
       }
-
-      if (forcarZoom) {
-        pickerMap.setView([lat, lng], 13);
-      }
+      if (zoom) pickerMap.setView([lat, lng], 13);
     }
 
-    // Slider de Raio em Tempo Real
-    document.getElementById('inputEstacaoRaio').addEventListener('input', (e) => {
+    function atualizarRotuloRaio(val) {
+      $('labelRaioDisplay').textContent = `${val} m (${(val / 1000).toFixed(1).replace('.', ',')} km)`;
+    }
+
+    $('inputEstacaoRaio').addEventListener('input', (e) => {
       const val = parseInt(e.target.value, 10);
-      const km = (val / 1000).toFixed(1);
-      document.getElementById('labelRaioDisplay').textContent = `${val} metros (${km} km)`;
-      if (pickerCircle) {
-        pickerCircle.setRadius(val);
+      atualizarRotuloRaio(val);
+      if (pickerCircle) pickerCircle.setRadius(val);
+    });
+
+    function abrirModalEstacao(st) {
+      $('formEstacao').reset();
+      const editando = !!st;
+      $('modalEstacaoTitle').textContent = editando ? `Editar estação ${st.id}` : 'Nova estação';
+      $('inputEstacaoEditId').value = editando ? st.id : '';
+      $('inputEstacaoCodigo').readOnly = editando;
+
+      if (editando) {
+        $('inputEstacaoCodigo').value = st.id;
+        $('inputEstacaoNome').value = st.name || '';
+        $('inputEstacaoRio').value = st.river || '';
+        $('inputEstacaoCidade').value = st.cidade || '';
+        $('inputEstacaoEstado').value = st.estado || '';
+        $('inputEstacaoBacia').value = st.bacia || '';
+        $('inputEstacaoStatus').value = st.status || 'Ativo';
+        $('inputEstacaoRaio').value = st.raio_metros || 1000;
+      } else {
+        $('inputEstacaoRaio').value = 1000;
+        $('inputEstacaoEstado').value = 'SP';
       }
-    });
-
-    // Abrir Modal de Nova Estação
-    document.getElementById('btnOpenModalNovaEstacao').addEventListener('click', () => {
-      document.getElementById('modalEstacaoTitle').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-blue-600"></i> <span>Cadastrar Nova Estação</span>`;
-      document.getElementById('formEstacao').reset();
-      document.getElementById('inputEstacaoDbId').value = '';
-      document.getElementById('inputEstacaoCodigo').readOnly = false;
-      document.getElementById('inputEstacaoRaio').value = 1000;
-      document.getElementById('labelRaioDisplay').textContent = '1000 metros (1.0 km)';
-      document.getElementById('modalEstacao').classList.remove('hidden');
-      lucide.createIcons();
+      atualizarRotuloRaio(parseInt($('inputEstacaoRaio').value, 10));
+      abrirModal('modalEstacao');
 
       setTimeout(() => {
         initPickerMap();
         pickerMap.invalidateSize();
-        renderizarEstacoesExistentesNoMapa(null);
-        
-        const defaultLat = -21.2662;
-        const defaultLng = -49.9482;
-        atualizarPosicaoMapa(defaultLat, defaultLng, true);
-      }, 250);
-    });
+        desenharEstacoesExistentes(editando ? st.db_id : null);
+        const [lat, lng] = editando && Array.isArray(st.coords) ? st.coords : CENTRO_PADRAO;
+        posicionarPonto(lat, lng, true);
+      }, 200);
+    }
 
-    // Editar Estação
-    window.editarEstacao = function(codigo) {
-      const st = cacheEstacoes.find(s => s.id === codigo);
-      if (!st) return;
+    $('btnNovaEstacao').addEventListener('click', () => abrirModalEstacao(null));
 
-      document.getElementById('modalEstacaoTitle').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-blue-600"></i> <span>Editar Estação ${st.id}</span>`;
-      document.getElementById('inputEstacaoDbId').value = st.id;
-      document.getElementById('inputEstacaoCodigo').value = st.id;
-      document.getElementById('inputEstacaoCodigo').readOnly = true;
-      document.getElementById('inputEstacaoNome').value = st.name;
-      document.getElementById('inputEstacaoRio').value = st.river;
-      document.getElementById('inputEstacaoCidade').value = st.cidade;
-      document.getElementById('inputEstacaoEstado').value = st.estado;
-      document.getElementById('inputEstacaoBacia').value = st.bacia || 'Baixo Tietê';
-      document.getElementById('inputEstacaoStatus').value = st.status || 'Ativo';
-
-      const raioVal = st.raio_metros || 1000;
-      document.getElementById('inputEstacaoRaio').value = raioVal;
-      document.getElementById('labelRaioDisplay').textContent = `${raioVal} metros (${(raioVal/1000).toFixed(1)} km)`;
-
-      document.getElementById('modalEstacao').classList.remove('hidden');
-      lucide.createIcons();
-
-      setTimeout(() => {
-        initPickerMap();
-        pickerMap.invalidateSize();
-        // Renderiza todas as outras estações como referência, exceto a atual
-        renderizarEstacoesExistentesNoMapa(st.id);
-        atualizarPosicaoMapa(st.coords[0], st.coords[1], true);
-      }, 250);
-    };
-
-    // Submissão do Formulário de Estação
-    document.getElementById('formEstacao').addEventListener('submit', async (e) => {
+    $('formEstacao').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const editingId = document.getElementById('inputEstacaoDbId').value;
-      const codigo = document.getElementById('inputEstacaoCodigo').value.trim();
-      const nome = document.getElementById('inputEstacaoNome').value.trim();
-      const rio_local = document.getElementById('inputEstacaoRio').value.trim();
-      const cidade = document.getElementById('inputEstacaoCidade').value.trim();
-      const estado = document.getElementById('inputEstacaoEstado').value.trim();
-      const latitude = parseFloat(document.getElementById('inputEstacaoLat').value);
-      const longitude = parseFloat(document.getElementById('inputEstacaoLng').value);
-      const raio_cobertura_metros = parseInt(document.getElementById('inputEstacaoRaio').value, 10);
-      const bacia_hidrografica = document.getElementById('inputEstacaoBacia').value.trim();
-      const status_operacional = document.getElementById('inputEstacaoStatus').value;
-
-      const payload = { 
-        codigo, 
-        nome, 
-        rio_local, 
-        cidade, 
-        estado, 
-        latitude, 
-        longitude, 
-        raio_cobertura_metros,
-        bacia_hidrografica, 
-        status_operacional 
+      const editId = $('inputEstacaoEditId').value;
+      const payload = {
+        codigo: $('inputEstacaoCodigo').value.trim(),
+        nome: $('inputEstacaoNome').value.trim(),
+        rio_local: $('inputEstacaoRio').value.trim(),
+        cidade: $('inputEstacaoCidade').value.trim(),
+        estado: $('inputEstacaoEstado').value.trim(),
+        latitude: parseFloat($('inputEstacaoLat').value),
+        longitude: parseFloat($('inputEstacaoLng').value),
+        raio_cobertura_metros: parseInt($('inputEstacaoRaio').value, 10),
+        bacia_hidrografica: $('inputEstacaoBacia').value.trim(),
+        status_operacional: $('inputEstacaoStatus').value
       };
 
       try {
-        const url = editingId ? `/api/estacoes/${editingId}` : '/api/estacoes';
-        const method = editingId ? 'PUT' : 'POST';
-
-        const res = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showToast(data.message || 'Estação salva com sucesso!');
-          document.getElementById('modalEstacao').classList.add('hidden');
-          carregarEstacoes();
+        const url = editId ? `/api/estacoes/${encodeURIComponent(editId)}` : '/api/estacoes';
+        const data = await api(url, { method: editId ? 'PUT' : 'POST', body: JSON.stringify(payload) });
+        showToast(data.message || 'Estação salva.');
+        fecharModal('modalEstacao');
+        await carregarEstacoes();
+        if (estacaoAtual) {
+          const atualizada = estacoes.find((s) => s.db_id === estacaoAtual.db_id);
+          if (atualizada) { estacaoAtual = atualizada; renderizarCabecalhoEstacao(); }
         } else {
-          throw new Error(data.error || 'Erro ao salvar estação.');
+          $('countEstacoes').textContent = estacoes.length;
         }
       } catch (err) {
-        if (isDevMode) {
-          if (editingId) {
-            const idx = cacheEstacoes.findIndex(s => String(s.id) === String(editingId) || String(s.db_id) === String(editingId));
-            if (idx >= 0) {
-              cacheEstacoes[idx] = { ...cacheEstacoes[idx], name: nome, river: rio_local, cidade, estado, coords: [latitude, longitude], raio_metros: raio_cobertura_metros, status: status_operacional };
-            }
-          } else {
-            cacheEstacoes.push({
-              id: codigo,
-              db_id: Date.now(),
-              name: nome,
-              river: rio_local,
-              cidade,
-              estado,
-              coords: [latitude, longitude],
-              raio_metros: raio_cobertura_metros,
-              status: status_operacional
-            });
-          }
-          showToast('Estação salva com sucesso (Simulação Local)!');
-          document.getElementById('modalEstacao').classList.add('hidden');
-          renderizarTabelaEstacoes(cacheEstacoes);
-          preencherSelectEstacoes(cacheEstacoes);
-          atualizarMetricasKPI();
-          return;
-        }
-        showToast('Erro de comunicação com a API.', true);
+        showToast(err.message, true);
       }
     });
 
-    window.excluirEstacao = async function(codigo) {
-      if (!confirm(`Tem certeza que deseja excluir a estação ${codigo}? Esta ação não pode ser desfeita.`)) return;
-
-      try {
-        const res = await fetch(`/api/estacoes/${codigo}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-
-        if (res.ok && data.success) {
-          showToast('Estação excluída com sucesso!');
-          carregarEstacoes();
-        } else {
-          throw new Error(data.error || 'Erro ao excluir estação.');
-        }
-      } catch (err) {
-        if (isDevMode) {
-          cacheEstacoes = cacheEstacoes.filter(s => s.id !== codigo);
-          showToast('Estação excluída com sucesso (Simulação Local)!');
-          renderizarTabelaEstacoes(cacheEstacoes);
-          preencherSelectEstacoes(cacheEstacoes);
-          atualizarMetricasKPI();
-          return;
-        }
-        showToast('Erro ao excluir estação.', true);
-      }
-    };
-
-    function preencherSelectEstacoes(estacoes) {
-      const select = document.getElementById('selectEquipamentoEstacao');
-      select.innerHTML = '<option value="">-- Nenhuma (Em estoque / Não vinculada) --</option>';
-      estacoes.forEach(s => {
-        select.innerHTML += `<option value="${s.db_id}">${s.id} — ${s.name} (${s.cidade})</option>`;
-      });
-    }
-
-    // ==========================================
-    // SEÇÃO 2: EQUIPAMENTOS ESP32
-    // ==========================================
-    let cacheEquipamentos = [];
-
-    async function carregarEquipamentos() {
-      try {
-        const res = await fetch('/api/equipamentos', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-
-        if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
-          cacheEquipamentos = data.data;
-        } else {
-          cacheEquipamentos = getMockEquipamentos();
-        }
-      } catch (err) {
-        console.log('Backend sem banco PostgreSQL. Carregando equipamentos locais simulados.');
-        cacheEquipamentos = getMockEquipamentos();
-      }
-
-      document.getElementById('badgeCountEquipamentos').textContent = cacheEquipamentos.length;
-      renderizarTabelaEquipamentos(cacheEquipamentos);
-      atualizarMetricasKPI();
-    }
-
-    function renderizarTabelaEquipamentos(lista) {
-      const tbody = document.getElementById('tbodyEquipamentos');
-      if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-400 font-mono">Nenhum equipamento cadastrado.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(eq => {
-        let statusBadge = '';
-        if (eq.status === 'Ativo') {
-          statusBadge = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Ativo</span>';
-        } else if (eq.status === 'Manutenção') {
-          statusBadge = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Manutenção</span>';
-        } else {
-          statusBadge = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200/80"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Offline</span>';
-        }
-
-        return `
-          <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
-            <td class="py-3.5 px-4">
-              <div class="font-bold text-slate-900 font-heading text-xs sm:text-sm">${eq.nome_dispositivo}</div>
-              <div class="text-[10px] text-slate-500 font-mono">${eq.modelo || 'ESP32'}</div>
-            </td>
-            <td class="py-3.5 px-4 font-mono font-bold text-slate-700">${eq.mac_address}</td>
-            <td class="py-3.5 px-4">
-              ${eq.estacao_codigo ? `
-                <span class="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-700 font-bold font-mono text-xs">
-                  ${eq.estacao_codigo}
-                </span>
-                <span class="text-slate-600 text-xs block mt-1 font-medium">${eq.estacao_nome || ''}</span>
-              ` : `<span class="text-slate-400 italic">Sem estação vinculada</span>`}
-            </td>
-            <td class="py-3.5 px-4">
-              <div class="flex items-center gap-1.5">
-                <input type="password" value="${eq.api_key}" readonly class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-[11px] text-slate-600 font-mono w-24 select-none">
-                <button onclick="copiarApiKey('${eq.api_key}')" class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-colors cursor-pointer" title="Copiar API Key">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="regenerarApiKey(${eq.id})" class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-amber-400 hover:bg-amber-50 text-slate-600 hover:text-amber-600 transition-colors cursor-pointer" title="Regenerar Chave">
-                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            </td>
-            <td class="py-3.5 px-4 text-slate-600 font-mono">v${eq.firmware_versao || '1.0.0'}</td>
-            <td class="py-3.5 px-4">${statusBadge}</td>
-            <td class="py-3.5 px-4 text-right space-x-1.5">
-              <button onclick="editarEquipamento(${eq.id})" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-all cursor-pointer" title="Editar">
-                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="excluirEquipamento(${eq.id})" class="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:border-rose-400 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-all cursor-pointer" title="Excluir">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      lucide.createIcons();
-    }
-
-    // Busca rápida em Equipamentos
-    document.getElementById('searchEquipamentos').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        renderizarTabelaEquipamentos(cacheEquipamentos);
-        return;
-      }
-      const filtrados = cacheEquipamentos.filter(eq => 
-        (eq.nome_dispositivo && eq.nome_dispositivo.toLowerCase().includes(q)) ||
-        (eq.mac_address && eq.mac_address.toLowerCase().includes(q)) ||
-        (eq.modelo && eq.modelo.toLowerCase().includes(q)) ||
-        (eq.estacao_codigo && eq.estacao_codigo.toLowerCase().includes(q))
-      );
-      renderizarTabelaEquipamentos(filtrados);
-    });
-
-    window.copiarApiKey = function(key) {
-      navigator.clipboard.writeText(key).then(() => {
-        showToast('API Key copiada para a área de transferência!');
-      });
-    };
-
-    window.regenerarApiKey = async function(id) {
-      if (!confirm('Deseja realmente gerar uma nova API Key? O código no ESP32 precisará ser atualizado com a nova chave.')) return;
-      try {
-        const res = await fetch(`/api/equipamentos/${id}/regenerar-chave`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast('Nova API Key gerada com sucesso!');
-          carregarEquipamentos();
-        } else {
-          showToast(data.error || 'Erro ao gerar nova chave.', true);
-        }
-      } catch (err) {
-        showToast('Erro de comunicação.', true);
-      }
-    };
-
-    document.getElementById('btnOpenModalNovoEquipamento').addEventListener('click', () => {
-      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i> <span>Cadastrar Equipamento ESP32</span>`;
-      document.getElementById('formEquipamento').reset();
-      document.getElementById('inputEquipamentoId').value = '';
-      document.getElementById('inputEquipamentoMac').readOnly = false;
-      document.getElementById('modalEquipamento').classList.remove('hidden');
-      lucide.createIcons();
-    });
-
-    window.editarEquipamento = function(id) {
-      const eq = cacheEquipamentos.find(item => item.id === id);
-      if (!eq) return;
-
-      document.getElementById('modalEquipamentoTitle').innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-600"></i> <span>Editar Equipamento ${eq.nome_dispositivo}</span>`;
-      document.getElementById('inputEquipamentoId').value = eq.id;
-      document.getElementById('inputEquipamentoMac').value = eq.mac_address;
-      document.getElementById('inputEquipamentoMac').readOnly = true;
-      document.getElementById('inputEquipamentoNome').value = eq.nome_dispositivo;
-      document.getElementById('inputEquipamentoModelo').value = eq.modelo || 'ESP32 DevKit V1';
-      document.getElementById('inputEquipamentoFirmware').value = eq.firmware_versao || '1.0.0';
-      document.getElementById('selectEquipamentoEstacao').value = eq.estacao_id || '';
-      document.getElementById('selectEquipamentoStatus').value = eq.status || 'Ativo';
-
-      document.getElementById('modalEquipamento').classList.remove('hidden');
-      lucide.createIcons();
-    };
-
-    document.getElementById('formEquipamento').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('inputEquipamentoId').value;
-      const mac_address = document.getElementById('inputEquipamentoMac').value.trim();
-      const nome_dispositivo = document.getElementById('inputEquipamentoNome').value.trim();
-      const modelo = document.getElementById('inputEquipamentoModelo').value.trim();
-      const firmware_versao = document.getElementById('inputEquipamentoFirmware').value.trim();
-      const estacao_id = document.getElementById('selectEquipamentoEstacao').value || null;
-      const status = document.getElementById('selectEquipamentoStatus').value;
-
-      const payload = { mac_address, nome_dispositivo, modelo, firmware_versao, estacao_id, status };
-
-      try {
-        const url = id ? `/api/equipamentos/${id}` : '/api/equipamentos';
-        const method = id ? 'PUT' : 'POST';
-
-        const res = await fetch(url, {
-          method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showToast(data.message || 'Equipamento salvo com sucesso!');
-          document.getElementById('modalEquipamento').classList.add('hidden');
-          carregarEquipamentos();
-        } else {
-          throw new Error(data.error || 'Erro ao salvar equipamento.');
-        }
-      } catch (err) {
-        if (isDevMode) {
-          const idNum = parseInt(id, 10);
-          if (id) {
-            const idx = cacheEquipamentos.findIndex(e => e.id === idNum || e.id == id);
-            if (idx >= 0) {
-              cacheEquipamentos[idx] = { ...cacheEquipamentos[idx], ...payload };
-            }
-          } else {
-            cacheEquipamentos.push({
-              id: Date.now(),
-              ...payload,
-              api_key: 'prot_live_' + Math.random().toString(36).substring(2, 10)
-            });
-          }
-          showToast('Equipamento salvo com sucesso (Simulação Local)!');
-          document.getElementById('modalEquipamento').classList.add('hidden');
-          renderizarTabelaEquipamentos(cacheEquipamentos);
-          atualizarMetricasKPI();
-          return;
-        }
-        showToast('Erro de comunicação com o servidor.', true);
-      }
-    });
-
-    window.excluirEquipamento = async function(id) {
-      if (!confirm('Deseja realmente remover este equipamento ESP32 do sistema?')) return;
-
-      try {
-        const res = await fetch(`/api/equipamentos/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showToast('Equipamento excluído com sucesso!');
-          carregarEquipamentos();
-        } else {
-          throw new Error(data.error || 'Erro ao excluir equipamento.');
-        }
-      } catch (err) {
-        if (isDevMode) {
-          cacheEquipamentos = cacheEquipamentos.filter(e => e.id != id);
-          showToast('Equipamento excluído com sucesso (Simulação Local)!');
-          renderizarTabelaEquipamentos(cacheEquipamentos);
-          atualizarMetricasKPI();
-          return;
-        }
-        showToast('Erro ao excluir equipamento.', true);
-      }
-    };
-
-    // ==========================================
-    // SEÇÃO 3: ADMINISTRADORES
-    // ==========================================
-    let cacheUsuarios = [];
-
-    async function carregarUsuarios() {
-      try {
-        const res = await fetch('/api/auth/usuarios', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-
-        if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
-          cacheUsuarios = data.data;
-        } else {
-          cacheUsuarios = getMockUsuarios();
-        }
-      } catch (err) {
-        console.log('Backend sem banco PostgreSQL. Carregando usuários locais simulados.');
-        cacheUsuarios = getMockUsuarios();
-      }
-
-      document.getElementById('badgeCountUsuarios').textContent = cacheUsuarios.length;
-      renderizarTabelaUsuarios(cacheUsuarios);
-      atualizarMetricasKPI();
-    }
-
-    function renderizarTabelaUsuarios(lista) {
-      const tbody = document.getElementById('tbodyUsuarios');
-      if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-400 font-mono">Nenhum membro cadastrado.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = lista.map(u => `
-        <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
-          <td class="py-3.5 px-4 font-bold text-slate-900 font-heading text-xs sm:text-sm">${u.nome}</td>
-          <td class="py-3.5 px-4 font-semibold text-blue-600 font-mono">@${u.usuario || 'admin'}</td>
-          <td class="py-3.5 px-4">
-            ${u.papel === 'operador' ? `
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200/80">
-                <i data-lucide="radio" class="w-3 h-3 text-blue-600"></i>
-                <span>Operador (${u.estacao_codigo || u.estacao_nome || ('Estação ' + (u.estacao_id || ''))})</span>
-              </span>
-            ` : `
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200/80">
-                <i data-lucide="shield-check" class="w-3 h-3 text-purple-600"></i>
-                <span>Admin Geral</span>
-              </span>
-            `}
+    // =====================================================================
+    // Equipamentos
+    // =====================================================================
+    function linhaEquipamento(eq) {
+      const chaveCurta = eq.api_key ? `${eq.api_key.slice(0, 8)}••••••••` : '—';
+      return `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-3 px-4">
+            <div class="font-semibold text-slate-900">${esc(eq.nome_dispositivo)}</div>
+            <div class="text-[11px] text-slate-500">${esc(eq.modelo || 'ESP32')}</div>
           </td>
-          <td class="py-3.5 px-4 text-slate-600 font-mono">${u.email}</td>
-          <td class="py-3.5 px-4">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold ${
-              u.ativo ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' : 'bg-rose-50 text-rose-700 border border-rose-200/80'
-            }">
-              <span class="w-1.5 h-1.5 rounded-full ${u.ativo ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
-              ${u.ativo ? 'Ativo' : 'Inativo'}
-            </span>
+          <td class="py-3 px-4 font-mono text-xs text-slate-700">${esc(eq.mac_address)}</td>
+          <td class="py-3 px-4 font-mono text-xs text-slate-600">v${esc(eq.firmware_versao || '1.0.0')}</td>
+          <td class="py-3 px-4">${statusBadge(eq.status)}</td>
+          <td class="py-3 px-4 text-xs text-slate-600">${eq.ultima_comunicacao ? esc(formatarData(eq.ultima_comunicacao)) : 'Sem comunicação'}</td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-xs text-slate-500">${esc(chaveCurta)}</span>
+              <button type="button" class="icon-btn" title="Copiar chave" data-acao="copiar-chave" data-key="${esc(eq.api_key)}"><i data-lucide="copy" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+              <button type="button" class="icon-btn" title="Gerar nova chave" data-acao="regenerar-chave" data-id="${eq.id}"><i data-lucide="refresh-cw" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+            </div>
           </td>
-          <td class="py-3.5 px-4 text-[11px] text-slate-500 font-mono">
-            ${new Date(u.criado_em).toLocaleDateString('pt-BR')}
+          <td class="py-3 px-4 text-right">
+            <div class="inline-flex items-center gap-1.5">
+              <button type="button" class="icon-btn" title="Editar" data-acao="editar-equip" data-id="${eq.id}"><i data-lucide="pencil" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+              <button type="button" class="icon-btn danger" title="Excluir" data-acao="excluir-equip" data-id="${eq.id}"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+            </div>
           </td>
-          <td class="py-3.5 px-4 text-right">
-            ${u.id !== usuarioLogado.id ? `
-              <div class="flex items-center justify-end gap-1.5">
-                <button onclick="alternarStatusUsuario(${u.id}, ${!u.ativo})" class="px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono transition-colors cursor-pointer ${
-                  u.ativo ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
-                }">
-                  ${u.ativo ? 'Desativar' : 'Ativar'}
-                </button>
-                <button onclick="excluirUsuario(${u.id}, '${u.nome}')" class="p-1.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer" title="Excluir Usuário">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            ` : `<span class="text-[11px] text-blue-700 italic font-semibold px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200/80 font-mono">(Sua Conta)</span>`}
-          </td>
-        </tr>
-      `).join('');
-
-      lucide.createIcons();
+        </tr>`;
     }
 
-    // Busca rápida em Usuários
-    document.getElementById('searchUsuarios').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if (!q) {
-        renderizarTabelaUsuarios(cacheUsuarios);
-        return;
+    function renderizarEquipamentos(tbodyId, lista, vazio) {
+      const tbody = $(tbodyId);
+      tbody.innerHTML = lista.length === 0
+        ? `<tr><td colspan="7" class="py-10 text-center text-slate-400">${esc(vazio)}</td></tr>`
+        : lista.map(linhaEquipamento).join('');
+      refreshIcons();
+    }
+
+    async function carregarEquipamentosEstacao() {
+      if (!estacaoAtual) return;
+      try {
+        const data = await api(`/api/equipamentos?estacao_id=${estacaoAtual.db_id}`);
+        equipamentosEstacao = data.data;
+      } catch (err) {
+        equipamentosEstacao = [];
+        showToast(err.message, true);
       }
-      const filtrados = cacheUsuarios.filter(u => 
-        (u.nome && u.nome.toLowerCase().includes(q)) ||
-        (u.usuario && u.usuario.toLowerCase().includes(q)) ||
-        (u.email && u.email.toLowerCase().includes(q)) ||
-        (u.papel && u.papel.toLowerCase().includes(q)) ||
-        (u.estacao_codigo && u.estacao_codigo.toLowerCase().includes(q)) ||
-        (u.estacao_nome && u.estacao_nome.toLowerCase().includes(q))
-      );
-      renderizarTabelaUsuarios(filtrados);
-    });
+      renderizarEquipamentos('tbodyEquipamentos', equipamentosEstacao, 'Nenhum equipamento cadastrado nesta estação.');
+      $('estKpiEquip').textContent = equipamentosEstacao.length;
+      $('estKpiAtivos').textContent = equipamentosEstacao.filter((q) => q.status === 'Ativo').length;
+    }
 
-    document.getElementById('btnOpenModalNovoAdmin').addEventListener('click', () => {
-      document.getElementById('formAdmin').reset();
+    async function carregarEstoque() {
+      try {
+        const data = await api('/api/equipamentos?estacao_id=none');
+        equipamentosEstoque = data.data;
+      } catch (err) {
+        equipamentosEstoque = [];
+        showToast(err.message, true);
+      }
+      renderizarEquipamentos('tbodyEstoque', equipamentosEstoque, 'Nenhum equipamento sem estação.');
+      $('countEstoque').textContent = equipamentosEstoque.length;
+      $('navEstoque').classList.toggle('hidden', equipamentosEstoque.length === 0);
+    }
 
-      // Popula select de estações para operadores
-      const selectEst = document.getElementById('selectAdminEstacao');
-      selectEst.innerHTML = '<option value="">-- Selecione a Estação --</option>' + 
-        cacheEstacoes.map(e => `<option value="${e.db_id}">${e.id} · ${e.name}</option>`).join('');
+    function listaEquipamentosAtiva() {
+      return contextoEquipamento === 'estoque' ? equipamentosEstoque : equipamentosEstacao;
+    }
 
-      document.getElementById('containerAdminEstacao').classList.add('hidden');
-      document.getElementById('selectAdminPapel').value = 'admin';
-      document.getElementById('modalAdmin').classList.remove('hidden');
-      lucide.createIcons();
-    });
+    async function recarregarEquipamentos() {
+      if (estacaoAtual) await carregarEquipamentosEstacao();
+      else await carregarEstoque();
+    }
 
-    document.getElementById('selectAdminPapel').addEventListener('change', (e) => {
-      const container = document.getElementById('containerAdminEstacao');
-      const selectEst = document.getElementById('selectAdminEstacao');
-      if (e.target.value === 'operador') {
-        container.classList.remove('hidden');
-        selectEst.required = true;
+    function abrirModalEquipamento(eq, contexto) {
+      contextoEquipamento = contexto;
+      $('formEquipamento').reset();
+      const editando = !!eq;
+      $('modalEquipamentoTitle').textContent = editando ? `Editar ${eq.nome_dispositivo}` : 'Novo equipamento';
+      $('inputEquipamentoId').value = editando ? eq.id : '';
+      $('inputEquipamentoMac').readOnly = editando;
+
+      // Somente o admin geral pode escolher/mover a estação do equipamento
+      const box = $('boxEquipamentoEstacao');
+      if (ehAdmin()) {
+        $('selectEquipamentoEstacao').innerHTML = '<option value="">Sem estação</option>' +
+          estacoes.map((s) => `<option value="${s.db_id}">${esc(s.id)} — ${esc(s.name)}</option>`).join('');
+        $('selectEquipamentoEstacao').value = editando
+          ? (eq.estacao_id || '')
+          : (contexto === 'estacao' && estacaoAtual ? estacaoAtual.db_id : '');
+        box.classList.remove('hidden');
       } else {
-        container.classList.add('hidden');
-        selectEst.required = false;
-        selectEst.value = '';
+        box.classList.add('hidden');
       }
-    });
 
-    document.getElementById('formAdmin').addEventListener('submit', async (e) => {
+      if (editando) {
+        $('inputEquipamentoMac').value = eq.mac_address;
+        $('inputEquipamentoNome').value = eq.nome_dispositivo;
+        $('inputEquipamentoModelo').value = eq.modelo || 'ESP32 DevKit V1';
+        $('inputEquipamentoFirmware').value = eq.firmware_versao || '1.0.0';
+        $('selectEquipamentoStatus').value = eq.status || 'Ativo';
+      }
+      abrirModal('modalEquipamento');
+    }
+
+    $('btnNovoEquipamento').addEventListener('click', () => abrirModalEquipamento(null, 'estacao'));
+    $('btnNovoEquipamentoEstoque').addEventListener('click', () => abrirModalEquipamento(null, 'estoque'));
+
+    $('formEquipamento').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const nome = document.getElementById('inputAdminNome').value.trim();
-      const usuario = document.getElementById('inputAdminUsuario').value.trim();
-      const email = document.getElementById('inputAdminEmail').value.trim();
-      const senha = document.getElementById('inputAdminSenha').value;
-      const papel = document.getElementById('selectAdminPapel').value;
-      const estacao_id = papel === 'operador' ? document.getElementById('selectAdminEstacao').value : null;
-
-      if (papel === 'operador' && !estacao_id) {
-        showToast('Selecione a estação para o perfil de operador.', true);
-        return;
-      }
+      const id = $('inputEquipamentoId').value;
+      const payload = {
+        mac_address: $('inputEquipamentoMac').value.trim(),
+        nome_dispositivo: $('inputEquipamentoNome').value.trim(),
+        modelo: $('inputEquipamentoModelo').value.trim(),
+        firmware_versao: $('inputEquipamentoFirmware').value.trim(),
+        status: $('selectEquipamentoStatus').value
+      };
+      if (ehAdmin()) payload.estacao_id = $('selectEquipamentoEstacao').value || null;
 
       try {
-        const res = await fetch('/api/auth/usuarios', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ nome, usuario, email, senha, papel, estacao_id })
+        const data = await api(id ? `/api/equipamentos/${id}` : '/api/equipamentos', {
+          method: id ? 'PUT' : 'POST',
+          body: JSON.stringify(payload)
         });
-
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showToast(data.message || 'Membro cadastrado com sucesso!');
-          document.getElementById('modalAdmin').classList.add('hidden');
-          carregarUsuarios();
-        } else {
-          throw new Error(data.error || 'Erro ao cadastrar membro.');
-        }
+        showToast(data.message || 'Equipamento salvo.');
+        fecharModal('modalEquipamento');
+        await recarregarEquipamentos();
+        if (ehAdmin() && !estacaoAtual) atualizarContagens();
       } catch (err) {
-        if (isDevMode) {
-          const estacaoObj = cacheEstacoes.find(e => e.db_id == estacao_id || e.id == estacao_id);
-          cacheUsuarios.push({
-            id: Date.now(),
-            nome,
-            usuario,
-            email,
-            papel,
-            estacao_id: estacao_id ? parseInt(estacao_id, 10) : null,
-            estacao_codigo: estacaoObj ? estacaoObj.id : null,
-            estacao_nome: estacaoObj ? estacaoObj.name : null,
-            ativo: true,
-            criado_em: new Date().toISOString()
-          });
-          showToast('Membro cadastrado com sucesso (Simulação Local)!');
-          document.getElementById('modalAdmin').classList.add('hidden');
-          renderizarTabelaUsuarios(cacheUsuarios);
-          atualizarMetricasKPI();
-          return;
-        }
-        showToast('Erro de comunicação.', true);
+        showToast(err.message, true);
       }
     });
 
-    window.alternarStatusUsuario = async function(id, novoStatus) {
-      try {
-        const res = await fetch(`/api/auth/usuarios/${id}/status`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ ativo: novoStatus })
-        });
+    async function tratarAcaoEquipamento(e) {
+      const btn = e.target.closest('[data-acao]');
+      if (!btn) return;
+      const contexto = btn.closest('#tbodyEstoque') ? 'estoque' : 'estacao';
+      contextoEquipamento = contexto;
+      const id = parseInt(btn.dataset.id, 10);
 
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showToast(data.message || 'Status alterado com sucesso!');
-          carregarUsuarios();
-        } else {
-          throw new Error(data.error || 'Erro ao alterar status.');
+      switch (btn.dataset.acao) {
+        case 'copiar-chave':
+          navigator.clipboard.writeText(btn.dataset.key).then(() => showToast('Chave de API copiada.'));
+          break;
+        case 'regenerar-chave':
+          if (!confirm('Gerar uma nova chave de API? O firmware do ESP32 precisará ser atualizado com a nova chave.')) return;
+          try {
+            await api(`/api/equipamentos/${id}/regenerar-chave`, { method: 'POST' });
+            showToast('Nova chave gerada.');
+            await recarregarEquipamentos();
+          } catch (err) { showToast(err.message, true); }
+          break;
+        case 'editar-equip': {
+          const eq = listaEquipamentosAtiva().find((q) => q.id === id);
+          if (eq) abrirModalEquipamento(eq, contexto);
+          break;
         }
-      } catch (err) {
-        if (isDevMode) {
-          const u = cacheUsuarios.find(x => x.id === id);
-          if (u) u.ativo = novoStatus;
-          showToast('Status alterado com sucesso (Simulação Local)!');
-          renderizarTabelaUsuarios(cacheUsuarios);
-          atualizarMetricasKPI();
-          return;
-        }
-        showToast('Erro ao atualizar status do usuário.', true);
+        case 'excluir-equip':
+          if (!confirm('Remover este equipamento do sistema?')) return;
+          try {
+            await api(`/api/equipamentos/${id}`, { method: 'DELETE' });
+            showToast('Equipamento excluído.');
+            await recarregarEquipamentos();
+            if (ehAdmin() && !estacaoAtual) atualizarContagens();
+          } catch (err) { showToast(err.message, true); }
+          break;
       }
-    };
+    }
+    $('tbodyEquipamentos').addEventListener('click', tratarAcaoEquipamento);
+    $('tbodyEstoque').addEventListener('click', tratarAcaoEquipamento);
 
-    window.excluirUsuario = async function(id, nome) {
-      if (!confirm(`Deseja realmente remover o usuário "${nome}"? Esta ação é irreversível.`)) return;
+    // =====================================================================
+    // Usuários
+    // =====================================================================
+    function perfilBadge(u) {
+      return u.papel === 'operador'
+        ? `Operador${u.estacao_codigo ? ' · ' + esc(u.estacao_codigo) : ''}`
+        : 'Administrador geral';
+    }
+
+    function statusUsuarioBadge(ativo) {
+      return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-slate-200 text-xs text-slate-700"><span class="w-1.5 h-1.5 rounded-full ${ativo ? 'bg-emerald-500' : 'bg-slate-400'}"></span>${ativo ? 'Ativo' : 'Inativo'}</span>`;
+    }
+
+    function acoesUsuario(u) {
+      if (u.id === me.id) return '<span class="text-xs text-slate-400">Sua conta</span>';
+      return `
+        <div class="inline-flex items-center gap-1.5">
+          <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-acao="status-usuario" data-id="${u.id}" data-ativo="${u.ativo ? '0' : '1'}">${u.ativo ? 'Desativar' : 'Ativar'}</button>
+          <button type="button" class="icon-btn danger" title="Excluir" data-acao="excluir-usuario" data-id="${u.id}" data-nome="${esc(u.nome)}"><i data-lucide="trash-2" class="w-3.5 h-3.5 pointer-events-none"></i></button>
+        </div>`;
+    }
+
+    async function carregarEquipeEstacao() {
+      if (!estacaoAtual) return;
+      try {
+        const data = await api(`/api/auth/usuarios?estacao_id=${estacaoAtual.db_id}`);
+        equipeEstacao = data.data;
+      } catch (err) {
+        equipeEstacao = [];
+        showToast(err.message, true);
+      }
+      const tbody = $('tbodyEquipe');
+      tbody.innerHTML = equipeEstacao.length === 0
+        ? `<tr><td colspan="6" class="py-10 text-center text-slate-400">Nenhum operador cadastrado nesta estação.</td></tr>`
+        : equipeEstacao.map((u) => `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-3 px-4 font-semibold text-slate-900">${esc(u.nome)}</td>
+            <td class="py-3 px-4 font-mono text-xs text-slate-700">@${esc(u.usuario || '')}</td>
+            <td class="py-3 px-4 text-slate-600">${esc(u.email)}</td>
+            <td class="py-3 px-4">${statusUsuarioBadge(u.ativo)}</td>
+            <td class="py-3 px-4 text-xs text-slate-500">${esc(formatarData(u.criado_em))}</td>
+            <td class="py-3 px-4 text-right">${acoesUsuario(u)}</td>
+          </tr>`).join('');
+      $('estKpiEquipe').textContent = equipeEstacao.length;
+      refreshIcons();
+    }
+
+    async function carregarUsuariosGlobais() {
+      try {
+        const data = await api('/api/auth/usuarios');
+        usuariosGlobais = data.data;
+      } catch (err) {
+        usuariosGlobais = [];
+        showToast(err.message, true);
+      }
+      $('countUsuarios').textContent = usuariosGlobais.length;
+      renderizarUsuariosGlobais($('searchUsuarios').value);
+    }
+
+    function renderizarUsuariosGlobais(filtro = '') {
+      const q = filtro.toLowerCase().trim();
+      const lista = !q ? usuariosGlobais : usuariosGlobais.filter((u) =>
+        [u.nome, u.usuario, u.email, u.papel, u.estacao_codigo].some((v) => v && String(v).toLowerCase().includes(q))
+      );
+      $('tbodyUsuarios').innerHTML = lista.length === 0
+        ? `<tr><td colspan="6" class="py-10 text-center text-slate-400">Nenhum usuário encontrado.</td></tr>`
+        : lista.map((u) => `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-3 px-4 font-semibold text-slate-900">${esc(u.nome)}</td>
+            <td class="py-3 px-4 font-mono text-xs text-slate-700">@${esc(u.usuario || '')}</td>
+            <td class="py-3 px-4 text-slate-600">${perfilBadge(u)}</td>
+            <td class="py-3 px-4 text-slate-600">${esc(u.email)}</td>
+            <td class="py-3 px-4">${statusUsuarioBadge(u.ativo)}</td>
+            <td class="py-3 px-4 text-right">${acoesUsuario(u)}</td>
+          </tr>`).join('');
+      refreshIcons();
+    }
+    $('searchUsuarios').addEventListener('input', (e) => renderizarUsuariosGlobais(e.target.value));
+
+    function abrirModalUsuario(estacaoFixa) {
+      contextoUsuario = estacaoFixa ? { estacao: estacaoFixa } : null;
+      $('formUsuario').reset();
+
+      const boxPapel = $('boxUsuarioPapel');
+      const boxEstacao = $('boxUsuarioEstacao');
+      const aviso = $('avisoUsuarioEstacao');
+      const selEst = $('selectUsuarioEstacao');
+      selEst.innerHTML = '<option value="">Selecione a estação</option>' +
+        estacoes.map((s) => `<option value="${s.db_id}">${esc(s.id)} — ${esc(s.name)}</option>`).join('');
+
+      if (estacaoFixa) {
+        // Dentro de uma estação: sempre operador daquela estação
+        $('modalUsuarioTitle').textContent = 'Novo operador';
+        boxPapel.classList.add('hidden');
+        boxEstacao.classList.add('hidden');
+        aviso.textContent = `O operador terá acesso somente à estação ${estacaoFixa.id}.`;
+        aviso.classList.remove('hidden');
+      } else {
+        $('modalUsuarioTitle').textContent = 'Novo usuário';
+        boxPapel.classList.remove('hidden');
+        aviso.classList.add('hidden');
+        $('selectUsuarioPapel').value = 'admin';
+        boxEstacao.classList.add('hidden');
+      }
+      abrirModal('modalUsuario');
+    }
+
+    $('selectUsuarioPapel').addEventListener('change', (e) => {
+      const operador = e.target.value === 'operador';
+      $('boxUsuarioEstacao').classList.toggle('hidden', !operador);
+      $('selectUsuarioEstacao').required = operador;
+    });
+
+    $('btnNovoOperador').addEventListener('click', () => abrirModalUsuario(estacaoAtual));
+    $('btnNovoUsuarioGlobal').addEventListener('click', () => abrirModalUsuario(null));
+
+    $('formUsuario').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let papel, estacao_id;
+      if (contextoUsuario) {
+        papel = 'operador';
+        estacao_id = contextoUsuario.estacao.db_id;
+      } else {
+        papel = $('selectUsuarioPapel').value;
+        estacao_id = papel === 'operador' ? $('selectUsuarioEstacao').value : null;
+        if (papel === 'operador' && !estacao_id) { showToast('Selecione a estação do operador.', true); return; }
+      }
 
       try {
-        const res = await fetch(`/api/auth/usuarios/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const data = await api('/api/auth/usuarios', {
+          method: 'POST',
+          body: JSON.stringify({
+            nome: $('inputUsuarioNome').value.trim(),
+            usuario: $('inputUsuarioLogin').value.trim(),
+            email: $('inputUsuarioEmail').value.trim(),
+            senha: $('inputUsuarioSenha').value,
+            papel,
+            estacao_id
+          })
         });
-
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showToast(data.message || 'Usuário excluído com sucesso!');
-          carregarUsuarios();
-        } else {
-          throw new Error(data.error || 'Erro ao excluir usuário.');
-        }
+        showToast(data.message || 'Usuário cadastrado.');
+        fecharModal('modalUsuario');
+        if (estacaoAtual) await carregarEquipeEstacao();
+        else await carregarUsuariosGlobais();
       } catch (err) {
-        if (isDevMode) {
-          cacheUsuarios = cacheUsuarios.filter(u => u.id != id);
-          showToast('Usuário excluído com sucesso (Simulação Local)!');
-          renderizarTabelaUsuarios(cacheUsuarios);
-          atualizarMetricasKPI();
-          return;
-        }
-        showToast('Erro ao excluir usuário.', true);
+        showToast(err.message, true);
       }
-    };
+    });
 
-    // Inicialização ao Carregar a Página
-    carregarEstacoes();
-    carregarEquipamentos();
-    carregarUsuarios();
+    async function tratarAcaoUsuario(e) {
+      const btn = e.target.closest('[data-acao]');
+      if (!btn) return;
+      const id = parseInt(btn.dataset.id, 10);
+      const recarregar = async () => { if (estacaoAtual) await carregarEquipeEstacao(); else await carregarUsuariosGlobais(); };
+
+      if (btn.dataset.acao === 'status-usuario') {
+        try {
+          await api(`/api/auth/usuarios/${id}/status`, { method: 'PUT', body: JSON.stringify({ ativo: btn.dataset.ativo === '1' }) });
+          showToast('Status atualizado.');
+          await recarregar();
+        } catch (err) { showToast(err.message, true); }
+      }
+      if (btn.dataset.acao === 'excluir-usuario') {
+        if (!confirm(`Remover o usuário "${btn.dataset.nome}"? Esta ação é irreversível.`)) return;
+        try {
+          await api(`/api/auth/usuarios/${id}`, { method: 'DELETE' });
+          showToast('Usuário excluído.');
+          await recarregar();
+        } catch (err) { showToast(err.message, true); }
+      }
+    }
+    $('tbodyEquipe').addEventListener('click', tratarAcaoUsuario);
+    $('tbodyUsuarios').addEventListener('click', tratarAcaoUsuario);
+
+    // =====================================================================
+    refreshIcons();
+    iniciar();
   </script>
 </body>
 </html>
