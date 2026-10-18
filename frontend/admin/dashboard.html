@@ -91,9 +91,11 @@
 
     <!-- Navegação principal (apenas administrador geral) -->
     <div id="adminNav" class="hidden">
-      <div class="bg-slate-100 p-1 rounded-xl inline-flex items-center gap-1 border border-slate-200/80">
+      <div class="bg-slate-100 p-1 rounded-xl inline-flex items-center gap-1 border border-slate-200/80 flex-wrap">
         <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs is-active" data-seg="main" data-view="viewEstacoes">Estações <span id="countEstacoes" class="ml-1 text-slate-500 font-normal">0</span></button>
         <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="main" data-view="viewUsuarios">Usuários <span id="countUsuarios" class="ml-1 text-slate-500 font-normal">0</span></button>
+        <button type="button" id="navAlertas" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="main" data-view="viewAlertas">Alertas <span id="countAlertas" class="ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">0</span></button>
+        <button type="button" id="navRelatorios" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="main" data-view="viewRelatorios">Relatórios</button>
         <button type="button" id="navEstoque" class="seg-btn px-4 py-1.5 rounded-lg text-xs hidden" data-seg="main" data-view="viewEstoque">Sem estação <span id="countEstoque" class="ml-1 text-slate-500 font-normal">0</span></button>
       </div>
     </div>
@@ -301,6 +303,128 @@
               </tr>
             </thead>
             <tbody id="tbodyEstoque" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    <!-- ==================== VISÃO: ALERTAS DO SISTEMA (RF10) ==================== -->
+    <section id="viewAlertas" class="main-view hidden space-y-4">
+      <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 font-heading">Gestão de Alertas e Anomalias</h1>
+          <p class="text-xs text-slate-500 mt-1">Ocorrências automáticas disparadas por violações da Resolução CONAMA nº 357/2005.</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="filtroStatusAlertaAdmin" class="field !w-auto">
+            <option value="todos">Todos os status</option>
+            <option value="Aberto" selected>Abertos</option>
+            <option value="Em análise">Em análise</option>
+            <option value="Resolvido">Resolvidos</option>
+          </select>
+          <button id="btnAtualizarAlertasAdmin" type="button" class="btn btn-ghost">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Atualizar</span>
+          </button>
+        </div>
+      </div>
+      <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Nível</th>
+                <th class="py-3 px-4">Estação</th>
+                <th class="py-3 px-4">Parâmetro</th>
+                <th class="py-3 px-4">Descrição da Anomalia</th>
+                <th class="py-3 px-4">Data/Hora</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-right">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyAlertasAdmin" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VISÃO: RELATÓRIOS TÉCNICOS (RF12 E RF13) ==================== -->
+    <section id="viewRelatorios" class="main-view hidden space-y-4">
+      <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 font-heading">Relatórios e Séries Históricas</h1>
+          <p class="text-xs text-slate-500 mt-1">Geração de relatórios analíticos e exportação de dados consolidados.</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btnBaixarCSVAdmin" type="button" class="btn btn-ghost">
+            <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i><span>Exportar CSV</span>
+          </button>
+          <button id="btnImprimirRelatorioAdmin" type="button" class="btn btn-primary">
+            <i data-lucide="printer" class="w-4 h-4"></i><span>Imprimir Relatório</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros do Relatório -->
+      <div class="card p-4 flex flex-wrap items-center gap-3 text-xs">
+        <div>
+          <label class="label" for="relatorioEstacaoSelect">Estação</label>
+          <select id="relatorioEstacaoSelect" class="field !w-auto">
+            <option value="">Todas as estações</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="relatorioDataInicio">Data Inicial</label>
+          <input type="date" id="relatorioDataInicio" class="field !w-auto">
+        </div>
+        <div>
+          <label class="label" for="relatorioDataFim">Data Final</label>
+          <input type="date" id="relatorioDataFim" class="field !w-auto">
+        </div>
+        <div class="pt-5">
+          <button id="btnGerarRelatorioAdmin" type="button" class="btn btn-primary">
+            <i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Compilar Dados</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Painel de Indicadores Analíticos -->
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="card p-4">
+          <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Total de Leituras</span>
+          <span id="kpiRelatorioTotal" class="text-2xl font-bold font-mono text-slate-900 mt-1 block">0</span>
+        </div>
+        <div class="card p-4">
+          <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Conformidade CONAMA</span>
+          <span id="kpiRelatorioConformidade" class="text-2xl font-bold font-mono text-emerald-600 mt-1 block">100%</span>
+        </div>
+        <div class="card p-4">
+          <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Média Índice IRE</span>
+          <span id="kpiRelatorioIRE" class="text-2xl font-bold font-mono text-blue-600 mt-1 block">—</span>
+        </div>
+        <div class="card p-4">
+          <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Ocorrências / Alertas</span>
+          <span id="kpiRelatorioAlertas" class="text-2xl font-bold font-mono text-rose-600 mt-1 block">0</span>
+        </div>
+      </div>
+
+      <!-- Resumo Detalhado dos Parâmetros -->
+      <div class="card overflow-hidden">
+        <div class="p-4 border-b border-slate-100 font-semibold text-slate-800 text-sm">
+          Diagnóstico Consolidado dos Parâmetros Físico-Químicos
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
+              <tr>
+                <th class="py-3 px-4">Parâmetro</th>
+                <th class="py-3 px-4 text-center">Mínimo</th>
+                <th class="py-3 px-4 text-center">Média</th>
+                <th class="py-3 px-4 text-center">Máximo</th>
+                <th class="py-3 px-4">Norma Legal (CONAMA Classe 2)</th>
+                <th class="py-3 px-4 text-center">Situação</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyRelatorioParams" class="divide-y divide-slate-100 font-mono text-xs">
+              <!-- Dynamically populated -->
+            </tbody>
           </table>
         </div>
       </div>
@@ -601,6 +725,8 @@
         if (btn.dataset.seg === 'main') {
           if (btn.dataset.view === 'viewUsuarios') carregarUsuariosGlobais();
           if (btn.dataset.view === 'viewEstoque') carregarEstoque();
+          if (btn.dataset.view === 'viewAlertas') carregarAlertasAdmin();
+          if (btn.dataset.view === 'viewRelatorios') carregarRelatoriosAdmin();
         }
       });
     });
@@ -662,14 +788,18 @@
     async function atualizarContagens() {
       $('countEstacoes').textContent = estacoes.length;
       try {
-        const [u, e] = await Promise.all([
+        const [u, e, a] = await Promise.all([
           api('/api/auth/usuarios'),
-          api('/api/equipamentos?estacao_id=none')
+          api('/api/equipamentos?estacao_id=none'),
+          api('/api/alertas/resumo').catch(() => ({ data: { abertos: 0 } }))
         ]);
         usuariosGlobais = u.data;
         equipamentosEstoque = e.data;
         $('countUsuarios').textContent = u.count;
         $('countEstoque').textContent = e.count;
+        if (a && a.data) {
+          $('countAlertas').textContent = a.data.abertos || 0;
+        }
         $('navEstoque').classList.toggle('hidden', e.count === 0);
       } catch (err) { /* contagens são auxiliares */ }
     }
@@ -1268,6 +1398,198 @@
     }
     $('tbodyEquipe').addEventListener('click', tratarAcaoUsuario);
     $('tbodyUsuarios').addEventListener('click', tratarAcaoUsuario);
+
+    // =====================================================================
+    // Alertas do Sistema (RF10)
+    // =====================================================================
+    async function carregarAlertasAdmin() {
+      const statusFiltro = $('filtroStatusAlertaAdmin') ? $('filtroStatusAlertaAdmin').value : 'todos';
+      const tbody = $('tbodyAlertasAdmin');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Carregando alertas do sistema...</td></tr>';
+
+      try {
+        const qs = statusFiltro && statusFiltro !== 'todos' ? `?status=${encodeURIComponent(statusFiltro)}` : '';
+        const res = await api(`/api/alertas${qs}`);
+        const lista = res.data || [];
+
+        if (lista.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">Nenhum alerta registrado com o filtro selecionado.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = lista.map((al) => {
+          const isCrit = (al.nivel || '').toLowerCase() === 'crítico' || (al.nivel || '').toLowerCase() === 'critico';
+          const badgeNivel = isCrit
+            ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-rose-100 text-rose-800"><span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>Crítico</span>'
+            : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>Atenção</span>';
+
+          const statusBadge = al.status === 'Resolvido'
+            ? '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">Resolvido</span>'
+            : (al.status === 'Em análise' ? '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800">Em análise</span>' : '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-rose-100 text-rose-800">Aberto</span>');
+
+          const btnAcao = al.status !== 'Resolvido'
+            ? `<button onclick="window.alterarStatusAlerta(${al.id}, 'Resolvido')" class="btn btn-ghost !py-1 !px-2.5 text-xs text-emerald-700 hover:bg-emerald-50" title="Marcar como resolvido"><i data-lucide="check" class="w-3.5 h-3.5"></i> Resolver</button>`
+            : `<button onclick="window.alterarStatusAlerta(${al.id}, 'Aberto')" class="btn btn-ghost !py-1 !px-2.5 text-xs text-slate-500" title="Reabrir alerta">Reabrir</button>`;
+
+          return `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="py-3 px-4">${badgeNivel}</td>
+              <td class="py-3 px-4 font-semibold text-slate-800">${esc(al.estacao_nome || al.estacao_codigo)}</td>
+              <td class="py-3 px-4 font-mono font-bold text-slate-900">${esc(al.parametro || 'Geral')}</td>
+              <td class="py-3 px-4 text-xs text-slate-700 max-w-xs">${esc(al.descricao)}</td>
+              <td class="py-3 px-4 text-xs text-slate-500 font-mono">${formatarData(al.gerado_em)}</td>
+              <td class="py-3 px-4 text-center">${statusBadge}</td>
+              <td class="py-3 px-4 text-right">${btnAcao}</td>
+            </tr>
+          `;
+        }).join('');
+        refreshIcons();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-500">Erro ao carregar alertas: ${esc(err.message)}</td></tr>`;
+      }
+    }
+
+    window.alterarStatusAlerta = async function(id, novoStatus) {
+      try {
+        await api(`/api/alertas/${id}/status`, {
+          method: 'PUT',
+          body: JSON.stringify({ status: novoStatus })
+        });
+        showToast(`Alerta atualizado para '${novoStatus}'!`);
+        await carregarAlertasAdmin();
+        await atualizarContagens();
+      } catch (err) {
+        showToast(err.message || 'Erro ao alterar status do alerta.', true);
+      }
+    };
+
+    if ($('btnAtualizarAlertasAdmin')) $('btnAtualizarAlertasAdmin').onclick = carregarAlertasAdmin;
+    if ($('filtroStatusAlertaAdmin')) $('filtroStatusAlertaAdmin').onchange = carregarAlertasAdmin;
+
+    // =====================================================================
+    // Relatórios e Exportação Analítica (RF12 e RF13)
+    // =====================================================================
+    async function carregarRelatoriosAdmin() {
+      const sel = $('relatorioEstacaoSelect');
+      if (sel && sel.options.length <= 1) {
+        estacoes.forEach((st) => {
+          const opt = document.createElement('option');
+          opt.value = st.id;
+          opt.textContent = st.name;
+          sel.appendChild(opt);
+        });
+      }
+
+      const estId = sel ? sel.value : '';
+      const dtInicio = $('relatorioDataInicio') ? $('relatorioDataInicio').value : '';
+      const dtFim = $('relatorioDataFim') ? $('relatorioDataFim').value : '';
+
+      const queryParams = [];
+      if (estId) queryParams.push(`estacao_id=${encodeURIComponent(estId)}`);
+      if (dtInicio) queryParams.push(`data_inicio=${encodeURIComponent(dtInicio)}`);
+      if (dtFim) queryParams.push(`data_fim=${encodeURIComponent(dtFim)}`);
+      const qs = queryParams.length ? '?' + queryParams.join('&') : '';
+
+      try {
+        const res = await api(`/api/telemetria/relatorio${qs}`);
+        if (!res.success) return;
+
+        const est = res.estatisticas || {};
+        $('kpiRelatorioTotal').textContent = est.totalLeituras || 0;
+        $('kpiRelatorioConformidade').textContent = `${est.taxaConformidadeConama || 100}%`;
+        $('kpiRelatorioIRE').textContent = est.ire && est.ire.media ? `${est.ire.media}/100` : '—';
+        $('kpiRelatorioAlertas').textContent = est.distribuicaoRisco ? (est.distribuicaoRisco.alerta + est.distribuicaoRisco.critico) : 0;
+
+        const tbody = $('tbodyRelatorioParams');
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 px-4 font-semibold text-slate-800">pH da Água</td>
+              <td class="py-3 px-4 text-center">${est.ph?.min ?? '—'}</td>
+              <td class="py-3 px-4 text-center font-bold text-slate-900">${est.ph?.media ?? '—'}</td>
+              <td class="py-3 px-4 text-center">${est.ph?.max ?? '—'}</td>
+              <td class="py-3 px-4 font-sans text-slate-600">6.0 a 9.0 (CONAMA Classe 2)</td>
+              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 px-4 font-semibold text-slate-800">Turbidez</td>
+              <td class="py-3 px-4 text-center">${est.turbidez?.min ?? '—'} NTU</td>
+              <td class="py-3 px-4 text-center font-bold text-slate-900">${est.turbidez?.media ?? '—'} NTU</td>
+              <td class="py-3 px-4 text-center">${est.turbidez?.max ?? '—'} NTU</td>
+              <td class="py-3 px-4 font-sans text-slate-600">Máximo 100 NTU</td>
+              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3 px-4 font-semibold text-slate-800">Temperatura da Água</td>
+              <td class="py-3 px-4 text-center">${est.temperatura?.min ?? '—'} °C</td>
+              <td class="py-3 px-4 text-center font-bold text-slate-900">${est.temperatura?.media ?? '—'} °C</td>
+              <td class="py-3 px-4 text-center">${est.temperatura?.max ?? '—'} °C</td>
+              <td class="py-3 px-4 font-sans text-slate-600">Até 30 °C</td>
+              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span></td>
+            </tr>
+            <tr class="hover:bg-slate-50 bg-blue-50/20">
+              <td class="py-3 px-4 font-bold text-blue-900">Índice IRE Sintético</td>
+              <td class="py-3 px-4 text-center font-bold">${est.ire?.min ?? '—'}</td>
+              <td class="py-3 px-4 text-center font-extrabold text-blue-700">${est.ire?.media ?? '—'}</td>
+              <td class="py-3 px-4 text-center font-bold">${est.ire?.max ?? '—'}</td>
+              <td class="py-3 px-4 font-sans text-slate-600">Referência ideal &ge; 60</td>
+              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Equilibrado</span></td>
+            </tr>
+          `;
+        }
+      } catch (err) {
+        showToast('Não foi possível compilar os dados do relatório analítico.', true);
+      }
+    }
+
+    if ($('btnGerarRelatorioAdmin')) $('btnGerarRelatorioAdmin').onclick = carregarRelatoriosAdmin;
+    if ($('btnImprimirRelatorioAdmin')) $('btnImprimirRelatorioAdmin').onclick = () => window.print();
+
+    if ($('btnBaixarCSVAdmin')) {
+      $('btnBaixarCSVAdmin').onclick = async () => {
+        try {
+          const sel = $('relatorioEstacaoSelect');
+          const estId = sel ? sel.value : '';
+          const qs = estId ? `?estacao_id=${encodeURIComponent(estId)}&limit=1000` : '?limit=1000';
+          const res = await api(`/api/telemetria/historico${qs}`);
+          const dados = res.data || [];
+
+          if (dados.length === 0) {
+            showToast('Nenhum dado encontrado para exportação.', true);
+            return;
+          }
+
+          const headers = ['ID', 'Data/Hora', 'Código Estação', 'Nome Estação', 'pH', 'Turbidez (NTU)', 'Temperatura (°C)', 'Índice IRE', 'Nível de Risco', 'Cenário'];
+          const rows = dados.map((d) => [
+            d.id,
+            `"${d.timestamp}"`,
+            `"${d.estacao_codigo}"`,
+            `"${d.estacao_nome}"`,
+            d.params.ph,
+            d.params.turb,
+            d.params.temp,
+            d.ire,
+            `"${d.nivel_risco}"`,
+            `"${d.scenarioTag || ''}"`
+          ].join(';'));
+
+          const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `relatorio_telemetria_admin_${new Date().toISOString().split('T')[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('Relatório CSV baixado com sucesso!');
+        } catch (err) {
+          showToast('Erro ao exportar CSV: ' + err.message, true);
+        }
+      };
+    }
 
     // =====================================================================
     refreshIcons();

@@ -374,9 +374,39 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // ============================================================
+  // Controles de Histórico, Filtros por Período, Alertas e Relatórios (RF10, RF12, RF13)
+  // ============================================================
+  const historyPeriodSelect = document.getElementById('historyPeriodSelect');
+  const historyCustomDates = document.getElementById('historyCustomDates');
+  const historyDateStart = document.getElementById('historyDateStart');
+  const historyDateEnd = document.getElementById('historyDateEnd');
+  const btnApplyHistoryFilter = document.getElementById('btnApplyHistoryFilter');
+  const historyStationFilter = document.getElementById('historyStationFilter');
+  const btnExportCSV = document.getElementById('btnExportCSV');
+  const btnOpenReportFromHistory = document.getElementById('btnOpenReportFromHistory');
+  const btnTopReport = document.getElementById('btnTopReport');
+  const sidebarBtnRelatorios = document.getElementById('sidebarBtnRelatorios');
+  const reportModal = document.getElementById('reportModal');
+  const btnCloseReportModal = document.getElementById('btnCloseReportModal');
+  const btnPrintReportNow = document.getElementById('btnPrintReportNow');
+
+  // Alertas DOM Elements (RF10)
+  const alertasModal = document.getElementById('alertasModal');
+  const btnCloseAlertasModal = document.getElementById('btnCloseAlertasModal');
+  const btnTopAlerts = document.getElementById('btnTopAlerts');
+  const sidebarBtnAlertas = document.getElementById('sidebarBtnAlertas');
+  const topAlertCountBadge = document.getElementById('topAlertCountBadge');
+  const sidebarAlertBadge = document.getElementById('sidebarAlertBadge');
+  const alertasTableBody = document.getElementById('alertasTableBody');
+  const alertSummaryCounter = document.getElementById('alertSummaryCounter');
+  let currentAlertFilter = 'todos';
+  let cachedAlertas = [];
+
   function openHistoryModal() {
     if (historyModal) {
       historyModal.classList.remove('hidden');
+      updateHistoryStationFilterOptions();
       renderHistoryTable();
       if (window.lucide) lucide.createIcons();
     }
@@ -398,6 +428,43 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  // Alternar seletor de datas customizadas
+  if (historyPeriodSelect) {
+    historyPeriodSelect.onchange = () => {
+      if (historyPeriodSelect.value === 'custom') {
+        if (historyCustomDates) {
+          historyCustomDates.classList.remove('hidden');
+          historyCustomDates.classList.add('flex');
+        }
+      } else {
+        if (historyCustomDates) {
+          historyCustomDates.classList.add('hidden');
+          historyCustomDates.classList.remove('flex');
+        }
+        renderHistoryTable();
+      }
+    };
+  }
+
+  if (btnApplyHistoryFilter) {
+    btnApplyHistoryFilter.onclick = () => renderHistoryTable();
+  }
+
+  if (historyStationFilter) {
+    historyStationFilter.onchange = () => renderHistoryTable();
+  }
+
+  function updateHistoryStationFilterOptions() {
+    if (!historyStationFilter) return;
+    const currentVal = historyStationFilter.value;
+    const stations = Array.isArray(state.stations) ? state.stations : app.getDefaultStations();
+    historyStationFilter.innerHTML = `
+      <option value="todas">Todas as estações</option>
+      ${stations.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+    `;
+    if (currentVal) historyStationFilter.value = currentVal;
+  }
+
   if (btnClearHistoryModal) {
     btnClearHistoryModal.onclick = () => {
       if (confirm('Deseja limpar todos os registros do histórico?')) {
@@ -407,12 +474,338 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chartInstance) {
           chartInstance.data.labels = [];
           chartInstance.data.datasets[0].data = [];
-          chartInstance.data.datasets[1].data = [];
           chartInstance.update();
         }
       }
     };
   }
+
+  // Exportação CSV (RF12)
+  function exportFilteredHistoryToCSV() {
+    const list = getFilteredHistory();
+    if (list.length === 0) {
+      alert('Nenhum registro para exportar no período selecionado.');
+      return;
+    }
+
+    const headers = ['Horário', 'Data', 'Estação', 'Índice IRE', 'Classificação', 'pH', 'Turbidez (NTU)', 'Temperatura (°C)'];
+    const rows = list.map(item => {
+      const p = item.params || {};
+      return [
+        `"${item.timestamp || ''}"`,
+        `"${item.date || ''}"`,
+        `"${item.stationName || ''}"`,
+        (item.ire !== undefined ? Number(item.ire).toFixed(1) : ''),
+        `"${item.status ? item.status.title : ''}"`,
+        (p.ph !== undefined ? Number(p.ph).toFixed(2) : ''),
+        (p.turb !== undefined ? Number(p.turb).toFixed(1) : ''),
+        (p.temp !== undefined ? Number(p.temp).toFixed(1) : '')
+      ].join(';');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.href = url;
+    a.download = `relatorio_telemetria_proteus_${dateStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  if (btnExportCSV) btnExportCSV.onclick = exportFilteredHistoryToCSV;
+
+  // Modal de Relatório Técnico (RF12)
+  function openReportModal() {
+    const reportModal = document.getElementById('reportModal');
+    if (!reportModal) return;
+
+    const list = getFilteredHistory();
+    const currentSt = getActiveStation();
+    const stName = (historyStationFilter && historyStationFilter.value !== 'todas')
+      ? (state.stations.find(s => s.id === historyStationFilter.value)?.name || currentSt.name)
+      : (currentSt ? currentSt.name : 'Todas as estações');
+
+    const total = list.length;
+    let sumPH = 0, minPH = 999, maxPH = -999;
+    let sumTurb = 0, minTurb = 999, maxTurb = -999;
+    let sumTemp = 0, minTemp = 999, maxTemp = -999;
+    let sumIRE = 0, minIRE = 999, maxIRE = -999;
+    let conformes = 0;
+    let alertasCount = 0;
+
+    list.forEach(item => {
+      const p = item.params || {};
+      const ph = Number(p.ph) || 7.0;
+      const turb = Number(p.turb) || 5;
+      const temp = Number(p.temp) || 22;
+      const ire = Number(item.ire) || 80;
+
+      sumPH += ph; minPH = Math.min(minPH, ph); maxPH = Math.max(maxPH, ph);
+      sumTurb += turb; minTurb = Math.min(minTurb, turb); maxTurb = Math.max(maxTurb, turb);
+      sumTemp += temp; minTemp = Math.min(minTemp, temp); maxTemp = Math.max(maxTemp, temp);
+      sumIRE += ire; minIRE = Math.min(minIRE, ire); maxIRE = Math.max(maxIRE, ire);
+
+      if (ph >= 6.0 && ph <= 9.0 && turb <= 100 && temp <= 30) {
+        conformes++;
+      }
+      if (turb > 100 || ph < 6.0 || ph > 9.0 || ire < 55) {
+        alertasCount++;
+      }
+    });
+
+    const avgPH = total > 0 ? (sumPH / total).toFixed(2) : '7.20';
+    const avgTurb = total > 0 ? (sumTurb / total).toFixed(1) : '8.0';
+    const avgTemp = total > 0 ? (sumTemp / total).toFixed(1) : '22.4';
+    const avgIRE = total > 0 ? (sumIRE / total).toFixed(1) : '85.0';
+    const complianceRate = total > 0 ? ((conformes / total) * 100).toFixed(1) : '100.0';
+
+    const elEmissao = document.getElementById('reportEmissaoData');
+    const elStation = document.getElementById('reportStationName');
+    const elTotal = document.getElementById('reportTotalReadings');
+    const elCompliance = document.getElementById('reportComplianceRate');
+    const elAlerts = document.getElementById('reportTotalAlerts');
+    const elBody = document.getElementById('reportBodyParams');
+
+    if (elEmissao) elEmissao.textContent = new Date().toLocaleString('pt-BR');
+    if (elStation) elStation.textContent = stName;
+    if (elTotal) elTotal.textContent = `${total} registros`;
+    if (elCompliance) elCompliance.textContent = `${complianceRate}%`;
+    if (elAlerts) elAlerts.textContent = `${alertasCount} evento(s)`;
+
+    if (elBody) {
+      elBody.innerHTML = `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-semibold text-slate-800">pH da Água</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? minPH.toFixed(2) : '7.00'}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${avgPH}</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? maxPH.toFixed(2) : '7.40'}</td>
+          <td class="py-2.5 px-3 font-sans text-slate-600">6.0 a 9.0</td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgPH >= 6 && avgPH <= 9 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${avgPH >= 6 && avgPH <= 9 ? 'CONFORME' : 'NÃO CONFORME'}
+            </span>
+          </td>
+        </tr>
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-semibold text-slate-800">Turbidez (NTU)</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? minTurb.toFixed(1) : '4.0'}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${avgTurb} NTU</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? maxTurb.toFixed(1) : '12.0'}</td>
+          <td class="py-2.5 px-3 font-sans text-slate-600">Até 100 NTU</td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgTurb <= 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${avgTurb <= 100 ? 'CONFORME' : 'NÃO CONFORME'}
+            </span>
+          </td>
+        </tr>
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-semibold text-slate-800">Temperatura da Água (°C)</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? minTemp.toFixed(1) : '21.0'}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${avgTemp} °C</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? maxTemp.toFixed(1) : '24.0'}</td>
+          <td class="py-2.5 px-3 font-sans text-slate-600">Máx. 30 °C (elevação &lt; 3°C)</td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgTemp <= 30 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${avgTemp <= 30 ? 'CONFORME' : 'NÃO CONFORME'}
+            </span>
+          </td>
+        </tr>
+        <tr class="hover:bg-slate-50 bg-blue-50/30">
+          <td class="py-2.5 px-3 font-bold text-blue-900">Índice IRE (Síntese)</td>
+          <td class="py-2.5 px-3 text-center font-bold">${total > 0 ? minIRE.toFixed(1) : '80.0'}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-blue-700 text-sm">${avgIRE}/100</td>
+          <td class="py-2.5 px-3 text-center font-bold">${total > 0 ? maxIRE.toFixed(1) : '90.0'}</td>
+          <td class="py-2.5 px-3 font-sans text-slate-600">Mínimo ideal &ge; 60.0</td>
+          <td class="py-2.5 px-3 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgIRE >= 60 ? 'bg-emerald-100 text-emerald-800' : (avgIRE >= 40 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')}">
+              ${avgIRE >= 80 ? 'ÓTIMO' : (avgIRE >= 60 ? 'BOM' : (avgIRE >= 40 ? 'ALERTA' : 'CRÍTICO'))}
+            </span>
+          </td>
+        </tr>
+      `;
+    }
+
+    reportModal.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function closeReportModal() {
+    if (reportModal) reportModal.classList.add('hidden');
+  }
+
+  if (btnOpenReportFromHistory) btnOpenReportFromHistory.onclick = openReportModal;
+  if (btnTopReport) btnTopReport.onclick = openReportModal;
+  if (sidebarBtnRelatorios) sidebarBtnRelatorios.onclick = openReportModal;
+  if (btnCloseReportModal) btnCloseReportModal.onclick = closeReportModal;
+  if (btnPrintReportNow) {
+    btnPrintReportNow.onclick = () => window.print();
+  }
+  if (reportModal) {
+    reportModal.onclick = (e) => {
+      if (e.target === reportModal) closeReportModal();
+    };
+  }
+
+  // Central de Alertas Automáticos (RF10)
+  async function fetchAlertas(statusFilter = 'todos') {
+    currentAlertFilter = statusFilter;
+    try {
+      const res = await fetch(`${app.API_BASE_URL}/alertas?status=${statusFilter}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          cachedAlertas = json.data;
+          renderAlertasTable(cachedAlertas);
+          updateAlertBadges(cachedAlertas);
+          return;
+        }
+      }
+    } catch (e) {
+      // Modo offline fallback
+    }
+
+    // Fallback: calcular alertas a partir do histórico recente
+    const mockAlerts = [];
+    const currentSt = getActiveStation();
+    const stName = currentSt ? currentSt.name : 'BRB-04 · Barbosa';
+
+    (state.history || []).forEach((item, idx) => {
+      const p = item.params || {};
+      if (p.turb && p.turb > 100) {
+        mockAlerts.push({
+          id: idx * 10 + 1,
+          nivel: p.turb > 150 ? 'Crítico' : 'Atenção',
+          estacao_nome: item.stationName || stName,
+          parametro: 'Turbidez',
+          descricao: `Turbidez elevada de ${p.turb.toFixed(1)} NTU (limite CONAMA: 100 NTU).`,
+          status: 'Aberto',
+          gerado_em: new Date().toISOString()
+        });
+      }
+      if (p.ph && (p.ph < 6.0 || p.ph > 9.0)) {
+        mockAlerts.push({
+          id: idx * 10 + 2,
+          nivel: 'Crítico',
+          estacao_nome: item.stationName || stName,
+          parametro: 'pH',
+          descricao: `pH fora do padrão (${p.ph.toFixed(2)}), faixa ideal CONAMA: 6.0 a 9.0.`,
+          status: 'Aberto',
+          gerado_em: new Date().toISOString()
+        });
+      }
+      if (item.ire && item.ire < 40) {
+        mockAlerts.push({
+          id: idx * 10 + 3,
+          nivel: 'Crítico',
+          estacao_nome: item.stationName || stName,
+          parametro: 'IRE',
+          descricao: `Índice IRE Crítico (${Number(item.ire).toFixed(1)}/100) - Risco de floração de microalgas.`,
+          status: 'Em análise',
+          gerado_em: new Date().toISOString()
+        });
+      }
+    });
+
+    cachedAlertas = mockAlerts;
+    const filtered = statusFilter === 'todos' ? cachedAlertas : cachedAlertas.filter(a => a.status.toLowerCase() === statusFilter.toLowerCase());
+    renderAlertasTable(filtered);
+    updateAlertBadges(cachedAlertas);
+  }
+
+  function renderAlertasTable(alerts) {
+    if (!alertasTableBody) return;
+    if (alerts.length === 0) {
+      alertasTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-8 text-slate-400 font-sans">
+            Nenhuma ocorrência de alerta registrada para o filtro selecionado. Parâmetros dentro da normalidade CONAMA.
+          </td>
+        </tr>
+      `;
+      if (alertSummaryCounter) alertSummaryCounter.textContent = '0 ocorrências encontradas.';
+      return;
+    }
+
+    alertasTableBody.innerHTML = alerts.map(a => {
+      const isCritico = (a.nivel || '').toLowerCase() === 'crítico' || (a.nivel || '').toLowerCase() === 'critico';
+      const badgeClass = isCritico
+        ? 'bg-rose-100 text-rose-800 border-rose-200'
+        : 'bg-amber-100 text-amber-800 border-amber-200';
+      const statusClass = a.status === 'Resolvido'
+        ? 'bg-emerald-100 text-emerald-800'
+        : (a.status === 'Em análise' ? 'bg-sky-100 text-sky-800' : 'bg-rose-100 text-rose-800');
+
+      const dataFormatada = a.gerado_em ? new Date(a.gerado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 'Recente';
+
+      return `
+        <tr class="hover:bg-slate-50/80 transition-colors">
+          <td class="py-2.5 px-3.5 whitespace-nowrap">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold border ${badgeClass}">
+              <span class="w-1.5 h-1.5 rounded-full ${isCritico ? 'bg-rose-600' : 'bg-amber-600'}"></span>
+              ${a.nivel || 'Atenção'}
+            </span>
+          </td>
+          <td class="py-2.5 px-3.5 font-medium text-slate-800">${a.estacao_nome || a.estacao_codigo || 'Estação'}</td>
+          <td class="py-2.5 px-3.5 font-bold text-slate-900">${a.parametro || 'Geral'}</td>
+          <td class="py-2.5 px-3.5 font-sans text-slate-700">${a.descricao}</td>
+          <td class="py-2.5 px-3.5 text-center whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-md text-[10.5px] font-semibold ${statusClass}">${a.status || 'Aberto'}</span>
+          </td>
+          <td class="py-2.5 px-3.5 text-slate-400 font-mono text-[11px] whitespace-nowrap">${dataFormatada}</td>
+        </tr>
+      `;
+    }).join('');
+
+    if (alertSummaryCounter) {
+      alertSummaryCounter.textContent = `${alerts.length} ocorrência(s) encontrada(s).`;
+    }
+  }
+
+  function updateAlertBadges(alerts) {
+    const abertos = alerts.filter(a => (a.status || '').toLowerCase() !== 'resolvido').length;
+    if (topAlertCountBadge) topAlertCountBadge.textContent = abertos;
+    if (sidebarAlertBadge) sidebarAlertBadge.textContent = abertos;
+  }
+
+  function openAlertasModal() {
+    if (alertasModal) {
+      alertasModal.classList.remove('hidden');
+      fetchAlertas(currentAlertFilter);
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+
+  function closeAlertasModal() {
+    if (alertasModal) alertasModal.classList.add('hidden');
+  }
+
+  if (btnTopAlerts) btnTopAlerts.onclick = openAlertasModal;
+  if (sidebarBtnAlertas) sidebarBtnAlertas.onclick = openAlertasModal;
+  if (btnCloseAlertasModal) btnCloseAlertasModal.onclick = closeAlertasModal;
+  if (alertasModal) {
+    alertasModal.onclick = (e) => {
+      if (e.target === alertasModal) closeAlertasModal();
+    };
+  }
+
+  document.querySelectorAll('.alert-filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.alert-filter-btn').forEach(b => {
+        b.classList.remove('bg-slate-900', 'text-white', 'is-active');
+        b.classList.add('text-slate-600');
+      });
+      btn.classList.add('bg-slate-900', 'text-white', 'is-active');
+      btn.classList.remove('text-slate-600');
+      fetchAlertas(btn.dataset.status);
+    };
+  });
+
+  // Atualizar contagem inicial de alertas
+  fetchAlertas('todos');
 
   /**
    * Chart.js Time-Series Dual Y-Axes
@@ -613,7 +1006,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const entry = {
       timestamp: timeStr,
       date: dateStr,
+      rawDate: now.toISOString(),
       stationName: currentSt ? currentSt.name : 'Estação Tietê',
+      stationId: currentSt ? currentSt.id : 'BRB-04',
       ire: diag.ire,
       status: diag.status,
       params: { ...params }
@@ -629,13 +1024,77 @@ document.addEventListener('DOMContentLoaded', () => {
     renderHistoryTable();
   }
 
+  function getFilteredHistory() {
+    if (!Array.isArray(state.history)) return [];
+
+    let filtered = [...state.history];
+
+    // Filtro por Estação
+    if (historyStationFilter && historyStationFilter.value && historyStationFilter.value !== 'todas') {
+      const selectedId = historyStationFilter.value;
+      const targetStation = (state.stations || []).find(s => s.id === selectedId);
+      filtered = filtered.filter(item => {
+        return (item.stationId && item.stationId === selectedId) ||
+               (item.stationName && targetStation && item.stationName === targetStation.name) ||
+               (item.stationName && item.stationName.includes(selectedId));
+      });
+    }
+
+    // Filtro por Período (RF13)
+    if (historyPeriodSelect) {
+      const period = historyPeriodSelect.value;
+      const now = Date.now();
+
+      if (period === '24h') {
+        const threshold = 24 * 60 * 60 * 1000;
+        filtered = filtered.filter(item => {
+          if (!item.rawDate) return true;
+          return (now - new Date(item.rawDate).getTime()) <= threshold;
+        });
+      } else if (period === '7d') {
+        const threshold = 7 * 24 * 60 * 60 * 1000;
+        filtered = filtered.filter(item => {
+          if (!item.rawDate) return true;
+          return (now - new Date(item.rawDate).getTime()) <= threshold;
+        });
+      } else if (period === '30d') {
+        const threshold = 30 * 24 * 60 * 60 * 1000;
+        filtered = filtered.filter(item => {
+          if (!item.rawDate) return true;
+          return (now - new Date(item.rawDate).getTime()) <= threshold;
+        });
+      } else if (period === 'custom') {
+        const startVal = historyDateStart ? historyDateStart.value : null;
+        const endVal = historyDateEnd ? historyDateEnd.value : null;
+        if (startVal) {
+          const startTime = new Date(startVal + 'T00:00:00').getTime();
+          filtered = filtered.filter(item => {
+            const d = item.rawDate ? new Date(item.rawDate).getTime() : now;
+            return d >= startTime;
+          });
+        }
+        if (endVal) {
+          const endTime = new Date(endVal + 'T23:59:59').getTime();
+          filtered = filtered.filter(item => {
+            const d = item.rawDate ? new Date(item.rawDate).getTime() : now;
+            return d <= endTime;
+          });
+        }
+      }
+    }
+
+    return filtered;
+  }
+
   function renderHistoryTable() {
     if (!historyTableBody) return;
-    if (!Array.isArray(state.history) || state.history.length === 0) {
+    const filteredList = getFilteredHistory();
+
+    if (filteredList.length === 0) {
       historyTableBody.innerHTML = `
         <tr>
           <td colspan="7" class="text-center py-8 text-slate-400 font-sans">
-            Nenhum registro no histórico de telemetria. Inicie a simulação ou selecione um cenário para registrar dados.
+            Nenhum registro encontrado no histórico para o período e estação selecionados.
           </td>
         </tr>
       `;
@@ -643,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    historyTableBody.innerHTML = state.history.map(item => {
+    historyTableBody.innerHTML = filteredList.map(item => {
       const time = item.timestamp || '--:--:--';
       const date = item.date || 'Hoje';
       const station = item.stationName || 'Estação Tietê';
@@ -684,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).join('');
 
     if (historyRecordCount) {
-      historyRecordCount.textContent = `Exibindo ${state.history.length} registro(s) sincronizados com a telemetria do Rio Tietê.`;
+      historyRecordCount.textContent = `Exibindo ${filteredList.length} registro(s) sincronizados com a telemetria do Rio Tietê.`;
     }
   }
 

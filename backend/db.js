@@ -119,6 +119,22 @@ async function initPostgreSQL() {
       );
     `);
 
+    // Criar tabela alertas se não existir (RF10)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS alertas (
+        id SERIAL PRIMARY KEY,
+        estacao_id INT NOT NULL REFERENCES estacoes(id) ON DELETE CASCADE,
+        medicao_id BIGINT REFERENCES leituras_telemetria(id) ON DELETE SET NULL,
+        nivel VARCHAR(20) NOT NULL,
+        descricao VARCHAR(255) NOT NULL,
+        parametro VARCHAR(30),
+        valor_medido DECIMAL(6, 2),
+        status VARCHAR(20) DEFAULT 'Aberto',
+        gerado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        resolvido_em TIMESTAMP NULL
+      );
+    `);
+
     // Inserir estacoes padrão se a tabela estiver vazia
     const res = await client.query('SELECT COUNT(*) AS total FROM estacoes');
     if (parseInt(res.rows[0].total, 10) === 0) {
@@ -135,6 +151,12 @@ async function initPostgreSQL() {
         (1, 7.20, 4.00, 8.60, 22.40, 15.30, 'Excelente', '[MOCK] ÁGUA IDEAL'),
         (2, 8.40, 48.00, 3.80, 26.50, 58.70, 'Alerta', '[MOCK] ÁGUA REGULAR'),
         (3, 9.20, 120.00, 1.10, 29.50, 89.40, 'Crítico', '[MOCK] ÁGUA RUIM / CRÍTICA');
+
+        INSERT INTO alertas (estacao_id, medicao_id, nivel, descricao, parametro, valor_medido, status)
+        VALUES
+        (3, 3, 'Crítico', 'Turbidez elevada detectada: 120.00 NTU (limite CONAMA: 100 NTU)', 'Turbidez', 120.00, 'Aberto'),
+        (3, 3, 'Crítico', 'pH alcalino fora do padrão CONAMA: 9.20 (faixa ideal: 6.0 a 9.0)', 'pH', 9.20, 'Aberto'),
+        (2, 2, 'Atenção', 'Variação térmica e turbidez em elevação: 48.00 NTU', 'Turbidez', 48.00, 'Em análise');
       `);
       console.log('🌱 Dados iniciais (Seed) populados no PostgreSQL!');
     }

@@ -8,6 +8,7 @@ const estacoesRoutes = require('./routes/estacoes');
 const telemetriaRoutes = require('./routes/telemetria');
 
 const equipamentosRoutes = require('./routes/equipamentos');
+const alertasRoutes = require('./routes/alertas');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.use('/api/estacoes', estacoesRoutes);
 app.use('/api/telemetria', telemetriaRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/equipamentos', equipamentosRoutes);
+app.use('/api/alertas', alertasRoutes);
 
 
 // Rota de Healthcheck / Status

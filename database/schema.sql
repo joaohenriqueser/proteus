@@ -91,6 +91,24 @@ CREATE TABLE IF NOT EXISTS equipamentos (
     FOREIGN KEY (estacao_id) REFERENCES estacoes(id) ON DELETE SET NULL
 );
 
+-- ============================================================
+-- 6. TABELA DE ALERTAS AUTOMÁTICOS DO SISTEMA (RF10)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS alertas (
+    id SERIAL PRIMARY KEY,
+    estacao_id INT NOT NULL,
+    medicao_id BIGINT NULL,
+    nivel VARCHAR(20) NOT NULL,                    -- 'Atenção', 'Crítico'
+    descricao VARCHAR(255) NOT NULL,               -- Ex: 'Turbidez elevada: 120 NTU acima do limite CONAMA (100 NTU)'
+    parametro VARCHAR(30) NULL,                    -- 'Turbidez', 'pH', 'Temperatura', 'IRE'
+    valor_medido DECIMAL(6, 2) NULL,
+    status VARCHAR(20) DEFAULT 'Aberto',           -- 'Aberto', 'Em análise', 'Resolvido'
+    gerado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolvido_em TIMESTAMP NULL,
+    FOREIGN KEY (estacao_id) REFERENCES estacoes(id) ON DELETE CASCADE,
+    FOREIGN KEY (medicao_id) REFERENCES leituras_telemetria(id) ON DELETE SET NULL
+);
+
 
 -- ============================================================
 -- DADOS INICIAIS (SEED) PARA TESTAR E VISUALIZAR NO DBEAVER
@@ -108,3 +126,10 @@ VALUES
 (1, 7.20, 4.00, 8.60, 22.40, 15.30, 'Excelente', '[MOCK] ÁGUA IDEAL'),
 (2, 8.40, 48.00, 3.80, 26.50, 58.70, 'Alerta', '[MOCK] ÁGUA REGULAR'),
 (3, 9.20, 120.00, 1.10, 29.50, 89.40, 'Crítico', '[MOCK] ÁGUA RUIM / CRÍTICA');
+
+-- Inserção de Alertas Automáticos de Exemplo (RF10)
+INSERT INTO alertas (estacao_id, medicao_id, nivel, descricao, parametro, valor_medido, status)
+VALUES
+(3, 3, 'Crítico', 'Turbidez elevada detectada: 120.00 NTU (limite CONAMA: 100 NTU)', 'Turbidez', 120.00, 'Aberto'),
+(3, 3, 'Crítico', 'pH alcalino fora do padrão CONAMA: 9.20 (faixa ideal: 6.0 a 9.0)', 'pH', 9.20, 'Aberto'),
+(2, 2, 'Atenção', 'Variação térmica e turbidez em elevação: 48.00 NTU', 'Turbidez', 48.00, 'Em análise');
