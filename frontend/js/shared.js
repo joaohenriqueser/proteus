@@ -5,7 +5,7 @@
 
 window.TieteApp = {
   STORAGE_KEY: 'proteus_telemetry_state',
-  API_BASE_URL: 'http://localhost:3000/api',
+  API_BASE_URL: (window.location && window.location.protocol.startsWith('http') ? window.location.origin : 'http://localhost:3001') + '/api',
 
   async fetchStationsFromAPI() {
     try {
