@@ -390,6 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const reportModal = document.getElementById('reportModal');
   const btnCloseReportModal = document.getElementById('btnCloseReportModal');
   const btnPrintReportNow = document.getElementById('btnPrintReportNow');
+  const reportPeriodSelect = document.getElementById('reportPeriodSelect');
+  const reportStationFilter = document.getElementById('reportStationFilter');
+  const btnExportCSVFromReport = document.getElementById('btnExportCSVFromReport');
+  const reportPeriodoBadge = document.getElementById('reportPeriodoBadge');
 
   // Alertas DOM Elements (RF10)
   const alertasModal = document.getElementById('alertasModal');
@@ -431,6 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Alternar seletor de datas customizadas
   if (historyPeriodSelect) {
     historyPeriodSelect.onchange = () => {
+      if (reportPeriodSelect) reportPeriodSelect.value = historyPeriodSelect.value;
       if (historyPeriodSelect.value === 'custom') {
         if (historyCustomDates) {
           historyCustomDates.classList.remove('hidden');
@@ -451,18 +456,30 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (historyStationFilter) {
-    historyStationFilter.onchange = () => renderHistoryTable();
+    historyStationFilter.onchange = () => {
+      if (reportStationFilter) reportStationFilter.value = historyStationFilter.value;
+      renderHistoryTable();
+    };
   }
 
   function updateHistoryStationFilterOptions() {
-    if (!historyStationFilter) return;
-    const currentVal = historyStationFilter.value;
     const stations = Array.isArray(state.stations) ? state.stations : app.getDefaultStations();
-    historyStationFilter.innerHTML = `
+    const optionsHtml = `
       <option value="todas">Todas as estações</option>
       ${stations.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
     `;
-    if (currentVal) historyStationFilter.value = currentVal;
+
+    if (historyStationFilter) {
+      const currentVal = historyStationFilter.value;
+      historyStationFilter.innerHTML = optionsHtml;
+      if (currentVal) historyStationFilter.value = currentVal;
+    }
+
+    if (reportStationFilter) {
+      const currentValReport = reportStationFilter.value;
+      reportStationFilter.innerHTML = optionsHtml;
+      if (currentValReport) reportStationFilter.value = currentValReport;
+    }
   }
 
   if (btnClearHistoryModal) {
@@ -481,19 +498,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Exportação CSV (RF12)
-  function exportFilteredHistoryToCSV() {
-    const list = getFilteredHistory();
-    if (list.length === 0) {
+  function exportFilteredHistoryToCSV(customList) {
+    const list = Array.isArray(customList) ? customList : getFilteredHistory();
+    if (!list || list.length === 0) {
       alert('Nenhum registro para exportar no período selecionado.');
       return;
     }
 
-    const headers = ['Horário', 'Data', 'Estação', 'Índice IRE', 'Classificação', 'pH', 'Turbidez (NTU)', 'Temperatura (°C)'];
+    const headers = ['Data', 'Horário', 'Estação', 'Índice IRE', 'Classificação', 'pH', 'Turbidez (NTU)', 'Temperatura (°C)'];
     const rows = list.map(item => {
       const p = item.params || {};
       return [
-        `"${item.timestamp || ''}"`,
         `"${item.date || ''}"`,
+        `"${item.timestamp || ''}"`,
         `"${item.stationName || ''}"`,
         (item.ire !== undefined ? Number(item.ire).toFixed(1) : ''),
         `"${item.status ? item.status.title : ''}"`,
@@ -508,26 +525,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const dateStr = new Date().toISOString().split('T')[0];
+    const fileName = `relatorio_telemetria_proteus_${dateStr}.csv`;
     a.href = url;
-    a.download = `relatorio_telemetria_proteus_${dateStr}.csv`;
+    a.setAttribute('download', fileName);
+    a.download = fileName;
+    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 2000);
   }
 
-  if (btnExportCSV) btnExportCSV.onclick = exportFilteredHistoryToCSV;
+  if (btnExportCSV) btnExportCSV.onclick = () => exportFilteredHistoryToCSV();
 
   // Modal de Relatório Técnico (RF12)
   function openReportModal() {
     const reportModal = document.getElementById('reportModal');
     if (!reportModal) return;
 
-    const list = getFilteredHistory();
-    const currentSt = getActiveStation();
-    const stName = (historyStationFilter && historyStationFilter.value !== 'todas')
-      ? (state.stations.find(s => s.id === historyStationFilter.value)?.name || currentSt.name)
-      : (currentSt ? currentSt.name : 'Todas as estações');
+    updateHistoryStationFilterOptions();
+
+    // Sincronizar filtros selecionados
+    const currentPeriod = (reportPeriodSelect && reportPeriodSelect.value) || 
+                          (historyPeriodSelect && historyPeriodSelect.value) || '30d';
+    if (reportPeriodSelect) reportPeriodSelect.value = currentPeriod;
+
+    const currentStation = (reportStationFilter && reportStationFilter.value) || 
+                           (historyStationFilter && historyStationFilter.value) || 'todas';
+    if (reportStationFilter) reportStationFilter.value = currentStation;
+
+    const list = getFilteredHistory(currentPeriod, currentStation);
+    const stations = Array.isArray(state.stations) ? state.stations : app.getDefaultStations();
+    const stObj = stations.find(s => s.id === currentStation);
+    const stName = (currentStation !== 'todas' && stObj) ? stObj.name : 'Todas as estações (Bacia Baixo Tietê)';
+
+    const periodLabels = {
+      '24h': 'Últimas 24 horas',
+      '7d': 'Últimos 7 dias',
+      '30d': 'Últimos 30 dias',
+      'todos': 'Histórico Completo',
+      'custom': 'Período Personalizado'
+    };
+    const periodLabel = periodLabels[currentPeriod] || 'Últimos 30 dias';
 
     const total = list.length;
     let sumPH = 0, minPH = 999, maxPH = -999;
@@ -557,72 +598,87 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    const avgPH = total > 0 ? (sumPH / total).toFixed(2) : '7.20';
-    const avgTurb = total > 0 ? (sumTurb / total).toFixed(1) : '8.0';
-    const avgTemp = total > 0 ? (sumTemp / total).toFixed(1) : '22.4';
-    const avgIRE = total > 0 ? (sumIRE / total).toFixed(1) : '85.0';
+    const avgPH = total > 0 ? (sumPH / total).toFixed(2) : '—';
+    const avgTurb = total > 0 ? (sumTurb / total).toFixed(1) : '—';
+    const avgTemp = total > 0 ? (sumTemp / total).toFixed(1) : '—';
+    const avgIRE = total > 0 ? (sumIRE / total).toFixed(1) : '—';
     const complianceRate = total > 0 ? ((conformes / total) * 100).toFixed(1) : '100.0';
 
     const elEmissao = document.getElementById('reportEmissaoData');
     const elStation = document.getElementById('reportStationName');
+    const elPeriodo = document.getElementById('reportPeriodoBadge');
     const elTotal = document.getElementById('reportTotalReadings');
     const elCompliance = document.getElementById('reportComplianceRate');
     const elAlerts = document.getElementById('reportTotalAlerts');
     const elBody = document.getElementById('reportBodyParams');
+    const elDiagnostico = document.getElementById('reportDiagnosticoTexto');
 
     if (elEmissao) elEmissao.textContent = new Date().toLocaleString('pt-BR');
     if (elStation) elStation.textContent = stName;
+    if (elPeriodo) elPeriodo.textContent = periodLabel;
     if (elTotal) elTotal.textContent = `${total} registros`;
     if (elCompliance) elCompliance.textContent = `${complianceRate}%`;
     if (elAlerts) elAlerts.textContent = `${alertasCount} evento(s)`;
+
+    if (elDiagnostico) {
+      if (total === 0) {
+        elDiagnostico.textContent = `Nenhum registro de telemetria encontrado para o filtro selecionado (${periodLabel}). Ajuste o período ou a estação selecionada.`;
+      } else if (complianceRate >= 99 && alertasCount === 0) {
+        elDiagnostico.textContent = `A análise integrada dos dados físico-químicos registrados pelas sondas IoT no período de ${periodLabel.toLowerCase()} (${total} leituras) demonstra estabilidade limnológica plena e conformidade estrita com a Resolução CONAMA nº 357/2005 (Classe 2). Não foram detectadas violações de turbidez ou dispersão crítica de pH.`;
+      } else if (complianceRate >= 90) {
+        elDiagnostico.textContent = `A série temporal consolidada no período de ${periodLabel.toLowerCase()} (${total} leituras) aponta conformidade geral de ${complianceRate}%, com registro pontual de ${alertasCount} evento(s) anômalo(s) associado(s) a escoamento superficial e picos de turbidez (máx. ${maxTurb.toFixed(1)} NTU). O Índice IRE médio permaneceu em patamar satisfatório (${avgIRE}/100).`;
+      } else {
+        elDiagnostico.textContent = `A série temporal consolidada no período de ${periodLabel.toLowerCase()} (${total} leituras) aponta vulnerabilidade hídrica com conformidade de ${complianceRate}%. Houve ${alertasCount} incidente(s) crítico(s) com violação dos limiares CONAMA Classe 2 (máx. turbidez de ${maxTurb.toFixed(1)} NTU e mín. IRE de ${minIRE.toFixed(1)}), recomendando intensificação da fiscalização e rastreio de efluentes a montante.`;
+      }
+    }
 
     if (elBody) {
       elBody.innerHTML = `
         <tr class="hover:bg-slate-50">
           <td class="py-2.5 px-3 font-semibold text-slate-800">pH da Água</td>
-          <td class="py-2.5 px-3 text-center">${total > 0 ? minPH.toFixed(2) : '7.00'}</td>
-          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${avgPH}</td>
-          <td class="py-2.5 px-3 text-center">${total > 0 ? maxPH.toFixed(2) : '7.40'}</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? minPH.toFixed(2) : '—'}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${total > 0 ? avgPH : '—'}</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? maxPH.toFixed(2) : '—'}</td>
           <td class="py-2.5 px-3 font-sans text-slate-600">6.0 a 9.0</td>
           <td class="py-2.5 px-3 text-center">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgPH >= 6 && avgPH <= 9 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-              ${avgPH >= 6 && avgPH <= 9 ? 'CONFORME' : 'NÃO CONFORME'}
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${total > 0 && avgPH >= 6 && avgPH <= 9 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${total > 0 ? (avgPH >= 6 && avgPH <= 9 ? 'CONFORME' : 'NÃO CONFORME') : 'SEM DADOS'}
             </span>
           </td>
         </tr>
         <tr class="hover:bg-slate-50">
           <td class="py-2.5 px-3 font-semibold text-slate-800">Turbidez (NTU)</td>
-          <td class="py-2.5 px-3 text-center">${total > 0 ? minTurb.toFixed(1) : '4.0'}</td>
-          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${avgTurb} NTU</td>
-          <td class="py-2.5 px-3 text-center">${total > 0 ? maxTurb.toFixed(1) : '12.0'}</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? minTurb.toFixed(1) : '—'}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${total > 0 ? avgTurb + ' NTU' : '—'}</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? maxTurb.toFixed(1) : '—'}</td>
           <td class="py-2.5 px-3 font-sans text-slate-600">Até 100 NTU</td>
           <td class="py-2.5 px-3 text-center">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgTurb <= 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-              ${avgTurb <= 100 ? 'CONFORME' : 'NÃO CONFORME'}
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${total > 0 && avgTurb <= 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${total > 0 ? (avgTurb <= 100 ? 'CONFORME' : 'NÃO CONFORME') : 'SEM DADOS'}
             </span>
           </td>
         </tr>
         <tr class="hover:bg-slate-50">
           <td class="py-2.5 px-3 font-semibold text-slate-800">Temperatura da Água (°C)</td>
-          <td class="py-2.5 px-3 text-center">${total > 0 ? minTemp.toFixed(1) : '21.0'}</td>
-          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${avgTemp} °C</td>
-          <td class="py-2.5 px-3 text-center">${total > 0 ? maxTemp.toFixed(1) : '24.0'}</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? minTemp.toFixed(1) : '—'}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-slate-900">${total > 0 ? avgTemp + ' °C' : '—'}</td>
+          <td class="py-2.5 px-3 text-center">${total > 0 ? maxTemp.toFixed(1) : '—'}</td>
           <td class="py-2.5 px-3 font-sans text-slate-600">Máx. 30 °C (elevação &lt; 3°C)</td>
           <td class="py-2.5 px-3 text-center">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgTemp <= 30 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-              ${avgTemp <= 30 ? 'CONFORME' : 'NÃO CONFORME'}
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${total > 0 && avgTemp <= 30 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${total > 0 ? (avgTemp <= 30 ? 'CONFORME' : 'NÃO CONFORME') : 'SEM DADOS'}
             </span>
           </td>
         </tr>
         <tr class="hover:bg-slate-50 bg-blue-50/30">
           <td class="py-2.5 px-3 font-bold text-blue-900">Índice IRE (Síntese)</td>
-          <td class="py-2.5 px-3 text-center font-bold">${total > 0 ? minIRE.toFixed(1) : '80.0'}</td>
-          <td class="py-2.5 px-3 text-center font-extrabold text-blue-700 text-sm">${avgIRE}/100</td>
-          <td class="py-2.5 px-3 text-center font-bold">${total > 0 ? maxIRE.toFixed(1) : '90.0'}</td>
+          <td class="py-2.5 px-3 text-center font-bold">${total > 0 ? minIRE.toFixed(1) : '—'}</td>
+          <td class="py-2.5 px-3 text-center font-extrabold text-blue-700 text-sm">${total > 0 ? avgIRE + '/100' : '—'}</td>
+          <td class="py-2.5 px-3 text-center font-bold">${total > 0 ? maxIRE.toFixed(1) : '—'}</td>
           <td class="py-2.5 px-3 font-sans text-slate-600">Mínimo ideal &ge; 60.0</td>
           <td class="py-2.5 px-3 text-center">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${avgIRE >= 60 ? 'bg-emerald-100 text-emerald-800' : (avgIRE >= 40 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')}">
-              ${avgIRE >= 80 ? 'ÓTIMO' : (avgIRE >= 60 ? 'BOM' : (avgIRE >= 40 ? 'ALERTA' : 'CRÍTICO'))}
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${total > 0 && avgIRE >= 60 ? 'bg-emerald-100 text-emerald-800' : (avgIRE >= 40 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800')}">
+              ${total > 0 ? (avgIRE >= 80 ? 'ÓTIMO' : (avgIRE >= 60 ? 'BOM' : (avgIRE >= 40 ? 'ALERTA' : 'CRÍTICO'))) : 'SEM DADOS'}
             </span>
           </td>
         </tr>
@@ -635,6 +691,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeReportModal() {
     if (reportModal) reportModal.classList.add('hidden');
+  }
+
+  if (reportPeriodSelect) {
+    reportPeriodSelect.onchange = () => {
+      if (historyPeriodSelect) historyPeriodSelect.value = reportPeriodSelect.value;
+      openReportModal();
+    };
+  }
+
+  if (reportStationFilter) {
+    reportStationFilter.onchange = () => {
+      if (historyStationFilter) historyStationFilter.value = reportStationFilter.value;
+      openReportModal();
+    };
+  }
+
+  if (btnExportCSVFromReport) {
+    btnExportCSVFromReport.onclick = () => {
+      const p = (reportPeriodSelect && reportPeriodSelect.value) || '30d';
+      const s = (reportStationFilter && reportStationFilter.value) || 'todas';
+      exportFilteredHistoryToCSV(getFilteredHistory(p, s));
+    };
   }
 
   if (btnOpenReportFromHistory) btnOpenReportFromHistory.onclick = openReportModal;
@@ -968,31 +1046,67 @@ document.addEventListener('DOMContentLoaded', () => {
    * Telemetry Historical Data Engine & Modal Table Manager
    */
   function seedInitialHistory() {
-    if (!Array.isArray(state.history) || state.history.length < 5) {
-      const currentSt = getActiveStation();
-      const stName = currentSt ? currentSt.name : 'BRB-04 · Barbosa';
+    // Verifica se já possui histórico consistente com múltiplos dias e datas ISO
+    const hasMultiDay = Array.isArray(state.history) && 
+      state.history.length >= 15 && 
+      state.history.some(item => item.rawDate && (Date.now() - new Date(item.rawDate).getTime()) > 48 * 60 * 60 * 1000);
+
+    if (!hasMultiDay) {
       const now = Date.now();
-      const sampleOffsets = [
-        { min: 4, ph: 7.4, turb: 9, temp: 22.8 },
-        { min: 18, ph: 7.3, turb: 12, temp: 23.0 },
-        { min: 45, ph: 7.6, turb: 20, temp: 23.5 },
-        { min: 90, ph: 7.8, turb: 28, temp: 24.1 },
-        { min: 180, ph: 7.9, turb: 35, temp: 24.6 },
-        { min: 360, ph: 7.2, turb: 10, temp: 22.2 }
+      
+      // Especificação de série temporal realística de 30 dias para as estações da bacia
+      const historySeedSpec = [
+        // Hoje (últimas 24h) - 7 leituras recentes (condições normais e estáveis)
+        { hoursAgo: 0.2, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.35, turb: 8.5, temp: 23.0 },
+        { hoursAgo: 0.8, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.40, turb: 9.0, temp: 22.8 },
+        { hoursAgo: 2.5, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.25, turb: 12.0, temp: 23.2 },
+        { hoursAgo: 5.0, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.30, turb: 10.5, temp: 23.5 },
+        { hoursAgo: 9.0, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.50, turb: 11.0, temp: 22.4 },
+        { hoursAgo: 14.5, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.20, turb: 14.0, temp: 21.8 },
+        { hoursAgo: 20.0, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.15, turb: 15.5, temp: 21.5 },
+
+        // 1 a 7 dias atrás - 9 leituras (evento de chuva moderada no 3º dia)
+        { hoursAgo: 36, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.28, turb: 11.2, temp: 22.9 },
+        { hoursAgo: 52, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.10, turb: 18.0, temp: 22.4 },
+        { hoursAgo: 68, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.95, turb: 28.0, temp: 21.9 },
+        { hoursAgo: 78, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.80, turb: 45.0, temp: 21.2 }, // chuva moderada
+        { hoursAgo: 90, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 6.75, turb: 52.0, temp: 21.0 },
+        { hoursAgo: 108, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.05, turb: 30.0, temp: 22.0 },
+        { hoursAgo: 125, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.35, turb: 15.0, temp: 23.1 },
+        { hoursAgo: 144, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.45, turb: 10.0, temp: 23.6 },
+        { hoursAgo: 162, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.50, turb: 8.0, temp: 24.0 },
+
+        // 8 a 30 dias atrás - 13 leituras (inclui evento pontual com enxurrada e turbidez 118 NTU)
+        { hoursAgo: 204, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.32, turb: 13.0, temp: 23.0 },
+        { hoursAgo: 245, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.20, turb: 19.0, temp: 22.7 },
+        { hoursAgo: 290, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.10, turb: 24.0, temp: 22.2 },
+        { hoursAgo: 350, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 6.85, turb: 38.0, temp: 21.6 },
+        { hoursAgo: 400, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.40, turb: 88.0, temp: 20.8 },
+        { hoursAgo: 420, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.20, turb: 118.0, temp: 20.5 }, // Evento crítico (>100 NTU)
+        { hoursAgo: 440, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 6.45, turb: 92.0, temp: 20.9 },
+        { hoursAgo: 480, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.80, turb: 42.0, temp: 21.5 },
+        { hoursAgo: 535, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.15, turb: 22.0, temp: 22.8 },
+        { hoursAgo: 590, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.40, turb: 12.0, temp: 23.4 },
+        { hoursAgo: 630, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.60, turb: 7.5, temp: 24.5 },
+        { hoursAgo: 665, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.70, turb: 6.2, temp: 24.8 },
+        { hoursAgo: 700, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.55, turb: 8.0, temp: 24.1 }
       ];
 
-      state.history = sampleOffsets.map(item => {
-        const itemDate = new Date(now - item.min * 60 * 1000);
-        const diag = engine.diagnose({ ph: item.ph, turb: item.turb, od: item.od, temp: item.temp });
+      state.history = historySeedSpec.map(item => {
+        const itemDate = new Date(now - item.hoursAgo * 60 * 60 * 1000);
+        const diag = engine.diagnose({ ph: item.ph, turb: item.turb, temp: item.temp });
         return {
           timestamp: itemDate.toLocaleTimeString('pt-BR'),
           date: itemDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-          stationName: stName,
+          rawDate: itemDate.toISOString(),
+          stationId: item.stId,
+          stationName: item.stName,
           ire: diag.ire,
           status: diag.status,
-          params: { ph: item.ph, turb: item.turb, od: item.od, temp: item.temp }
+          params: { ph: item.ph, turb: item.turb, temp: item.temp }
         };
       });
+
       app.saveState(state);
     }
   }
@@ -1019,67 +1133,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     state.history.unshift(entry);
-    if (state.history.length > 50) state.history.pop();
+    if (state.history.length > 200) state.history.pop();
     app.saveState(state);
     renderHistoryTable();
   }
 
-  function getFilteredHistory() {
+  function getFilteredHistory(customPeriod, customStation) {
     if (!Array.isArray(state.history)) return [];
 
     let filtered = [...state.history];
 
     // Filtro por Estação
-    if (historyStationFilter && historyStationFilter.value && historyStationFilter.value !== 'todas') {
-      const selectedId = historyStationFilter.value;
-      const targetStation = (state.stations || []).find(s => s.id === selectedId);
+    const selectedStation = customStation !== undefined 
+      ? customStation 
+      : (historyStationFilter ? historyStationFilter.value : 'todas');
+
+    if (selectedStation && selectedStation !== 'todas') {
+      const targetStation = (state.stations || []).find(s => s.id === selectedStation);
       filtered = filtered.filter(item => {
-        return (item.stationId && item.stationId === selectedId) ||
+        return (item.stationId && item.stationId === selectedStation) ||
                (item.stationName && targetStation && item.stationName === targetStation.name) ||
-               (item.stationName && item.stationName.includes(selectedId));
+               (item.stationName && item.stationName.includes(selectedStation));
       });
     }
 
     // Filtro por Período (RF13)
-    if (historyPeriodSelect) {
-      const period = historyPeriodSelect.value;
-      const now = Date.now();
+    const period = customPeriod !== undefined 
+      ? customPeriod 
+      : (historyPeriodSelect ? historyPeriodSelect.value : 'todos');
+    const now = Date.now();
 
-      if (period === '24h') {
-        const threshold = 24 * 60 * 60 * 1000;
+    if (period === '24h') {
+      const threshold = 24 * 60 * 60 * 1000;
+      filtered = filtered.filter(item => {
+        const itemTime = item.rawDate ? new Date(item.rawDate).getTime() : now;
+        return (now - itemTime) <= threshold;
+      });
+    } else if (period === '7d') {
+      const threshold = 7 * 24 * 60 * 60 * 1000;
+      filtered = filtered.filter(item => {
+        const itemTime = item.rawDate ? new Date(item.rawDate).getTime() : now;
+        return (now - itemTime) <= threshold;
+      });
+    } else if (period === '30d') {
+      const threshold = 30 * 24 * 60 * 60 * 1000;
+      filtered = filtered.filter(item => {
+        const itemTime = item.rawDate ? new Date(item.rawDate).getTime() : now;
+        return (now - itemTime) <= threshold;
+      });
+    } else if (period === 'custom') {
+      const startVal = historyDateStart ? historyDateStart.value : null;
+      const endVal = historyDateEnd ? historyDateEnd.value : null;
+      if (startVal) {
+        const startTime = new Date(startVal + 'T00:00:00').getTime();
         filtered = filtered.filter(item => {
-          if (!item.rawDate) return true;
-          return (now - new Date(item.rawDate).getTime()) <= threshold;
+          const itemTime = item.rawDate ? new Date(item.rawDate).getTime() : now;
+          return itemTime >= startTime;
         });
-      } else if (period === '7d') {
-        const threshold = 7 * 24 * 60 * 60 * 1000;
+      }
+      if (endVal) {
+        const endTime = new Date(endVal + 'T23:59:59').getTime();
         filtered = filtered.filter(item => {
-          if (!item.rawDate) return true;
-          return (now - new Date(item.rawDate).getTime()) <= threshold;
+          const itemTime = item.rawDate ? new Date(item.rawDate).getTime() : now;
+          return itemTime <= endTime;
         });
-      } else if (period === '30d') {
-        const threshold = 30 * 24 * 60 * 60 * 1000;
-        filtered = filtered.filter(item => {
-          if (!item.rawDate) return true;
-          return (now - new Date(item.rawDate).getTime()) <= threshold;
-        });
-      } else if (period === 'custom') {
-        const startVal = historyDateStart ? historyDateStart.value : null;
-        const endVal = historyDateEnd ? historyDateEnd.value : null;
-        if (startVal) {
-          const startTime = new Date(startVal + 'T00:00:00').getTime();
-          filtered = filtered.filter(item => {
-            const d = item.rawDate ? new Date(item.rawDate).getTime() : now;
-            return d >= startTime;
-          });
-        }
-        if (endVal) {
-          const endTime = new Date(endVal + 'T23:59:59').getTime();
-          filtered = filtered.filter(item => {
-            const d = item.rawDate ? new Date(item.rawDate).getTime() : now;
-            return d <= endTime;
-          });
-        }
       }
     }
 

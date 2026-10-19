@@ -85,15 +85,15 @@
         <!-- Alertas Automáticos (RF10) -->
         <button id="sidebarBtnAlertas" type="button" class="sidebar-link w-full text-left" title="Alertas Automáticos do Sistema (RF10)">
           <div class="link-icon">
-            <i data-lucide="bell" class="w-4 h-4 text-rose-500"></i>
+            <i data-lucide="bell" class="w-4 h-4"></i>
           </div>
-          <span class="link-label">Alertas <span id="sidebarAlertBadge" class="ml-1 text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full font-bold">0</span></span>
+          <span class="link-label">Alertas <span id="sidebarAlertBadge" class="ml-1 text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full font-bold">0</span></span>
         </button>
 
         <!-- Relatórios Consolidados (RF12) -->
         <button id="sidebarBtnRelatorios" type="button" class="sidebar-link w-full text-left" title="Relatórios Técnicos (RF12)">
           <div class="link-icon">
-            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
           </div>
           <span class="link-label">Relatórios</span>
         </button>
@@ -264,12 +264,12 @@
         <!-- Quick Access: Alertas & Relatórios -->
         <div class="glass-pill px-2 py-1 flex items-center gap-1.5 shadow-sm">
           <button id="btnTopAlerts" type="button" class="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-700 hover:text-rose-600 hover:bg-rose-50/60 transition-colors flex items-center gap-1.5 cursor-pointer" title="Alertas do Sistema (RF10)">
-            <i data-lucide="bell" class="w-3.5 h-3.5 text-rose-500"></i>
+            <i data-lucide="bell" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Alertas</span>
-            <span id="topAlertCountBadge" class="bg-rose-100 text-rose-700 font-mono text-[10.5px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+            <span id="topAlertCountBadge" class="bg-slate-100 text-slate-600 font-mono text-[10.5px] font-bold px-1.5 py-0.2 rounded-full">0</span>
           </button>
           <button id="btnTopReport" type="button" class="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-700 hover:text-blue-600 hover:bg-blue-50/60 transition-colors flex items-center gap-1.5 cursor-pointer" title="Relatório Técnico Consolidado (RF12)">
-            <i data-lucide="file-text" class="w-3.5 h-3.5 text-blue-600"></i>
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">Relatório</span>
           </button>
         </div>
@@ -554,6 +554,31 @@
         </div>
       </div>
 
+      <!-- Barra de Filtros do Relatório (Print:hidden) -->
+      <div class="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs print:hidden">
+        <div class="flex items-center gap-2 flex-wrap">
+          <label class="font-bold text-slate-600 font-mono text-[11px] uppercase">Período:</label>
+          <select id="reportPeriodSelect" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="todos">Todos os registros</option>
+            <option value="24h">Últimas 24 horas</option>
+            <option value="7d">Últimos 7 dias</option>
+            <option value="30d" selected>Últimos 30 dias</option>
+          </select>
+
+          <label class="font-bold text-slate-600 font-mono text-[11px] uppercase ml-1 sm:ml-2">Estação:</label>
+          <select id="reportStationFilter" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="todas">Todas as estações</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btnExportCSVFromReport" type="button" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-semibold hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer" title="Exportar dados do relatório em CSV">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Exportar CSV</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Printable Report Sheet Body -->
       <div id="reportPrintArea" class="space-y-6 text-slate-900 font-sans">
         
@@ -566,9 +591,6 @@
             <p class="text-xs font-semibold text-slate-600 mt-0.5">
               P.R.O.T.E.U.S. · Plataforma de Observação e Telemetria em Rios Urbanos
             </p>
-            <p class="text-[11px] text-slate-500 font-mono">
-              IFSP — Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (Campus Birigui)
-            </p>
           </div>
           <div class="text-right text-[11px] font-mono text-slate-500 leading-relaxed">
             <div><strong>Emissão:</strong> <span id="reportEmissaoData">—</span></div>
@@ -578,10 +600,14 @@
         </div>
 
         <!-- Meta Info Pill Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
           <div>
             <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Estação Avaliada</span>
             <span id="reportStationName" class="text-xs font-bold text-slate-800 font-sans truncate block">—</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Período Analisado</span>
+            <span id="reportPeriodoBadge" class="text-xs font-bold text-blue-700 font-mono block">Últimos 30 dias</span>
           </div>
           <div>
             <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Total de Leituras</span>
@@ -632,16 +658,10 @@
         </div>
 
         <!-- Assinaturas e Rodapé -->
-        <div class="pt-6 border-t border-slate-200 grid grid-cols-2 gap-8 text-center text-xs font-sans text-slate-600">
+        <div class="pt-6 border-t border-slate-200 text-center text-xs font-sans text-slate-600">
           <div>
-            <div class="border-b border-slate-300 w-3/4 mx-auto mb-1"></div>
-            <p class="font-bold text-slate-800">Cauã Cristal Lemes</p>
-            <p class="text-[10px] text-slate-500">Pesquisa e Desenvolvimento IoT</p>
-          </div>
-          <div>
-            <div class="border-b border-slate-300 w-3/4 mx-auto mb-1"></div>
+            <div class="border-b border-slate-300 w-1/2 mx-auto mb-1"></div>
             <p class="font-bold text-slate-800">Equipe P.R.O.T.E.U.S.</p>
-            <p class="text-[10px] text-slate-500">IFSP Campus Birigui</p>
           </div>
         </div>
 

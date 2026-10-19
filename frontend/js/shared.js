@@ -112,7 +112,7 @@ window.TieteApp = {
         params: state.params,
         activeScenarioTag: state.activeScenarioTag,
         isLoopRunning: state.isLoopRunning,
-        history: state.history.slice(0, 30),
+        history: (state.history || []).slice(0, 200),
         stations: state.stations,
         activeStationId: state.activeStationId
       }));
