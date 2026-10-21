@@ -3,14 +3,19 @@ const router = express.Router();
 const db = require('../db');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+function ehOperador(req) {
+  return req.usuario && req.usuario.papel === 'operador';
+}
+
 /**
  * GET /api/alertas
  * Lista os alertas automáticos gerados pelo sistema (RF10)
- * Aceita filtros: ?estacao_id=&status=&nivel=&limit=
+ * Operador: restrito exclusivamente aos alertas da própria estação
+ * Admin geral: pode listar de todas as estações ou filtrar por ?estacao_id=
  */
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
-    const { estacao_id, status, nivel, limit = 50 } = req.query;
+    let { estacao_id, status, nivel, limit = 50 } = req.query;
 
     let sql = `
       SELECT 
@@ -35,7 +40,12 @@ router.get('/', async (req, res) => {
     const params = [];
     let paramIndex = 1;
 
-    if (estacao_id) {
+    // Regra estrita: se for operador, restringe à sua estação
+    if (ehOperador(req)) {
+      sql += ` AND a.estacao_id = $${paramIndex}`;
+      params.push(req.usuario.estacao_id);
+      paramIndex += 1;
+    } else if (estacao_id) {
       const isNum = !isNaN(estacao_id);
       if (isNum) {
         sql += ` AND (e.id = $${paramIndex} OR e.codigo = $${paramIndex + 1})`;
@@ -93,14 +103,19 @@ router.get('/', async (req, res) => {
 /**
  * GET /api/alertas/resumo
  * Retorna contadores agregados de alertas (RF10)
+ * Operador: contadores restritos à sua estação
  */
-router.get('/resumo', async (req, res) => {
+router.get('/resumo', authMiddleware, async (req, res) => {
   try {
-    const totalQuery = await db.query('SELECT COUNT(*) AS total FROM alertas');
-    const abertosQuery = await db.query("SELECT COUNT(*) AS total FROM alertas WHERE status = 'Aberto'");
-    const emAnaliseQuery = await db.query("SELECT COUNT(*) AS total FROM alertas WHERE status = 'Em análise'");
-    const resolvidosQuery = await db.query("SELECT COUNT(*) AS total FROM alertas WHERE status = 'Resolvido'");
-    const criticosQuery = await db.query("SELECT COUNT(*) AS total FROM alertas WHERE nivel = 'Crítico' AND status != 'Resolvido'");
+    const whereClause = ehOperador(req) ? ' WHERE estacao_id = $1' : '';
+    const andWhere = ehOperador(req) ? ' AND estacao_id = $1' : '';
+    const params = ehOperador(req) ? [req.usuario.estacao_id] : [];
+
+    const totalQuery = await db.query(`SELECT COUNT(*) AS total FROM alertas${whereClause}`, params);
+    const abertosQuery = await db.query(`SELECT COUNT(*) AS total FROM alertas WHERE status = 'Aberto'${andWhere}`, params);
+    const emAnaliseQuery = await db.query(`SELECT COUNT(*) AS total FROM alertas WHERE status = 'Em análise'${andWhere}`, params);
+    const resolvidosQuery = await db.query(`SELECT COUNT(*) AS total FROM alertas WHERE status = 'Resolvido'${andWhere}`, params);
+    const criticosQuery = await db.query(`SELECT COUNT(*) AS total FROM alertas WHERE nivel = 'Crítico' AND status != 'Resolvido'${andWhere}`, params);
 
     res.json({
       success: true,
@@ -121,8 +136,9 @@ router.get('/resumo', async (req, res) => {
 /**
  * PUT /api/alertas/:id/status
  * Atualiza o status de um alerta ('Aberto', 'Em análise', 'Resolvido')
+ * Operador: pode atualizar apenas alertas da sua própria estação
  */
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -133,6 +149,16 @@ router.put('/:id/status', async (req, res) => {
         success: false,
         error: `Status inválido. Use um dos seguintes: ${validStatus.join(', ')}.`
       });
+    }
+
+    if (ehOperador(req)) {
+      const check = await db.query('SELECT estacao_id FROM alertas WHERE id = $1', [id]);
+      if (check.rows.length === 0) {
+        return res.status(404).json({ success: false, error: 'Alerta não encontrado.' });
+      }
+      if (check.rows[0].estacao_id !== req.usuario.estacao_id) {
+        return res.status(403).json({ success: false, error: 'Acesso negado. Este alerta pertence a outra estação.' });
+      }
     }
 
     const resolvidoEm = status === 'Resolvido' ? new Date() : null;
@@ -165,9 +191,13 @@ router.put('/:id/status', async (req, res) => {
  * POST /api/alertas
  * Criação de alerta (usado pela telemetria ou operador)
  */
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
-    const { estacao_id, medicao_id, nivel, descricao, parametro, valor_medido } = req.body;
+    let { estacao_id, medicao_id, nivel, descricao, parametro, valor_medido } = req.body;
+
+    if (ehOperador(req)) {
+      estacao_id = req.usuario.estacao_id;
+    }
 
     if (!estacao_id || !descricao) {
       return res.status(400).json({ success: false, error: 'Estação e descrição são obrigatórias.' });

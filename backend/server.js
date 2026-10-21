@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
-require('dotenv').config();
-
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
 const estacoesRoutes = require('./routes/estacoes');
 const telemetriaRoutes = require('./routes/telemetria');
 

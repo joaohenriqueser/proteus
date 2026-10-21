@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // Pool de Conexões PostgreSQL NATIVO
 // Suporte a SSL para bancos em nuvem (como Neon Tech, Supabase, Render, AWS)
@@ -151,14 +152,30 @@ async function initPostgreSQL() {
         (1, 7.20, 4.00, 8.60, 22.40, 15.30, 'Excelente', '[MOCK] ÁGUA IDEAL'),
         (2, 8.40, 48.00, 3.80, 26.50, 58.70, 'Alerta', '[MOCK] ÁGUA REGULAR'),
         (3, 9.20, 120.00, 1.10, 29.50, 89.40, 'Crítico', '[MOCK] ÁGUA RUIM / CRÍTICA');
-
-        INSERT INTO alertas (estacao_id, medicao_id, nivel, descricao, parametro, valor_medido, status)
-        VALUES
-        (3, 3, 'Crítico', 'Turbidez elevada detectada: 120.00 NTU (limite CONAMA: 100 NTU)', 'Turbidez', 120.00, 'Aberto'),
-        (3, 3, 'Crítico', 'pH alcalino fora do padrão CONAMA: 9.20 (faixa ideal: 6.0 a 9.0)', 'pH', 9.20, 'Aberto'),
-        (2, 2, 'Atenção', 'Variação térmica e turbidez em elevação: 48.00 NTU', 'Turbidez', 48.00, 'Em análise');
       `);
-      console.log('🌱 Dados iniciais (Seed) populados no PostgreSQL!');
+      console.log('🌱 Dados iniciais de estações e telemetria populados no PostgreSQL!');
+    }
+
+    // Inserir alertas padrão se a tabela de alertas estiver vazia (RF10)
+    const resAlertas = await client.query('SELECT COUNT(*) AS total FROM alertas');
+    if (parseInt(resAlertas.rows[0].total, 10) === 0) {
+      const estRes = await client.query('SELECT id FROM estacoes ORDER BY id ASC LIMIT 3');
+      const medRes = await client.query('SELECT id, estacao_id FROM leituras_telemetria ORDER BY id ASC LIMIT 3');
+      if (estRes.rows.length > 0) {
+        const estCrit = estRes.rows[2] ? estRes.rows[2].id : estRes.rows[0].id;
+        const estAten = estRes.rows[1] ? estRes.rows[1].id : estRes.rows[0].id;
+        const medCrit = medRes.rows[2] ? medRes.rows[2].id : null;
+        const medAten = medRes.rows[1] ? medRes.rows[1].id : null;
+
+        await client.query(`
+          INSERT INTO alertas (estacao_id, medicao_id, nivel, descricao, parametro, valor_medido, status)
+          VALUES
+          ($1, $2, 'Crítico', 'Turbidez elevada detectada: 120.00 NTU (limite CONAMA: 100 NTU)', 'Turbidez', 120.00, 'Aberto'),
+          ($1, $2, 'Crítico', 'pH alcalino fora do padrão CONAMA: 9.20 (faixa ideal: 6.0 a 9.0)', 'pH', 9.20, 'Aberto'),
+          ($3, $4, 'Atenção', 'Variação térmica e turbidez em elevação: 48.00 NTU', 'Turbidez', 48.00, 'Em análise');
+        `, [estCrit, medCrit, estAten, medAten]);
+        console.log('🌱 Alertas padrão populados no PostgreSQL!');
+      }
     }
   } catch (err) {
     console.error('❌ Erro de conexão com PostgreSQL:', err.message);

@@ -1,6 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const jwt = require('jsonwebtoken');
+const authMiddleware = require('../middlewares/authMiddleware');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'proteus_jwt_padrao_dev';
+
+function ehOperador(req) {
+  return req.usuario && req.usuario.papel === 'operador';
+}
+
+function extrairUsuarioOpcional(req) {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) return null;
+  const partes = authHeader.split(' ');
+  if (partes.length !== 2 || partes[0] !== 'Bearer') return null;
+  try {
+    return jwt.verify(partes[1], JWT_SECRET);
+  } catch (e) {
+    return null;
+  }
+}
 
 /**
  * Função Server-side de Cálculo do IRE (Resolução CONAMA 357/2005)
@@ -41,7 +61,13 @@ function calculateIRE(ph, turb, od, temp) {
  */
 router.get('/historico', async (req, res) => {
   try {
-    const { estacao_id, limit = 100, data_inicio, data_fim } = req.query;
+    let { estacao_id, limit = 100, data_inicio, data_fim } = req.query;
+
+    // Se o solicitante for um operador autenticado, limita à sua estação
+    const user = extrairUsuarioOpcional(req);
+    if (user && user.papel === 'operador' && user.estacao_id) {
+      estacao_id = user.estacao_id;
+    }
     let sql = `
       SELECT 
         t.id,
@@ -260,10 +286,16 @@ router.post('/', async (req, res) => {
 
 /**
  * GET /api/telemetria/relatorio (RF12 - Relatórios Consolidados com Base nos Dados)
+ * Operador: restrito exclusivamente aos dados da sua estação
  */
-router.get('/relatorio', async (req, res) => {
+router.get('/relatorio', authMiddleware, async (req, res) => {
   try {
-    const { estacao_id, data_inicio, data_fim } = req.query;
+    let { estacao_id, data_inicio, data_fim } = req.query;
+
+    // Regra estrita: se for operador, restringe à sua própria estação
+    if (ehOperador(req)) {
+      estacao_id = req.usuario.estacao_id;
+    }
 
     let whereClause = 'WHERE 1=1';
     const params = [];

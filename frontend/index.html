@@ -81,22 +81,6 @@
           </div>
           <span class="link-label">Metodologia</span>
         </a>
-
-        <!-- Alertas Automáticos (RF10) -->
-        <button id="sidebarBtnAlertas" type="button" class="sidebar-link w-full text-left" title="Alertas Automáticos do Sistema (RF10)">
-          <div class="link-icon">
-            <i data-lucide="bell" class="w-4 h-4"></i>
-          </div>
-          <span class="link-label">Alertas <span id="sidebarAlertBadge" class="ml-1 text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full font-bold">0</span></span>
-        </button>
-
-        <!-- Relatórios Consolidados (RF12) -->
-        <button id="sidebarBtnRelatorios" type="button" class="sidebar-link w-full text-left" title="Relatórios Técnicos (RF12)">
-          <div class="link-icon">
-            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-          </div>
-          <span class="link-label">Relatórios</span>
-        </button>
       </nav>
     </div>
 
@@ -261,19 +245,6 @@
           </button>
         </div>
 
-        <!-- Quick Access: Alertas & Relatórios -->
-        <div class="glass-pill px-2 py-1 flex items-center gap-1.5 shadow-sm">
-          <button id="btnTopAlerts" type="button" class="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-700 hover:text-rose-600 hover:bg-rose-50/60 transition-colors flex items-center gap-1.5 cursor-pointer" title="Alertas do Sistema (RF10)">
-            <i data-lucide="bell" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">Alertas</span>
-            <span id="topAlertCountBadge" class="bg-slate-100 text-slate-600 font-mono text-[10.5px] font-bold px-1.5 py-0.2 rounded-full">0</span>
-          </button>
-          <button id="btnTopReport" type="button" class="px-2.5 py-1 text-xs font-semibold rounded-lg text-slate-700 hover:text-blue-600 hover:bg-blue-50/60 transition-colors flex items-center gap-1.5 cursor-pointer" title="Relatório Técnico Consolidado (RF12)">
-            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">Relatório</span>
-          </button>
-        </div>
-
       </div>
 
       <!-- ==================== FLOATING MAP ZOOM & CENTERING CONTROLS ==================== -->
@@ -423,11 +394,6 @@
             <i data-lucide="download" class="w-3.5 h-3.5"></i>
             <span>Exportar CSV</span>
           </button>
-          <!-- Botão Relatório Técnico (RF12) -->
-          <button id="btnOpenReportFromHistory" type="button" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm cursor-pointer" title="Abrir Relatório Técnico Consolidado">
-            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-            <span>Relatório Técnico</span>
-          </button>
         </div>
       </div>
 
@@ -458,213 +424,6 @@
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
           Transmissão em tempo real ativa
         </span>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ==================== MODAL DE ALERTAS AUTOMÁTICOS (RF10) ==================== -->
-  <div id="alertasModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3 sm:p-6">
-    <div class="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-3xl p-5 sm:p-7 max-w-4xl w-full max-h-[85vh] shadow-2xl flex flex-col justify-between space-y-4">
-      
-      <!-- Modal Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-            <i data-lucide="bell" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h2 class="text-base sm:text-lg font-bold text-slate-900 font-sans">Central de Alertas e Anomalias</h2>
-            <p class="text-xs text-slate-500 font-sans mt-0.5">Identificação automática de violações aos padrões da Resolução CONAMA nº 357/2005.</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button id="btnCloseAlertasModal" type="button" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Fechar Janela">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Filtros de Status de Alerta -->
-      <div class="flex items-center justify-between gap-3 flex-wrap bg-slate-50/80 p-2.5 rounded-2xl border border-slate-200/70 text-xs">
-        <div class="inline-flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200">
-          <button type="button" class="alert-filter-btn px-3 py-1 rounded-lg font-semibold is-active bg-slate-900 text-white" data-status="todos">Todos</button>
-          <button type="button" class="alert-filter-btn px-3 py-1 rounded-lg font-semibold text-slate-600 hover:text-slate-900" data-status="Aberto">Abertos</button>
-          <button type="button" class="alert-filter-btn px-3 py-1 rounded-lg font-semibold text-slate-600 hover:text-slate-900" data-status="Em análise">Em análise</button>
-          <button type="button" class="alert-filter-btn px-3 py-1 rounded-lg font-semibold text-slate-600 hover:text-slate-900" data-status="Resolvido">Resolvidos</button>
-        </div>
-        <span id="alertSummaryCounter" class="text-xs font-mono text-slate-500">Carregando alertas...</span>
-      </div>
-
-      <!-- Table Container -->
-      <div class="overflow-x-auto overflow-y-auto flex-grow max-h-[50vh] border border-slate-100 rounded-2xl">
-        <table class="w-full text-left font-sans text-xs border-collapse">
-          <thead class="bg-slate-50/90 sticky top-0 text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200/80 backdrop-blur-sm z-10">
-            <tr>
-              <th class="py-3 px-3.5">Nível</th>
-              <th class="py-3 px-3.5">Estação</th>
-              <th class="py-3 px-3.5">Parâmetro</th>
-              <th class="py-3 px-3.5">Descrição da Ocorrência</th>
-              <th class="py-3 px-3.5 text-center">Status</th>
-              <th class="py-3 px-3.5">Detecção</th>
-            </tr>
-          </thead>
-          <tbody id="alertasTableBody" class="divide-y divide-slate-100 font-mono text-xs text-slate-700">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Modal Footer -->
-      <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] font-mono text-slate-500">
-        <span>Monitoramento contínuo com gatilhos automáticos de anomalia.</span>
-        <span class="text-rose-600 font-bold flex items-center gap-1">
-          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
-          Proteção Ambiental Ativa
-        </span>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ==================== MODAL DE RELATÓRIO TÉCNICO (RF12) ==================== -->
-  <div id="reportModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[10000] hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-4xl w-full max-h-[92vh] shadow-2xl flex flex-col justify-between space-y-5 overflow-y-auto">
-      
-      <!-- Report Modal Controls -->
-      <div class="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-            <i data-lucide="file-check" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h2 class="text-base font-bold text-slate-900 font-sans">Relatório Técnico Consolidado (RF12)</h2>
-            <p class="text-xs text-slate-500 font-sans">Síntese estatística e conformidade com a Resolução CONAMA nº 357/2005.</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="btnPrintReportNow" type="button" class="btn btn-primary px-3 py-1.5 text-xs flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-sm cursor-pointer">
-            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-            <span>Imprimir / Salvar PDF</span>
-          </button>
-          <button id="btnCloseReportModal" type="button" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Fechar Janela">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Barra de Filtros do Relatório (Print:hidden) -->
-      <div class="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs print:hidden">
-        <div class="flex items-center gap-2 flex-wrap">
-          <label class="font-bold text-slate-600 font-mono text-[11px] uppercase">Período:</label>
-          <select id="reportPeriodSelect" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
-            <option value="todos">Todos os registros</option>
-            <option value="24h">Últimas 24 horas</option>
-            <option value="7d">Últimos 7 dias</option>
-            <option value="30d" selected>Últimos 30 dias</option>
-          </select>
-
-          <label class="font-bold text-slate-600 font-mono text-[11px] uppercase ml-1 sm:ml-2">Estação:</label>
-          <select id="reportStationFilter" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
-            <option value="todas">Todas as estações</option>
-          </select>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button id="btnExportCSVFromReport" type="button" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-semibold hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer" title="Exportar dados do relatório em CSV">
-            <i data-lucide="download" class="w-3.5 h-3.5"></i>
-            <span>Exportar CSV</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Printable Report Sheet Body -->
-      <div id="reportPrintArea" class="space-y-6 text-slate-900 font-sans">
-        
-        <!-- Institutional Header -->
-        <div class="flex items-start justify-between border-b-2 border-slate-800 pb-4">
-          <div>
-            <h1 class="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-slate-900">
-              Relatório de Telemetria e Qualidade Ambiental
-            </h1>
-            <p class="text-xs font-semibold text-slate-600 mt-0.5">
-              P.R.O.T.E.U.S. · Plataforma de Observação e Telemetria em Rios Urbanos
-            </p>
-          </div>
-          <div class="text-right text-[11px] font-mono text-slate-500 leading-relaxed">
-            <div><strong>Emissão:</strong> <span id="reportEmissaoData">—</span></div>
-            <div><strong>Referência:</strong> CONAMA nº 357/2005 (Classe 2)</div>
-            <div><strong>Escopo:</strong> Bacia Hidrográfica do Baixo Tietê</div>
-          </div>
-        </div>
-
-        <!-- Meta Info Pill Bar -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-          <div>
-            <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Estação Avaliada</span>
-            <span id="reportStationName" class="text-xs font-bold text-slate-800 font-sans truncate block">—</span>
-          </div>
-          <div>
-            <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Período Analisado</span>
-            <span id="reportPeriodoBadge" class="text-xs font-bold text-blue-700 font-mono block">Últimos 30 dias</span>
-          </div>
-          <div>
-            <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Total de Leituras</span>
-            <span id="reportTotalReadings" class="text-xs font-bold text-slate-800 font-mono block">—</span>
-          </div>
-          <div>
-            <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Conformidade Legal</span>
-            <span id="reportComplianceRate" class="text-xs font-bold text-emerald-700 font-mono block">—</span>
-          </div>
-          <div>
-            <span class="text-[10px] font-mono uppercase text-slate-400 block font-bold">Alertas Gerados</span>
-            <span id="reportTotalAlerts" class="text-xs font-bold text-rose-700 font-mono block">—</span>
-          </div>
-        </div>
-
-        <!-- Quadro Comparativo de Parâmetros -->
-        <div>
-          <h3 class="text-xs font-bold text-slate-800 font-mono uppercase tracking-wider mb-2">
-            Quadro Estatístico de Parâmetros Físico-Químicos
-          </h3>
-          <div class="overflow-x-auto border border-slate-200 rounded-xl">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead class="bg-slate-100 text-slate-600 font-mono text-[11px] uppercase border-b border-slate-200">
-                <tr>
-                  <th class="py-2.5 px-3">Parâmetro</th>
-                  <th class="py-2.5 px-3 text-center">Mínimo</th>
-                  <th class="py-2.5 px-3 text-center">Média</th>
-                  <th class="py-2.5 px-3 text-center">Máximo</th>
-                  <th class="py-2.5 px-3">Critério CONAMA Classe 2</th>
-                  <th class="py-2.5 px-3 text-center">Conformidade</th>
-                </tr>
-              </thead>
-              <tbody id="reportBodyParams" class="divide-y divide-slate-100 font-mono">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Diagnóstico Limnológico Geral e IRE -->
-        <div class="border border-slate-200 rounded-2xl p-4 bg-slate-50/50 space-y-2">
-          <h3 class="text-xs font-bold text-slate-800 font-mono uppercase tracking-wider">
-            Diagnóstico Limnológico Consolidado (Algoritmo IRE)
-          </h3>
-          <p id="reportDiagnosticoTexto" class="text-xs text-slate-700 leading-relaxed font-sans">
-            A análise integrada dos dados físico-químicos registrados pelas sondas IoT no período demonstra parâmetros sob controle ambiental, sem incidência de anóxia ou eutrofização crítica prolongada.
-          </p>
-        </div>
-
-        <!-- Assinaturas e Rodapé -->
-        <div class="pt-6 border-t border-slate-200 text-center text-xs font-sans text-slate-600">
-          <div>
-            <div class="border-b border-slate-300 w-1/2 mx-auto mb-1"></div>
-            <p class="font-bold text-slate-800">Equipe P.R.O.T.E.U.S.</p>
-          </div>
-        </div>
-
       </div>
 
     </div>

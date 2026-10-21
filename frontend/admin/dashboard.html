@@ -63,6 +63,13 @@
     th { font-weight: 600; }
 
     .leaflet-popup-content-wrapper { border-radius: 10px !important; }
+
+    @media print {
+      body { background: #fff !important; }
+      header, #adminNav, .btn, .icon-btn, input, select, #toast, .seg-btn, #relatorioPresets, #relatorioEstacaoPresets { display: none !important; }
+      #viewRelatorios, #tabRelatoriosEstacao { display: block !important; }
+      .card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; break-inside: avoid; }
+    }
   </style>
 </head>
 <body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col">
@@ -172,9 +179,11 @@
       </div>
 
       <!-- Abas da estação -->
-      <div class="bg-slate-100 p-1 rounded-xl inline-flex items-center gap-1 border border-slate-200/80">
+      <div class="bg-slate-100 p-1 rounded-xl inline-flex items-center gap-1 border border-slate-200/80 flex-wrap">
         <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs is-active" data-seg="est" data-view="tabEquipamentos">Equipamentos</button>
         <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="est" data-view="tabEquipe">Equipe</button>
+        <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="est" data-view="tabAlertasEstacao">Alertas <span id="countAlertasEstacao" class="ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">0</span></button>
+        <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="est" data-view="tabRelatoriosEstacao">Relatórios</button>
         <button type="button" class="seg-btn px-4 py-1.5 rounded-lg text-xs" data-seg="est" data-view="tabDados">Dados da estação</button>
       </div>
 
@@ -237,6 +246,153 @@
       <div id="tabDados" class="est-view hidden">
         <div class="card p-5">
           <dl id="dadosEstacao" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm"></dl>
+        </div>
+      </div>
+
+      <!-- Aba: Alertas da estação -->
+      <div id="tabAlertasEstacao" class="est-view hidden space-y-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <p class="text-xs text-slate-500">Alertas e violações identificadas nesta estação.</p>
+          <button id="btnAtualizarAlertasEstacao" type="button" class="btn btn-ghost !py-1.5">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Atualizar</span>
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Nível</th>
+                  <th class="py-3 px-4">Parâmetro</th>
+                  <th class="py-3 px-4">Descrição da Anomalia</th>
+                  <th class="py-3 px-4">Valor Medido</th>
+                  <th class="py-3 px-4">Data/Hora</th>
+                  <th class="py-3 px-4 text-center">Status</th>
+                  <th class="py-3 px-4 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAlertasEstacao" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aba: Relatórios da estação (Acesso Operador & Admin) -->
+      <div id="tabRelatoriosEstacao" class="est-view hidden space-y-4">
+        <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 font-heading">Relatórios e Séries Históricas da Estação</h2>
+            <p class="text-xs text-slate-500 mt-1">Geração de relatórios analíticos, diagnósticos limnológicos e conformidade CONAMA Classe 2 para esta unidade.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btnBaixarCSVEstacao" type="button" class="btn btn-ghost">
+              <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i><span>Exportar CSV</span>
+            </button>
+            <button id="btnImprimirRelatorioEstacao" type="button" class="btn btn-primary">
+              <i data-lucide="printer" class="w-4 h-4"></i><span>Imprimir Relatório</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros do Relatório da Estação -->
+        <div class="card p-4 space-y-3 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+              <div>
+                <label class="label" for="relatorioEstacaoDataInicio">Data Inicial</label>
+                <input type="date" id="relatorioEstacaoDataInicio" class="field !w-auto">
+              </div>
+              <div>
+                <label class="label" for="relatorioEstacaoDataFim">Data Final</label>
+                <input type="date" id="relatorioEstacaoDataFim" class="field !w-auto">
+              </div>
+              <div class="pt-5">
+                <button id="btnGerarRelatorioEstacao" type="button" class="btn btn-primary">
+                  <i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Compilar Dados</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Presets rápidos -->
+            <div class="pt-5 flex items-center gap-1.5 flex-wrap" id="relatorioEstacaoPresets">
+              <span class="text-slate-400 font-medium mr-1">Filtro rápido:</span>
+              <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="24h">24h</button>
+              <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="7d">7 dias</button>
+              <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="30d">30 dias</button>
+              <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="tudo">Todo período</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel de Indicadores Analíticos -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div class="card p-4">
+            <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Total de Leituras</span>
+            <span id="kpiEstTotal" class="text-2xl font-bold font-mono text-slate-900 mt-1 block">0</span>
+          </div>
+          <div class="card p-4">
+            <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Conformidade CONAMA</span>
+            <span id="kpiEstConformidade" class="text-2xl font-bold font-mono text-emerald-600 mt-1 block">100%</span>
+          </div>
+          <div class="card p-4">
+            <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Média Índice IRE</span>
+            <span id="kpiEstIRE" class="text-2xl font-bold font-mono text-blue-600 mt-1 block">—</span>
+          </div>
+          <div class="card p-4">
+            <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Alertas / Violações</span>
+            <span id="kpiEstAlertas" class="text-2xl font-bold font-mono text-rose-600 mt-1 block">0</span>
+          </div>
+        </div>
+
+        <!-- Distribuição dos Níveis de Risco IRE -->
+        <div class="card p-4 space-y-2">
+          <div class="text-xs font-semibold text-slate-700">Distribuição por Nível de Risco IRE</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-2.5">
+              <span class="text-[11px] text-emerald-700 font-semibold block">Excelente (&ge; 75)</span>
+              <span id="kpiEstRiscoExcelente" class="text-lg font-bold font-mono text-emerald-800">0</span>
+            </div>
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-2.5">
+              <span class="text-[11px] text-blue-700 font-semibold block">Bom (55 a 74)</span>
+              <span id="kpiEstRiscoBom" class="text-lg font-bold font-mono text-blue-800">0</span>
+            </div>
+            <div class="bg-amber-50 border border-amber-100 rounded-lg p-2.5">
+              <span class="text-[11px] text-amber-700 font-semibold block">Alerta (35 a 54)</span>
+              <span id="kpiEstRiscoAlerta" class="text-lg font-bold font-mono text-amber-800">0</span>
+            </div>
+            <div class="bg-rose-50 border border-rose-100 rounded-lg p-2.5">
+              <span class="text-[11px] text-rose-700 font-semibold block">Crítico (&lt; 35)</span>
+              <span id="kpiEstRiscoCritico" class="text-lg font-bold font-mono text-rose-800">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumo Detalhado dos Parâmetros -->
+        <div class="card overflow-hidden">
+          <div class="p-4 border-b border-slate-100 font-semibold text-slate-800 text-sm">
+            Diagnóstico dos Parâmetros Físico-Químicos da Estação
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Parâmetro</th>
+                  <th class="py-3 px-4 text-center">Mínimo</th>
+                  <th class="py-3 px-4 text-center">Média</th>
+                  <th class="py-3 px-4 text-center">Máximo</th>
+                  <th class="py-3 px-4">Padrão CONAMA Classe 2</th>
+                  <th class="py-3 px-4 text-center">Conformidade</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyEstRelatorioParams" class="divide-y divide-slate-100 font-mono text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Parecer Limnológico Consolidado -->
+        <div class="card p-5 space-y-2">
+          <div class="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Parecer Limnológico Consolidado</div>
+          <p id="textoEstRelatorioDiagnostico" class="text-sm text-slate-700 leading-relaxed font-sans"></p>
         </div>
       </div>
     </section>
@@ -306,25 +462,76 @@
           </table>
         </div>
       </div>
+    </section>
+
     <!-- ==================== VISÃO: ALERTAS DO SISTEMA (RF10) ==================== -->
     <section id="viewAlertas" class="main-view hidden space-y-4">
       <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 class="text-lg font-bold text-slate-900 font-heading">Gestão de Alertas e Anomalias</h1>
-          <p class="text-xs text-slate-500 mt-1">Ocorrências automáticas disparadas por violações da Resolução CONAMA nº 357/2005.</p>
+          <p class="text-xs text-slate-500 mt-1">Ocorrências automáticas disparadas por violações dos padrões de qualidade da água (Resolução CONAMA nº 357/2005).</p>
         </div>
-        <div class="flex items-center gap-2 flex-wrap">
+        <button id="btnAtualizarAlertasAdmin" type="button" class="btn btn-ghost flex-shrink-0">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Atualizar Alertas</span>
+        </button>
+      </div>
+
+      <!-- Indicadores Resumo de Alertas -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="card p-3.5">
+          <span class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold block">Total</span>
+          <span id="kpiAlertasTotal" class="text-xl font-bold font-mono text-slate-900 mt-0.5 block">0</span>
+        </div>
+        <div class="card p-3.5 bg-rose-50/50 border-rose-100">
+          <span class="text-[11px] uppercase tracking-wider text-rose-700 font-semibold block">Abertos</span>
+          <span id="kpiAlertasAbertos" class="text-xl font-bold font-mono text-rose-700 mt-0.5 block">0</span>
+        </div>
+        <div class="card p-3.5 bg-amber-50/50 border-amber-100">
+          <span class="text-[11px] uppercase tracking-wider text-amber-700 font-semibold block">Em Análise</span>
+          <span id="kpiAlertasEmAnalise" class="text-xl font-bold font-mono text-amber-700 mt-0.5 block">0</span>
+        </div>
+        <div class="card p-3.5 bg-emerald-50/50 border-emerald-100">
+          <span class="text-[11px] uppercase tracking-wider text-emerald-700 font-semibold block">Resolvidos</span>
+          <span id="kpiAlertasResolvidos" class="text-xl font-bold font-mono text-emerald-700 mt-0.5 block">0</span>
+        </div>
+        <div class="card p-3.5 bg-rose-100/60 border-rose-200">
+          <span class="text-[11px] uppercase tracking-wider text-rose-800 font-semibold block">Críticos Ativos</span>
+          <span id="kpiAlertasCriticos" class="text-xl font-bold font-mono text-rose-900 mt-0.5 block">0</span>
+        </div>
+      </div>
+
+      <!-- Filtros de Alerta -->
+      <div class="card p-4 flex flex-wrap items-center gap-3 text-xs">
+        <div class="flex-1 min-w-[200px]">
+          <label class="label" for="searchAlertasAdmin">Pesquisar alerta</label>
+          <input type="text" id="searchAlertasAdmin" placeholder="Filtrar ocorrência, parâmetro, estação..." class="field">
+        </div>
+        <div>
+          <label class="label" for="filtroEstacaoAlertaAdmin">Estação</label>
+          <select id="filtroEstacaoAlertaAdmin" class="field !w-auto">
+            <option value="">Todas as estações</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="filtroNivelAlertaAdmin">Nível de gravidade</label>
+          <select id="filtroNivelAlertaAdmin" class="field !w-auto">
+            <option value="todos">Todos os níveis</option>
+            <option value="Crítico">Crítico</option>
+            <option value="Atenção">Atenção</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="filtroStatusAlertaAdmin">Status operacional</label>
           <select id="filtroStatusAlertaAdmin" class="field !w-auto">
             <option value="todos">Todos os status</option>
             <option value="Aberto" selected>Abertos</option>
             <option value="Em análise">Em análise</option>
             <option value="Resolvido">Resolvidos</option>
           </select>
-          <button id="btnAtualizarAlertasAdmin" type="button" class="btn btn-ghost">
-            <i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Atualizar</span>
-          </button>
         </div>
       </div>
+
+      <!-- Tabela de Alertas -->
       <div class="card overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
@@ -334,9 +541,10 @@
                 <th class="py-3 px-4">Estação</th>
                 <th class="py-3 px-4">Parâmetro</th>
                 <th class="py-3 px-4">Descrição da Anomalia</th>
+                <th class="py-3 px-4 text-center">Valor Medido</th>
                 <th class="py-3 px-4">Data/Hora</th>
                 <th class="py-3 px-4 text-center">Status</th>
-                <th class="py-3 px-4 text-right">Ação</th>
+                <th class="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody id="tbodyAlertasAdmin" class="divide-y divide-slate-100"></tbody>
@@ -350,7 +558,7 @@
       <div class="card p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 class="text-lg font-bold text-slate-900 font-heading">Relatórios e Séries Históricas</h1>
-          <p class="text-xs text-slate-500 mt-1">Geração de relatórios analíticos e exportação de dados consolidados.</p>
+          <p class="text-xs text-slate-500 mt-1">Geração de relatórios analíticos, diagnósticos consolidados e exportação de telemetria.</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <button id="btnBaixarCSVAdmin" type="button" class="btn btn-ghost">
@@ -363,25 +571,38 @@
       </div>
 
       <!-- Filtros do Relatório -->
-      <div class="card p-4 flex flex-wrap items-center gap-3 text-xs">
-        <div>
-          <label class="label" for="relatorioEstacaoSelect">Estação</label>
-          <select id="relatorioEstacaoSelect" class="field !w-auto">
-            <option value="">Todas as estações</option>
-          </select>
-        </div>
-        <div>
-          <label class="label" for="relatorioDataInicio">Data Inicial</label>
-          <input type="date" id="relatorioDataInicio" class="field !w-auto">
-        </div>
-        <div>
-          <label class="label" for="relatorioDataFim">Data Final</label>
-          <input type="date" id="relatorioDataFim" class="field !w-auto">
-        </div>
-        <div class="pt-5">
-          <button id="btnGerarRelatorioAdmin" type="button" class="btn btn-primary">
-            <i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Compilar Dados</span>
-          </button>
+      <div class="card p-4 space-y-3 text-xs">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <div>
+              <label class="label" for="relatorioEstacaoSelect">Estação</label>
+              <select id="relatorioEstacaoSelect" class="field !w-auto">
+                <option value="">Todas as estações</option>
+              </select>
+            </div>
+            <div>
+              <label class="label" for="relatorioDataInicio">Data Inicial</label>
+              <input type="date" id="relatorioDataInicio" class="field !w-auto">
+            </div>
+            <div>
+              <label class="label" for="relatorioDataFim">Data Final</label>
+              <input type="date" id="relatorioDataFim" class="field !w-auto">
+            </div>
+            <div class="pt-5">
+              <button id="btnGerarRelatorioAdmin" type="button" class="btn btn-primary">
+                <i data-lucide="bar-chart-2" class="w-4 h-4"></i><span>Compilar Dados</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets rápidos de período -->
+          <div class="pt-5 flex items-center gap-1.5 flex-wrap" id="relatorioPresets">
+            <span class="text-slate-400 font-medium mr-1">Filtro rápido:</span>
+            <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="24h">24h</button>
+            <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="7d">7 dias</button>
+            <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="30d">30 dias</button>
+            <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs" data-preset="tudo">Todo período</button>
+          </div>
         </div>
       </div>
 
@@ -400,8 +621,31 @@
           <span id="kpiRelatorioIRE" class="text-2xl font-bold font-mono text-blue-600 mt-1 block">—</span>
         </div>
         <div class="card p-4">
-          <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Ocorrências / Alertas</span>
+          <span class="text-xs font-mono uppercase text-slate-400 block font-bold">Ocorrências / Violações</span>
           <span id="kpiRelatorioAlertas" class="text-2xl font-bold font-mono text-rose-600 mt-1 block">0</span>
+        </div>
+      </div>
+
+      <!-- Distribuição dos Níveis de Qualidade / Risco -->
+      <div class="card p-4 space-y-2">
+        <div class="text-xs font-semibold text-slate-700">Distribuição por Nível de Risco IRE</div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="bg-emerald-50 border border-emerald-100 rounded-lg p-2.5">
+            <span class="text-[11px] text-emerald-700 font-semibold block">Excelente (&ge; 75)</span>
+            <span id="kpiRiscoExcelente" class="text-lg font-bold font-mono text-emerald-800">0</span>
+          </div>
+          <div class="bg-blue-50 border border-blue-100 rounded-lg p-2.5">
+            <span class="text-[11px] text-blue-700 font-semibold block">Bom (55 a 74)</span>
+            <span id="kpiRiscoBom" class="text-lg font-bold font-mono text-blue-800">0</span>
+          </div>
+          <div class="bg-amber-50 border border-amber-100 rounded-lg p-2.5">
+            <span class="text-[11px] text-amber-700 font-semibold block">Alerta (35 a 54)</span>
+            <span id="kpiRiscoAlerta" class="text-lg font-bold font-mono text-amber-800">0</span>
+          </div>
+          <div class="bg-rose-50 border border-rose-100 rounded-lg p-2.5">
+            <span class="text-[11px] text-rose-700 font-semibold block">Crítico (&lt; 35)</span>
+            <span id="kpiRiscoCritico" class="text-lg font-bold font-mono text-rose-800">0</span>
+          </div>
         </div>
       </div>
 
@@ -727,6 +971,9 @@
           if (btn.dataset.view === 'viewEstoque') carregarEstoque();
           if (btn.dataset.view === 'viewAlertas') carregarAlertasAdmin();
           if (btn.dataset.view === 'viewRelatorios') carregarRelatoriosAdmin();
+        } else if (btn.dataset.seg === 'est') {
+          if (btn.dataset.view === 'tabAlertasEstacao') carregarAlertasEstacao();
+          if (btn.dataset.view === 'tabRelatoriosEstacao') carregarRelatoriosEstacao();
         }
       });
     });
@@ -865,6 +1112,13 @@
     async function abrirEstacao(dbId) {
       const st = estacoes.find((s) => s.db_id === dbId);
       if (!st) return;
+
+      // Operador só pode abrir a própria estação
+      if (!ehAdmin() && me && me.estacao_id && st.db_id !== me.estacao_id) {
+        showToast('Acesso negado: restrito à sua estação cadastrada.', true);
+        return;
+      }
+
       estacaoAtual = st;
 
       // Admin geral volta para a lista; operador não possui lista
@@ -876,7 +1130,7 @@
       ativarSegmento('est', 'tabEquipamentos');
       renderizarCabecalhoEstacao();
 
-      await Promise.all([carregarEquipamentosEstacao(), carregarEquipeEstacao()]);
+      await Promise.all([carregarEquipamentosEstacao(), carregarEquipeEstacao(), carregarAlertasEstacao()]);
     }
 
     function renderizarCabecalhoEstacao() {
@@ -1402,83 +1656,220 @@
     // =====================================================================
     // Alertas do Sistema (RF10)
     // =====================================================================
+    let listaAlertasAdmin = [];
+
+    function renderizarBadgeNivelAlerta(nivel) {
+      const isCrit = (nivel || '').toLowerCase().includes('cr');
+      return isCrit
+        ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-rose-100 text-rose-800"><span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>Crítico</span>'
+        : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>Atenção</span>';
+    }
+
+    function renderizarBadgeStatusAlerta(status) {
+      if (status === 'Resolvido') {
+        return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Resolvido</span>';
+      }
+      if (status === 'Em análise') {
+        return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800"><span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>Em análise</span>';
+      }
+      return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-rose-100 text-rose-800"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Aberto</span>';
+    }
+
+    function renderizarBotoesAcaoAlerta(al) {
+      if (al.status === 'Aberto') {
+        return `
+          <div class="inline-flex items-center gap-1.5 justify-end">
+            <button type="button" class="btn btn-ghost !py-1 !px-2 !text-xs text-sky-700 hover:bg-sky-50" data-acao="status-alerta" data-id="${al.id}" data-status="Em análise" title="Colocar em análise">
+              <i data-lucide="clock" class="w-3.5 h-3.5 pointer-events-none"></i><span>Analisar</span>
+            </button>
+            <button type="button" class="btn btn-ghost !py-1 !px-2 !text-xs text-emerald-700 hover:bg-emerald-50" data-acao="status-alerta" data-id="${al.id}" data-status="Resolvido" title="Marcar como resolvido">
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5 pointer-events-none"></i><span>Resolver</span>
+            </button>
+          </div>`;
+      }
+      if (al.status === 'Em análise') {
+        return `
+          <div class="inline-flex items-center gap-1.5 justify-end">
+            <button type="button" class="btn btn-ghost !py-1 !px-2 !text-xs text-emerald-700 hover:bg-emerald-50" data-acao="status-alerta" data-id="${al.id}" data-status="Resolvido" title="Marcar como resolvido">
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5 pointer-events-none"></i><span>Resolver</span>
+            </button>
+            <button type="button" class="btn btn-ghost !py-1 !px-2 !text-xs text-slate-500 hover:bg-slate-50" data-acao="status-alerta" data-id="${al.id}" data-status="Aberto" title="Reabrir alerta">
+              <span>Reabrir</span>
+            </button>
+          </div>`;
+      }
+      return `
+        <button type="button" class="btn btn-ghost !py-1 !px-2.5 !text-xs text-slate-500 hover:bg-slate-50" data-acao="status-alerta" data-id="${al.id}" data-status="Aberto" title="Reabrir alerta">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 pointer-events-none"></i><span>Reabrir</span>
+        </button>`;
+    }
+
     async function carregarAlertasAdmin() {
-      const statusFiltro = $('filtroStatusAlertaAdmin') ? $('filtroStatusAlertaAdmin').value : 'todos';
+      const selEst = $('filtroEstacaoAlertaAdmin');
+      if (selEst) {
+        if (!ehAdmin() && me && me.estacao_id) {
+          const minhaEst = estacoes.find(s => s.db_id === me.estacao_id);
+          selEst.innerHTML = minhaEst 
+            ? `<option value="${minhaEst.id}">${esc(minhaEst.id)} — ${esc(minhaEst.name)}</option>`
+            : '<option value="">Minha Estação</option>';
+          selEst.disabled = true;
+        } else if (selEst.options.length <= 1 && estacoes.length > 0) {
+          selEst.innerHTML = '<option value="">Todas as estações</option>' +
+            estacoes.map(s => `<option value="${s.id}">${esc(s.id)} — ${esc(s.name)}</option>`).join('');
+        }
+      }
+
+      // Atualiza KPIs de Alertas
+      try {
+        const resResumo = await api('/api/alertas/resumo');
+        if (resResumo && resResumo.data) {
+          const d = resResumo.data;
+          $('kpiAlertasTotal').textContent = d.total ?? 0;
+          $('kpiAlertasAbertos').textContent = d.abertos ?? 0;
+          $('kpiAlertasEmAnalise').textContent = d.emAnalise ?? 0;
+          $('kpiAlertasResolvidos').textContent = d.resolvidos ?? 0;
+          $('kpiAlertasCriticos').textContent = d.criticosAtivos ?? 0;
+          $('countAlertas').textContent = d.abertos ?? 0;
+        }
+      } catch (e) {}
+
+      const estId = selEst ? selEst.value : '';
+      const nivel = $('filtroNivelAlertaAdmin') ? $('filtroNivelAlertaAdmin').value : 'todos';
+      const status = $('filtroStatusAlertaAdmin') ? $('filtroStatusAlertaAdmin').value : 'todos';
+
+      const qp = ['limit=100'];
+      if (estId) qp.push(`estacao_id=${encodeURIComponent(estId)}`);
+      if (nivel && nivel !== 'todos') qp.push(`nivel=${encodeURIComponent(nivel)}`);
+      if (status && status !== 'todos') qp.push(`status=${encodeURIComponent(status)}`);
+      const qs = '?' + qp.join('&');
+
       const tbody = $('tbodyAlertasAdmin');
       if (!tbody) return;
-      tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Carregando alertas do sistema...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-slate-400">Carregando alertas do sistema...</td></tr>';
 
       try {
-        const qs = statusFiltro && statusFiltro !== 'todos' ? `?status=${encodeURIComponent(statusFiltro)}` : '';
         const res = await api(`/api/alertas${qs}`);
-        const lista = res.data || [];
-
-        if (lista.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400">Nenhum alerta registrado com o filtro selecionado.</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = lista.map((al) => {
-          const isCrit = (al.nivel || '').toLowerCase() === 'crítico' || (al.nivel || '').toLowerCase() === 'critico';
-          const badgeNivel = isCrit
-            ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-rose-100 text-rose-800"><span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>Crítico</span>'
-            : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-800"><span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>Atenção</span>';
-
-          const statusBadge = al.status === 'Resolvido'
-            ? '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">Resolvido</span>'
-            : (al.status === 'Em análise' ? '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-sky-100 text-sky-800">Em análise</span>' : '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-rose-100 text-rose-800">Aberto</span>');
-
-          const btnAcao = al.status !== 'Resolvido'
-            ? `<button onclick="window.alterarStatusAlerta(${al.id}, 'Resolvido')" class="btn btn-ghost !py-1 !px-2.5 text-xs text-emerald-700 hover:bg-emerald-50" title="Marcar como resolvido"><i data-lucide="check" class="w-3.5 h-3.5"></i> Resolver</button>`
-            : `<button onclick="window.alterarStatusAlerta(${al.id}, 'Aberto')" class="btn btn-ghost !py-1 !px-2.5 text-xs text-slate-500" title="Reabrir alerta">Reabrir</button>`;
-
-          return `
-            <tr class="hover:bg-slate-50 transition-colors">
-              <td class="py-3 px-4">${badgeNivel}</td>
-              <td class="py-3 px-4 font-semibold text-slate-800">${esc(al.estacao_nome || al.estacao_codigo)}</td>
-              <td class="py-3 px-4 font-mono font-bold text-slate-900">${esc(al.parametro || 'Geral')}</td>
-              <td class="py-3 px-4 text-xs text-slate-700 max-w-xs">${esc(al.descricao)}</td>
-              <td class="py-3 px-4 text-xs text-slate-500 font-mono">${formatarData(al.gerado_em)}</td>
-              <td class="py-3 px-4 text-center">${statusBadge}</td>
-              <td class="py-3 px-4 text-right">${btnAcao}</td>
-            </tr>
-          `;
-        }).join('');
-        refreshIcons();
+        listaAlertasAdmin = res.data || [];
+        filtrarERenderizarAlertasAdmin();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-500">Erro ao carregar alertas: ${esc(err.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-rose-500">Erro ao carregar alertas: ${esc(err.message)}</td></tr>`;
       }
     }
 
-    window.alterarStatusAlerta = async function(id, novoStatus) {
+    function filtrarERenderizarAlertasAdmin() {
+      const q = ($('searchAlertasAdmin')?.value || '').toLowerCase().trim();
+      const filtrada = !q ? listaAlertasAdmin : listaAlertasAdmin.filter(al =>
+        [al.descricao, al.parametro, al.estacao_nome, al.estacao_codigo, al.nivel, al.status].some(v => v && String(v).toLowerCase().includes(q))
+      );
+
+      const tbody = $('tbodyAlertasAdmin');
+      if (!tbody) return;
+
+      if (filtrada.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-slate-400 font-sans">Nenhum alerta registrado com os filtros aplicados.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtrada.map(al => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="py-3 px-4">${renderizarBadgeNivelAlerta(al.nivel)}</td>
+          <td class="py-3 px-4">
+            <span class="font-mono text-xs px-2 py-0.5 rounded-md border border-slate-200 text-slate-700 mr-1">${esc(al.estacao_codigo)}</span>
+            <span class="font-medium text-slate-800 text-xs">${esc(al.estacao_nome || '')}</span>
+          </td>
+          <td class="py-3 px-4 font-mono font-bold text-slate-900">${esc(al.parametro || 'Qualidade')}</td>
+          <td class="py-3 px-4 text-xs text-slate-700 max-w-sm">${esc(al.descricao)}</td>
+          <td class="py-3 px-4 text-center font-mono font-semibold text-slate-800 text-xs">${al.valor_medido !== null ? al.valor_medido : '—'}</td>
+          <td class="py-3 px-4 text-xs text-slate-500 font-mono">${formatarData(al.gerado_em)}</td>
+          <td class="py-3 px-4 text-center">${renderizarBadgeStatusAlerta(al.status)}</td>
+          <td class="py-3 px-4 text-right">${renderizarBotoesAcaoAlerta(al)}</td>
+        </tr>
+      `).join('');
+      refreshIcons();
+    }
+
+    async function tratarAcaoAlertaAdmin(e) {
+      const btn = e.target.closest('[data-acao="status-alerta"]');
+      if (!btn) return;
+      const id = parseInt(btn.dataset.id, 10);
+      const novoStatus = btn.dataset.status;
       try {
         await api(`/api/alertas/${id}/status`, {
           method: 'PUT',
           body: JSON.stringify({ status: novoStatus })
         });
-        showToast(`Alerta atualizado para '${novoStatus}'!`);
+        showToast(`Status do alerta alterado para '${novoStatus}'.`);
         await carregarAlertasAdmin();
-        await atualizarContagens();
+        if (estacaoAtual) await carregarAlertasEstacao();
       } catch (err) {
         showToast(err.message || 'Erro ao alterar status do alerta.', true);
       }
-    };
+    }
 
-    if ($('btnAtualizarAlertasAdmin')) $('btnAtualizarAlertasAdmin').onclick = carregarAlertasAdmin;
-    if ($('filtroStatusAlertaAdmin')) $('filtroStatusAlertaAdmin').onchange = carregarAlertasAdmin;
+    $('tbodyAlertasAdmin')?.addEventListener('click', tratarAcaoAlertaAdmin);
+    $('btnAtualizarAlertasAdmin')?.addEventListener('click', carregarAlertasAdmin);
+    $('filtroStatusAlertaAdmin')?.addEventListener('change', carregarAlertasAdmin);
+    $('filtroNivelAlertaAdmin')?.addEventListener('change', carregarAlertasAdmin);
+    $('filtroEstacaoAlertaAdmin')?.addEventListener('change', carregarAlertasAdmin);
+    $('searchAlertasAdmin')?.addEventListener('input', filtrarERenderizarAlertasAdmin);
 
     // =====================================================================
-    // Relatórios e Exportação Analítica (RF12 e RF13)
+    // Alertas na Aba da Estação (tabAlertasEstacao)
     // =====================================================================
+    async function carregarAlertasEstacao() {
+      if (!estacaoAtual) return;
+      const tbody = $('tbodyAlertasEstacao');
+      if (!tbody) return;
+      tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Carregando alertas da estação...</td></tr>';
+
+      try {
+        const res = await api(`/api/alertas?estacao_id=${estacaoAtual.db_id}&limit=50`);
+        const lista = res.data || [];
+        const abertos = lista.filter(a => a.status !== 'Resolvido').length;
+        if ($('countAlertasEstacao')) $('countAlertasEstacao').textContent = abertos;
+
+        if (lista.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400 font-sans">Nenhum alerta registrado nesta estação. Todos os parâmetros em conformidade!</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = lista.map(al => `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-3 px-4">${renderizarBadgeNivelAlerta(al.nivel)}</td>
+            <td class="py-3 px-4 font-mono font-bold text-slate-900">${esc(al.parametro || 'Qualidade')}</td>
+            <td class="py-3 px-4 text-xs text-slate-700 max-w-sm">${esc(al.descricao)}</td>
+            <td class="py-3 px-4 text-center font-mono font-semibold text-slate-800 text-xs">${al.valor_medido !== null ? al.valor_medido : '—'}</td>
+            <td class="py-3 px-4 text-xs text-slate-500 font-mono">${formatarData(al.gerado_em)}</td>
+            <td class="py-3 px-4 text-center">${renderizarBadgeStatusAlerta(al.status)}</td>
+            <td class="py-3 px-4 text-right">${renderizarBotoesAcaoAlerta(al)}</td>
+          </tr>
+        `).join('');
+        refreshIcons();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-rose-500">Erro: ${esc(err.message)}</td></tr>`;
+      }
+    }
+    $('tbodyAlertasEstacao')?.addEventListener('click', tratarAcaoAlertaAdmin);
+    $('btnAtualizarAlertasEstacao')?.addEventListener('click', carregarAlertasEstacao);
+
+    // =====================================================================
+    // Relatórios e Séries Históricas (RF12 e RF13)
+    // =====================================================================
+    let relatorioCarregado = null;
+
     async function carregarRelatoriosAdmin() {
       const sel = $('relatorioEstacaoSelect');
-      if (sel && sel.options.length <= 1) {
-        estacoes.forEach((st) => {
-          const opt = document.createElement('option');
-          opt.value = st.id;
-          opt.textContent = st.name;
-          sel.appendChild(opt);
-        });
+      if (sel) {
+        if (!ehAdmin() && me && me.estacao_id) {
+          const minhaEst = estacoes.find(s => s.db_id === me.estacao_id);
+          sel.innerHTML = minhaEst 
+            ? `<option value="${minhaEst.id}">${esc(minhaEst.id)} — ${esc(minhaEst.name)}</option>`
+            : '<option value="">Minha Estação</option>';
+          sel.disabled = true;
+        } else if (sel.options.length <= 1 && estacoes.length > 0) {
+          sel.innerHTML = '<option value="">Todas as estações</option>' +
+            estacoes.map(s => `<option value="${s.id}">${esc(s.id)} — ${esc(s.name)}</option>`).join('');
+        }
       }
 
       const estId = sel ? sel.value : '';
@@ -1493,40 +1884,59 @@
 
       try {
         const res = await api(`/api/telemetria/relatorio${qs}`);
-        if (!res.success) return;
+        if (!res.success) throw new Error(res.error || 'Erro na compilação');
+        relatorioCarregado = res;
 
         const est = res.estatisticas || {};
-        $('kpiRelatorioTotal').textContent = est.totalLeituras || 0;
-        $('kpiRelatorioConformidade').textContent = `${est.taxaConformidadeConama || 100}%`;
+        $('kpiRelatorioTotal').textContent = est.totalLeituras ?? 0;
+        $('kpiRelatorioConformidade').textContent = `${est.taxaConformidadeConama ?? 100}%`;
         $('kpiRelatorioIRE').textContent = est.ire && est.ire.media ? `${est.ire.media}/100` : '—';
         $('kpiRelatorioAlertas').textContent = est.distribuicaoRisco ? (est.distribuicaoRisco.alerta + est.distribuicaoRisco.critico) : 0;
+
+        // Distribuição de risco
+        const dist = est.distribuicaoRisco || {};
+        if ($('kpiRiscoExcelente')) $('kpiRiscoExcelente').textContent = dist.excelente ?? 0;
+        if ($('kpiRiscoBom')) $('kpiRiscoBom').textContent = dist.bom ?? 0;
+        if ($('kpiRiscoAlerta')) $('kpiRiscoAlerta').textContent = dist.alerta ?? 0;
+        if ($('kpiRiscoCritico')) $('kpiRiscoCritico').textContent = dist.critico ?? 0;
+
+        // Diagnóstico consolidado com verificação dinâmica
+        const isPhOk = (!est.ph?.min || est.ph.min >= 6.0) && (!est.ph?.max || est.ph.max <= 9.0);
+        const isTurbOk = (!est.turbidez?.max || est.turbidez.max <= 100);
+        const isTempOk = (!est.temperatura?.max || est.temperatura.max <= 30);
+        const ireMedia = est.ire?.media || 0;
+        const ireSituacao = ireMedia >= 60
+          ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Equilibrado</span>'
+          : (ireMedia < 35
+              ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800">Crítico</span>'
+              : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">Alerta</span>');
 
         const tbody = $('tbodyRelatorioParams');
         if (tbody) {
           tbody.innerHTML = `
-            <tr class="hover:bg-slate-50">
+            <tr class="hover:bg-slate-50 transition-colors">
               <td class="py-3 px-4 font-semibold text-slate-800">pH da Água</td>
               <td class="py-3 px-4 text-center">${est.ph?.min ?? '—'}</td>
               <td class="py-3 px-4 text-center font-bold text-slate-900">${est.ph?.media ?? '—'}</td>
               <td class="py-3 px-4 text-center">${est.ph?.max ?? '—'}</td>
               <td class="py-3 px-4 font-sans text-slate-600">6.0 a 9.0 (CONAMA Classe 2)</td>
-              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span></td>
+              <td class="py-3 px-4 text-center">${isPhOk ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>' : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800">Não Conforme</span>'}</td>
             </tr>
-            <tr class="hover:bg-slate-50">
+            <tr class="hover:bg-slate-50 transition-colors">
               <td class="py-3 px-4 font-semibold text-slate-800">Turbidez</td>
               <td class="py-3 px-4 text-center">${est.turbidez?.min ?? '—'} NTU</td>
               <td class="py-3 px-4 text-center font-bold text-slate-900">${est.turbidez?.media ?? '—'} NTU</td>
               <td class="py-3 px-4 text-center">${est.turbidez?.max ?? '—'} NTU</td>
               <td class="py-3 px-4 font-sans text-slate-600">Máximo 100 NTU</td>
-              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span></td>
+              <td class="py-3 px-4 text-center">${isTurbOk ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>' : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800">Não Conforme</span>'}</td>
             </tr>
-            <tr class="hover:bg-slate-50">
+            <tr class="hover:bg-slate-50 transition-colors">
               <td class="py-3 px-4 font-semibold text-slate-800">Temperatura da Água</td>
               <td class="py-3 px-4 text-center">${est.temperatura?.min ?? '—'} °C</td>
               <td class="py-3 px-4 text-center font-bold text-slate-900">${est.temperatura?.media ?? '—'} °C</td>
               <td class="py-3 px-4 text-center">${est.temperatura?.max ?? '—'} °C</td>
               <td class="py-3 px-4 font-sans text-slate-600">Até 30 °C</td>
-              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span></td>
+              <td class="py-3 px-4 text-center">${isTempOk ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>' : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">Atenção</span>'}</td>
             </tr>
             <tr class="hover:bg-slate-50 bg-blue-50/20">
               <td class="py-3 px-4 font-bold text-blue-900">Índice IRE Sintético</td>
@@ -1534,66 +1944,264 @@
               <td class="py-3 px-4 text-center font-extrabold text-blue-700">${est.ire?.media ?? '—'}</td>
               <td class="py-3 px-4 text-center font-bold">${est.ire?.max ?? '—'}</td>
               <td class="py-3 px-4 font-sans text-slate-600">Referência ideal &ge; 60</td>
-              <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Equilibrado</span></td>
+              <td class="py-3 px-4 text-center">${ireSituacao}</td>
             </tr>
           `;
         }
       } catch (err) {
-        showToast('Não foi possível compilar os dados do relatório analítico.', true);
+        showToast('Não foi possível compilar os dados do relatório analítico: ' + err.message, true);
       }
     }
 
-    if ($('btnGerarRelatorioAdmin')) $('btnGerarRelatorioAdmin').onclick = carregarRelatoriosAdmin;
-    if ($('btnImprimirRelatorioAdmin')) $('btnImprimirRelatorioAdmin').onclick = () => window.print();
+    // Configuração dos Presets de Período
+    $('relatorioPresets')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-preset]');
+      if (!btn) return;
+      const preset = btn.dataset.preset;
+      const hoje = new Date();
+      const dtFimInput = $('relatorioDataFim');
+      const dtInicioInput = $('relatorioDataInicio');
 
-    if ($('btnBaixarCSVAdmin')) {
-      $('btnBaixarCSVAdmin').onclick = async () => {
-        try {
-          const sel = $('relatorioEstacaoSelect');
-          const estId = sel ? sel.value : '';
-          const qs = estId ? `?estacao_id=${encodeURIComponent(estId)}&limit=1000` : '?limit=1000';
-          const res = await api(`/api/telemetria/historico${qs}`);
-          const dados = res.data || [];
+      if (preset === 'tudo') {
+        dtInicioInput.value = '';
+        dtFimInput.value = '';
+      } else {
+        dtFimInput.value = hoje.toISOString().split('T')[0];
+        const dias = preset === '24h' ? 1 : (preset === '7d' ? 7 : 30);
+        const dataPassada = new Date(hoje.getTime() - dias * 24 * 60 * 60 * 1000);
+        dtInicioInput.value = dataPassada.toISOString().split('T')[0];
+      }
+      carregarRelatoriosAdmin();
+    });
 
-          if (dados.length === 0) {
-            showToast('Nenhum dado encontrado para exportação.', true);
-            return;
-          }
+    $('btnGerarRelatorioAdmin')?.addEventListener('click', carregarRelatoriosAdmin);
+    $('btnImprimirRelatorioAdmin')?.addEventListener('click', () => window.print());
 
-          const headers = ['ID', 'Data/Hora', 'Código Estação', 'Nome Estação', 'pH', 'Turbidez (NTU)', 'Temperatura (°C)', 'Índice IRE', 'Nível de Risco', 'Cenário'];
-          const rows = dados.map((d) => [
-            d.id,
-            `"${d.timestamp}"`,
-            `"${d.estacao_codigo}"`,
-            `"${d.estacao_nome}"`,
-            d.params.ph,
-            d.params.turb,
-            d.params.temp,
-            d.ire,
-            `"${d.nivel_risco}"`,
-            `"${d.scenarioTag || ''}"`
-          ].join(';'));
+    // Exportação em CSV
+    $('btnBaixarCSVAdmin')?.addEventListener('click', async () => {
+      try {
+        const sel = $('relatorioEstacaoSelect');
+        const estId = sel ? sel.value : '';
+        const dtInicio = $('relatorioDataInicio') ? $('relatorioDataInicio').value : '';
+        const dtFim = $('relatorioDataFim') ? $('relatorioDataFim').value : '';
 
-          const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
-          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-          const url = URL.createObjectURL(blob);
-          const fileName = `relatorio_telemetria_admin_${new Date().toISOString().split('T')[0]}.csv`;
-          a.href = url;
-          a.setAttribute('download', fileName);
-          a.download = fileName;
-          a.style.display = 'none';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }, 2000);
-          showToast('Relatório CSV baixado com sucesso!');
-        } catch (err) {
-          showToast('Erro ao exportar CSV: ' + err.message, true);
+        const qp = ['limit=1000'];
+        if (estId) qp.push(`estacao_id=${encodeURIComponent(estId)}`);
+        if (dtInicio) qp.push(`data_inicio=${encodeURIComponent(dtInicio)}`);
+        if (dtFim) qp.push(`data_fim=${encodeURIComponent(dtFim)}`);
+        const qs = '?' + qp.join('&');
+
+        const res = await api(`/api/telemetria/historico${qs}`);
+        const dados = res.data || [];
+
+        if (dados.length === 0) {
+          showToast('Nenhum dado encontrado para exportação no período selecionado.', true);
+          return;
         }
-      };
+
+        const headers = ['ID', 'Data/Hora', 'Código Estação', 'Nome Estação', 'pH', 'Turbidez (NTU)', 'Temperatura (°C)', 'Índice IRE', 'Nível de Risco', 'Cenário'];
+        const rows = dados.map((d) => [
+          d.id,
+          `"${d.timestamp || ''}"`,
+          `"${d.estacao_codigo || ''}"`,
+          `"${d.estacao_nome || ''}"`,
+          d.params?.ph ?? '',
+          d.params?.turb ?? '',
+          d.params?.temp ?? '',
+          d.ire ?? '',
+          `"${d.nivel_risco || ''}"`,
+          `"${d.scenarioTag || ''}"`
+        ].join(';'));
+
+        const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const fileName = `relatorio_telemetria_${estId ? estId + '_' : ''}${new Date().toISOString().split('T')[0]}.csv`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.setAttribute('download', fileName);
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 2000);
+        showToast('Relatório CSV baixado com sucesso!');
+      } catch (err) {
+        showToast('Erro ao exportar CSV: ' + err.message, true);
+      }
+    });
+
+    // =====================================================================
+    // Relatórios da Estação (tabRelatoriosEstacao)
+    // =====================================================================
+    async function carregarRelatoriosEstacao() {
+      if (!estacaoAtual) return;
+      const dtInicio = $('relatorioEstacaoDataInicio') ? $('relatorioEstacaoDataInicio').value : '';
+      const dtFim = $('relatorioEstacaoDataFim') ? $('relatorioEstacaoDataFim').value : '';
+
+      const queryParams = [`estacao_id=${encodeURIComponent(estacaoAtual.db_id)}`];
+      if (dtInicio) queryParams.push(`data_inicio=${encodeURIComponent(dtInicio)}`);
+      if (dtFim) queryParams.push(`data_fim=${encodeURIComponent(dtFim)}`);
+      const qs = '?' + queryParams.join('&');
+
+      try {
+        const res = await api(`/api/telemetria/relatorio${qs}`);
+        if (!res.success) throw new Error(res.error || 'Erro na compilação');
+
+        const est = res.estatisticas || {};
+        if ($('kpiEstTotal')) $('kpiEstTotal').textContent = est.totalLeituras ?? 0;
+        if ($('kpiEstConformidade')) $('kpiEstConformidade').textContent = `${est.taxaConformidadeConama ?? 100}%`;
+        if ($('kpiEstIRE')) $('kpiEstIRE').textContent = est.ire && est.ire.media ? `${est.ire.media}/100` : '—';
+        if ($('kpiEstAlertas')) $('kpiEstAlertas').textContent = est.distribuicaoRisco ? (est.distribuicaoRisco.alerta + est.distribuicaoRisco.critico) : 0;
+
+        const dist = est.distribuicaoRisco || {};
+        if ($('kpiEstRiscoExcelente')) $('kpiEstRiscoExcelente').textContent = dist.excelente ?? 0;
+        if ($('kpiEstRiscoBom')) $('kpiEstRiscoBom').textContent = dist.bom ?? 0;
+        if ($('kpiEstRiscoAlerta')) $('kpiEstRiscoAlerta').textContent = dist.alerta ?? 0;
+        if ($('kpiEstRiscoCritico')) $('kpiEstRiscoCritico').textContent = dist.critico ?? 0;
+
+        const isPhOk = (!est.ph?.min || est.ph.min >= 6.0) && (!est.ph?.max || est.ph.max <= 9.0);
+        const isTurbOk = (!est.turbidez?.max || est.turbidez.max <= 100);
+        const isTempOk = (!est.temperatura?.max || est.temperatura.max <= 30);
+        const ireMedia = est.ire?.media || 0;
+        const ireSituacao = ireMedia >= 60
+          ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Equilibrado</span>'
+          : (ireMedia < 35
+              ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800">Crítico</span>'
+              : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">Alerta</span>');
+
+        const tbody = $('tbodyEstRelatorioParams');
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="py-3 px-4 font-semibold text-slate-800">pH da Água</td>
+              <td class="py-3 px-4 text-center">${est.ph?.min ?? '—'}</td>
+              <td class="py-3 px-4 text-center font-bold text-slate-900">${est.ph?.media ?? '—'}</td>
+              <td class="py-3 px-4 text-center">${est.ph?.max ?? '—'}</td>
+              <td class="py-3 px-4 font-sans text-slate-600">6.0 a 9.0 (CONAMA Classe 2)</td>
+              <td class="py-3 px-4 text-center">${isPhOk ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>' : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800">Não Conforme</span>'}</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="py-3 px-4 font-semibold text-slate-800">Turbidez</td>
+              <td class="py-3 px-4 text-center">${est.turbidez?.min ?? '—'} NTU</td>
+              <td class="py-3 px-4 text-center font-bold text-slate-900">${est.turbidez?.media ?? '—'} NTU</td>
+              <td class="py-3 px-4 text-center">${est.turbidez?.max ?? '—'} NTU</td>
+              <td class="py-3 px-4 font-sans text-slate-600">Máximo 100 NTU</td>
+              <td class="py-3 px-4 text-center">${isTurbOk ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>' : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800">Não Conforme</span>'}</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="py-3 px-4 font-semibold text-slate-800">Temperatura da Água</td>
+              <td class="py-3 px-4 text-center">${est.temperatura?.min ?? '—'} °C</td>
+              <td class="py-3 px-4 text-center font-bold text-slate-900">${est.temperatura?.media ?? '—'} °C</td>
+              <td class="py-3 px-4 text-center">${est.temperatura?.max ?? '—'} °C</td>
+              <td class="py-3 px-4 font-sans text-slate-600">Até 30 °C</td>
+              <td class="py-3 px-4 text-center">${isTempOk ? '<span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">Conforme</span>' : '<span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">Atenção</span>'}</td>
+            </tr>
+            <tr class="hover:bg-slate-50 bg-blue-50/20">
+              <td class="py-3 px-4 font-bold text-blue-900">Índice IRE Sintético</td>
+              <td class="py-3 px-4 text-center font-bold">${est.ire?.min ?? '—'}</td>
+              <td class="py-3 px-4 text-center font-extrabold text-blue-700">${est.ire?.media ?? '—'}</td>
+              <td class="py-3 px-4 text-center font-bold">${est.ire?.max ?? '—'}</td>
+              <td class="py-3 px-4 font-sans text-slate-600">Referência ideal &ge; 60</td>
+              <td class="py-3 px-4 text-center">${ireSituacao}</td>
+            </tr>
+          `;
+        }
+
+        const pTxt = $('textoEstRelatorioDiagnostico');
+        if (pTxt) {
+          const tot = est.totalLeituras || 0;
+          const conf = est.taxaConformidadeConama ?? 100;
+          if (tot === 0) {
+            pTxt.textContent = `Nenhum registro de telemetria identificado para esta estação no período selecionado.`;
+          } else if (conf >= 98) {
+            pTxt.textContent = `A estação ${estacaoAtual.name} (${estacaoAtual.id}) apresentou estabilidade ambiental com ${conf}% de conformidade CONAMA Classe 2. Índices de turbidez e pH dentro dos padrões normativos.`;
+          } else {
+            pTxt.textContent = `A estação ${estacaoAtual.name} (${estacaoAtual.id}) registrou inconformidades pontuais (${conf}% de conformidade), requerendo verificação de efluentes ou descarte na bacia monitorada.`;
+          }
+        }
+      } catch (err) {
+        showToast('Erro ao compilar relatório da estação: ' + err.message, true);
+      }
     }
+
+    $('relatorioEstacaoPresets')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-preset]');
+      if (!btn) return;
+      const preset = btn.dataset.preset;
+      const hoje = new Date();
+      const dtFimInput = $('relatorioEstacaoDataFim');
+      const dtInicioInput = $('relatorioEstacaoDataInicio');
+
+      if (preset === 'tudo') {
+        dtInicioInput.value = '';
+        dtFimInput.value = '';
+      } else {
+        dtFimInput.value = hoje.toISOString().split('T')[0];
+        const dias = preset === '24h' ? 1 : (preset === '7d' ? 7 : 30);
+        const dataPassada = new Date(hoje.getTime() - dias * 24 * 60 * 60 * 1000);
+        dtInicioInput.value = dataPassada.toISOString().split('T')[0];
+      }
+      carregarRelatoriosEstacao();
+    });
+
+    $('btnGerarRelatorioEstacao')?.addEventListener('click', carregarRelatoriosEstacao);
+    $('btnImprimirRelatorioEstacao')?.addEventListener('click', () => window.print());
+
+    $('btnBaixarCSVEstacao')?.addEventListener('click', async () => {
+      if (!estacaoAtual) return;
+      try {
+        const dtInicio = $('relatorioEstacaoDataInicio') ? $('relatorioEstacaoDataInicio').value : '';
+        const dtFim = $('relatorioEstacaoDataFim') ? $('relatorioEstacaoDataFim').value : '';
+
+        const qp = ['limit=1000', `estacao_id=${encodeURIComponent(estacaoAtual.db_id)}`];
+        if (dtInicio) queryParams.push(`data_inicio=${encodeURIComponent(dtInicio)}`);
+        if (dtFim) queryParams.push(`data_fim=${encodeURIComponent(dtFim)}`);
+        const qs = '?' + qp.join('&');
+
+        const res = await api(`/api/telemetria/historico${qs}`);
+        const dados = res.data || [];
+
+        if (dados.length === 0) {
+          showToast('Nenhum dado encontrado para exportação nesta estação.', true);
+          return;
+        }
+
+        const headers = ['ID', 'Data/Hora', 'Código Estação', 'Nome Estação', 'pH', 'Turbidez (NTU)', 'Temperatura (°C)', 'Índice IRE', 'Nível de Risco', 'Cenário'];
+        const rows = dados.map((d) => [
+          d.id,
+          `"${d.timestamp || ''}"`,
+          `"${d.estacao_codigo || ''}"`,
+          `"${d.estacao_nome || ''}"`,
+          d.params?.ph ?? '',
+          d.params?.turb ?? '',
+          d.params?.temp ?? '',
+          d.ire ?? '',
+          `"${d.nivel_risco || ''}"`,
+          `"${d.scenarioTag || ''}"`
+        ].join(';'));
+
+        const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const fileName = `relatorio_telemetria_${estacaoAtual.id}_${new Date().toISOString().split('T')[0]}.csv`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.setAttribute('download', fileName);
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 2000);
+        showToast('Relatório CSV da estação baixado com sucesso!');
+      } catch (err) {
+        showToast('Erro ao exportar CSV: ' + err.message, true);
+      }
+    });
 
     // =====================================================================
     refreshIcons();
