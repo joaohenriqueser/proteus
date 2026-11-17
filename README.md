@@ -9,9 +9,9 @@ Desenvolvido no Instituto Federal de Educação, Ciência e Tecnologia de São P
 
 ## Sobre o Projeto
 
-O **PROTEUS** é um sistema experimental de telemetria hídrica projetado para monitorar a dinâmica físico-química da água em corpos hídricos sob impacto urbano, com aplicação piloto no Rio Tietê (município de Barbosa-SP).
+O **PROTEUS** é um sistema experimental de telemetria hídrica projetado para monitorar a dinâmica físico-química da água em corpos hídricos sob impacto urbano, com aplicação piloto no Rio Tietê (município de Barbosa-SP e reservatórios adjacentes do Baixo Tietê).
 
-A plataforma utiliza estações baseadas em microcontroladores ESP32 acoplados a sondas submersas para transmitir leituras contínuas diretamente a um servidor central, calculando em tempo real o **Índice de Risco de Eutrofização (IRE)** para identificar precocemente condições propícias à proliferação desordenada de microalgas e cianobactérias.
+A plataforma simula e processa leituras de estações baseadas em microcontroladores ESP32 acoplados a sondas submersas, calculando em tempo real o **Índice de Risco de Eutrofização (IRE)** para identificar precocemente condições propícias à proliferação desordenada de microalgas e cianobactérias.
 
 ---
 
@@ -40,79 +40,49 @@ $$IRE = \min\left(100, \, \max\left(0, \, \frac{0.60 \times S_{\text{turb}} + 0.
 
 ---
 
-## Arquitetura da Solução
+## Funcionalidades da Plataforma
 
-O projeto é estruturado em três camadas independentes:
+A aplicação web é dividida em três módulos interativos principais:
 
-- **Frontend (`frontend/`):** Interface web responsiva em HTML5, JavaScript ES6+ e Tailwind CSS. Inclui mapas espaciais interativos (Leaflet.js), gráficos de tendência temporal (Chart.js), simulador de parâmetros em tempo real, documentação metodológica e painel restrito de administração.
-- **Backend (`backend/`):** API REST construída em Node.js com Express, CORS, autenticação via JWT e conexão com banco de dados relacional.
-- **Banco de Dados (`database/`):** Modelo relacional em PostgreSQL para armazenamento de estações de monitoramento, registros históricos de telemetria e controle de usuários.
-- **Hardware IoT:** Unidade microcontroladora ESP32 com Wi-Fi integrada a sensor analógico de pH, sensor óptico de turbidez nefelométrica (IR 850 nm) e sensor digital blindado de temperatura Dallas DS18B20.
+1. **Monitoramento em Tempo Real (`index.html`):**
+   - Mapa espacial interativo (Leaflet.js) com seleção de estações no Rio Tietê (`BRB-04 · Barbosa-SP`, `PNP-02 · Penápolis-SP`, `ARÇ-01 · Araçatuba-SP`).
+   - Painel flutuante com pontuação do Índice IRE e leitura instantânea de pH, Turbidez e Temperatura.
+   - Cenários rápidos de teste (*Água Boa*, *Água Regular*, *Água Crítica*) e simulação contínua em tempo real.
+   - Gráfico de tendência temporal (Chart.js) e histórico analítico completo com filtros por período/estação e **exportação para CSV**.
+2. **Simulador Físico-Químico (`simulador.html`):**
+   - Controles deslizantes interativos para testar diferentes combinações de pH, Turbidez (NTU) e Temperatura (°C).
+   - Representação visual dinâmica do comportamento e transparência da água em tempo real.
+3. **Metodologia & Modelagem IRE (`metodologia.html`):**
+   - Visão geral didática do funcionamento do sistema e detalhamento técnico-regulatório baseado na Resolução CONAMA nº 357/2005.
 
 ---
 
 ## Estrutura de Diretórios
 
 ```text
-tietech-v1/
-├── backend/                  # Servidor Node.js e rotas REST da API
-│   ├── routes/               # Endpoints (/api/estacoes, /api/telemetria, /api/auth)
-│   ├── db.js                 # Conexão com PostgreSQL via pool
-│   ├── server.js             # Ponto de entrada HTTP e arquivos estáticos
-│   └── package.json          # Dependências do servidor
-├── database/                 # Scripts SQL de schema e dados iniciais
-│   └── schema.sql            # Definição de tabelas e índices
-├── frontend/                 # Interface web do usuário
-│   ├── assets/               # Vetores, logotipo e favicon
-│   ├── css/                  # Estilos globais e tokens de design
-│   ├── js/                   # Mecanismo do IRE, dashboard e simulador
-│   ├── admin/                # Painel de gestão restrita
-│   ├── index.html            # Monitoramento espacial ao vivo
-│   ├── simulador.html        # Simulador interativo de parâmetros
-│   └── metodologia.html      # Fundamentação técnica e modelo IRE
+proteus/
+├── assets/                   # Logotipos vetoriais e favicon
+├── css/
+│   └── style.css             # Estilos globais e design system (Glassmorphism Light)
+├── js/
+│   ├── shared.js             # Gerenciamento de estado local e navegação
+│   ├── ire_engine.js         # Motor matemático de cálculo e diagnóstico do IRE
+│   ├── dashboard.js          # Controlador do mapa, gráficos, simulação e histórico CSV
+│   └── simulator.js          # Controlador do simulador interativo de parâmetros
+├── index.html                # Tela principal de monitoramento espacial em tempo real
+├── simulador.html            # Simulador interativo de parâmetros físico-químicos
+├── metodologia.html          # Documentação metodológica e modelagem matemática
 └── README.md
 ```
 
 ---
 
-## Como Executar Localmente
+## Como Executar
 
-### Pré-requisitos
+O projeto é 100% estático (HTML5, CSS3/Tailwind CSS e JavaScript ES6+), pronto para hospedagem direta no **GitHub Pages** sem necessidade de servidor backend:
 
-- Node.js (versão 18 ou superior)
-- PostgreSQL (local ou em nuvem)
-
-### 1. Configurar o Banco de Dados
-
-Crie a base de dados no PostgreSQL e execute o script de criação:
-
-```bash
-psql -U postgres -d proteus_db -f database/schema.sql
-```
-
-### 2. Configurar Variáveis de Ambiente
-
-Crie o arquivo `backend/.env` com as seguintes credenciais:
-
-```env
-PORT=3000
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=sua_senha_aqui
-DB_NAME=proteus_db
-JWT_SECRET=chave_secreta_jwt_proteus
-```
-
-### 3. Iniciar o Servidor
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-A plataforma estará acessível em: `http://localhost:3000`
+- **Acesso Online:** Basta acessar o link do GitHub Pages do repositório.
+- **Execução Local:** Abra o arquivo `index.html` diretamente no navegador ou utilize uma extensão como o *Live Server* no VS Code.
 
 ---
 

@@ -4,43 +4,7 @@
  */
 
 window.TieteApp = {
-  STORAGE_KEY: 'proteus_telemetry_state',
-  API_BASE_URL: (window.location && window.location.protocol.startsWith('http') ? window.location.origin : 'http://localhost:3001') + '/api',
-
-  async fetchStationsFromAPI() {
-    try {
-      const response = await fetch(`${this.API_BASE_URL}/estacoes`);
-      if (response.ok) {
-        const json = await response.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          return json.data;
-        }
-      }
-    } catch (e) {
-      console.log('Backend API offline ou indisponível. Usando estações locais.', e.message);
-    }
-    return null;
-  },
-
-  async sendTelemetryToAPI(reading) {
-    try {
-      await fetch(`${this.API_BASE_URL}/telemetria`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          estacao_codigo: reading.stationId || 'BRB-04',
-          ph: reading.ph,
-          turb: reading.turb,
-          temp: reading.temp,
-          ire: reading.ire,
-          nivel_risco: reading.nivel_risco || reading.statusTitle,
-          cenario_tag: reading.scenarioTag
-        })
-      });
-    } catch (e) {
-      // Ignora silenciosamente se a API estática estiver offline
-    }
-  },
+  STORAGE_KEY: 'proteus_telemetry_state_v2',
 
   getDefaultStations() {
     return [

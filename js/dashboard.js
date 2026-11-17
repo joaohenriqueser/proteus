@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Sync Map Marker & Circle Halo
-    syncMap(colorHex, status.title);
+    syncMap(colorHex, status.title, ire);
 
     // Sync Chart & Log
     updateChart(ireNum);
@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => mapInstance.invalidateSize(), 200);
   }
 
-  function syncMap(colorHex, statusTitle) {
+  function syncMap(colorHex, statusTitle, ire) {
     if (!mapInstance || !mapMarker || !mapHalo) return;
     const currentSt = getActiveStation();
     mapHalo.setStyle({ color: colorHex, fillColor: colorHex });
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mapHalo.setRadius(currentSt.raio_metros);
     }
     mapMarker.setStyle({ color: colorHex });
-    mapMarker.setPopupContent(`<b>Estação ${currentSt.name}</b><br>Raio de Cobertura: ${currentSt.raio_metros || 1000}m<br>IRE ${state.params.ph.toFixed(1)} — ${statusTitle}<br>${state.activeScenarioTag}`);
+    mapMarker.setPopupContent(`<b>Estação ${currentSt.name}</b><br>Raio de Cobertura: ${currentSt.raio_metros || 1000}m<br>IRE ${ire || '--'} — ${statusTitle}<br>${state.activeScenarioTag}`);
     if (mapOverlayStatus) {
       mapOverlayStatus.textContent = statusTitle;
       mapOverlayStatus.style.color = colorHex;
@@ -415,7 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Alternar seletor de datas customizadas
   if (historyPeriodSelect) {
     historyPeriodSelect.onchange = () => {
-      if (reportPeriodSelect) reportPeriodSelect.value = historyPeriodSelect.value;
       if (historyPeriodSelect.value === 'custom') {
         if (historyCustomDates) {
           historyCustomDates.classList.remove('hidden');
@@ -437,7 +436,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (historyStationFilter) {
     historyStationFilter.onchange = () => {
-      if (reportStationFilter) reportStationFilter.value = historyStationFilter.value;
       renderHistoryTable();
     };
   }
@@ -686,39 +684,39 @@ document.addEventListener('DOMContentLoaded', () => {
       // Especificação de série temporal realística de 30 dias para as estações da bacia
       const historySeedSpec = [
         // Hoje (últimas 24h) - 7 leituras recentes (condições normais e estáveis)
-        { hoursAgo: 0.2, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.35, turb: 8.5, temp: 23.0 },
-        { hoursAgo: 0.8, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.40, turb: 9.0, temp: 22.8 },
-        { hoursAgo: 2.5, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.25, turb: 12.0, temp: 23.2 },
-        { hoursAgo: 5.0, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.30, turb: 10.5, temp: 23.5 },
-        { hoursAgo: 9.0, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.50, turb: 11.0, temp: 22.4 },
-        { hoursAgo: 14.5, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.20, turb: 14.0, temp: 21.8 },
-        { hoursAgo: 20.0, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.15, turb: 15.5, temp: 21.5 },
+        { hoursAgo: 0.2, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.35, turb: 8.5, temp: 23.0 },
+        { hoursAgo: 0.8, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.40, turb: 9.0, temp: 22.8 },
+        { hoursAgo: 2.5, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.25, turb: 12.0, temp: 23.2 },
+        { hoursAgo: 5.0, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.30, turb: 10.5, temp: 23.5 },
+        { hoursAgo: 9.0, stId: 'ARÇ-01', stName: 'ARÇ-01 · Araçatuba-SP', ph: 7.50, turb: 11.0, temp: 22.4 },
+        { hoursAgo: 14.5, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.20, turb: 14.0, temp: 21.8 },
+        { hoursAgo: 20.0, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.15, turb: 15.5, temp: 21.5 },
 
         // 1 a 7 dias atrás - 9 leituras (evento de chuva moderada no 3º dia)
-        { hoursAgo: 36, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.28, turb: 11.2, temp: 22.9 },
-        { hoursAgo: 52, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.10, turb: 18.0, temp: 22.4 },
-        { hoursAgo: 68, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.95, turb: 28.0, temp: 21.9 },
-        { hoursAgo: 78, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.80, turb: 45.0, temp: 21.2 }, // chuva moderada
-        { hoursAgo: 90, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 6.75, turb: 52.0, temp: 21.0 },
-        { hoursAgo: 108, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.05, turb: 30.0, temp: 22.0 },
-        { hoursAgo: 125, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.35, turb: 15.0, temp: 23.1 },
-        { hoursAgo: 144, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.45, turb: 10.0, temp: 23.6 },
-        { hoursAgo: 162, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.50, turb: 8.0, temp: 24.0 },
+        { hoursAgo: 36, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.28, turb: 11.2, temp: 22.9 },
+        { hoursAgo: 52, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.10, turb: 18.0, temp: 22.4 },
+        { hoursAgo: 68, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 6.95, turb: 28.0, temp: 21.9 },
+        { hoursAgo: 78, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 6.80, turb: 45.0, temp: 21.2 }, // chuva moderada
+        { hoursAgo: 90, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 6.75, turb: 52.0, temp: 21.0 },
+        { hoursAgo: 108, stId: 'ARÇ-01', stName: 'ARÇ-01 · Araçatuba-SP', ph: 7.05, turb: 30.0, temp: 22.0 },
+        { hoursAgo: 125, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.35, turb: 15.0, temp: 23.1 },
+        { hoursAgo: 144, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.45, turb: 10.0, temp: 23.6 },
+        { hoursAgo: 162, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.50, turb: 8.0, temp: 24.0 },
 
         // 8 a 30 dias atrás - 13 leituras (inclui evento pontual com enxurrada e turbidez 118 NTU)
-        { hoursAgo: 204, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.32, turb: 13.0, temp: 23.0 },
-        { hoursAgo: 245, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.20, turb: 19.0, temp: 22.7 },
-        { hoursAgo: 290, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.10, turb: 24.0, temp: 22.2 },
-        { hoursAgo: 350, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 6.85, turb: 38.0, temp: 21.6 },
-        { hoursAgo: 400, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.40, turb: 88.0, temp: 20.8 },
-        { hoursAgo: 420, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.20, turb: 118.0, temp: 20.5 }, // Evento crítico (>100 NTU)
-        { hoursAgo: 440, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 6.45, turb: 92.0, temp: 20.9 },
-        { hoursAgo: 480, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 6.80, turb: 42.0, temp: 21.5 },
-        { hoursAgo: 535, stId: 'BRB-02', stName: 'BRB-02 · Buritama', ph: 7.15, turb: 22.0, temp: 22.8 },
-        { hoursAgo: 590, stId: 'BRB-03', stName: 'BRB-03 · Araçatuba', ph: 7.40, turb: 12.0, temp: 23.4 },
-        { hoursAgo: 630, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.60, turb: 7.5, temp: 24.5 },
-        { hoursAgo: 665, stId: 'BRB-01', stName: 'BRB-01 · Sales', ph: 7.70, turb: 6.2, temp: 24.8 },
-        { hoursAgo: 700, stId: 'BRB-04', stName: 'BRB-04 · Barbosa', ph: 7.55, turb: 8.0, temp: 24.1 }
+        { hoursAgo: 204, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.32, turb: 13.0, temp: 23.0 },
+        { hoursAgo: 245, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.20, turb: 19.0, temp: 22.7 },
+        { hoursAgo: 290, stId: 'ARÇ-01', stName: 'ARÇ-01 · Araçatuba-SP', ph: 7.10, turb: 24.0, temp: 22.2 },
+        { hoursAgo: 350, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 6.85, turb: 38.0, temp: 21.6 },
+        { hoursAgo: 400, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 6.40, turb: 88.0, temp: 20.8 },
+        { hoursAgo: 420, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 6.20, turb: 118.0, temp: 20.5 }, // Evento crítico (>100 NTU)
+        { hoursAgo: 440, stId: 'ARÇ-01', stName: 'ARÇ-01 · Araçatuba-SP', ph: 6.45, turb: 92.0, temp: 20.9 },
+        { hoursAgo: 480, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 6.80, turb: 42.0, temp: 21.5 },
+        { hoursAgo: 535, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.15, turb: 22.0, temp: 22.8 },
+        { hoursAgo: 590, stId: 'ARÇ-01', stName: 'ARÇ-01 · Araçatuba-SP', ph: 7.40, turb: 12.0, temp: 23.4 },
+        { hoursAgo: 630, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.60, turb: 7.5, temp: 24.5 },
+        { hoursAgo: 665, stId: 'PNP-02', stName: 'PNP-02 · Penápolis-SP', ph: 7.70, turb: 6.2, temp: 24.8 },
+        { hoursAgo: 700, stId: 'BRB-04', stName: 'BRB-04 · Barbosa-SP', ph: 7.55, turb: 8.0, temp: 24.1 }
       ];
 
       state.history = historySeedSpec.map(item => {
